@@ -8,12 +8,13 @@ local Player = require(ServerScriptService:WaitForChild("Player"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 
-local PlayerClickedRE = ReplicatedStorage:WaitForChild("PlayerClicked")
-local UnlockPostRF = ReplicatedStorage:WaitForChild("UnlockPost")
-local UpgradePostsRE = ReplicatedStorage:WaitForChild("UpgradePosts")
-local FollowersRE = ReplicatedStorage:WaitForChild("Followers")
-local InformationRE = ReplicatedStorage:WaitForChild("Information")
-local ParticleRE = ReplicatedStorage:WaitForChild("Particle")
+local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
+local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
+local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
+local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
+local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("Information")
+local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
+local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("CollectPlayTimeReward")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
@@ -35,28 +36,27 @@ end
 
 --[[
 	When a player joins, instantiates everything that will be needed for them
-	
+
 	@param plr : Player, the player who joined the game
 ]]--
 function ServerModule.onJoin(plr : Player)
 	local p = Player.new(plr)
-	
+
 	-- save the player module on the server module
 	players[plr.Name] = p
-	
+
 	if not p.plotModule:AssignPlot(p.player) then
 		ServerModule.onLeave(plr)
 	end
-	
+
 	-- load the follower goal progress and goal
 	p.plotModule.phone.FollowerGoal.Goal.SurfaceGui.GoalText.Text = tostring(p.nextFollowerGoal .. " followers")
 	p.plotModule.followerGoal.Size = UDim2.new(0.7,0, ((p.followers / p.nextFollowerGoal) * 0.97), 0)
-	
+
 	-- generate the state machine
 	p.postModule:GenerateStateMachine()
 
 	-- detect when player touches the upgrade post part
-	
 	p.maid:GiveTask(
 		p.plotModule.phone.UpgradePosts.HitBox.Touched:Connect(function(hit)
 			if hit.Parent and hit.Name == "HumanoidRootPart" and hit.Parent.Name == p.plotModule.phone.Owner.Value then
@@ -73,7 +73,7 @@ function ServerModule.onJoin(plr : Player)
 			end
 		end)
 	)
-	
+
 	-- teleport the player once his character is loaded
 	p.maid:GiveTask(
 		plr.CharacterAdded:Connect(function(character)
@@ -90,12 +90,12 @@ function ServerModule.onJoin(plr : Player)
 	if plr.Character then
 		plr.Character.PrimaryPart.CFrame = CFrame.new(p.plotModule.phone.TeleportPart.Position, p.plotModule.phone.PrimaryPart.Position)
 	end
-	
-	
-	local followersStore = DataStore2("followers", plr) 
-	
+
+
+	local followersStore = DataStore2("followers", plr)
+
 	-- callback on followers store update
-	followersStore:OnUpdate(function()		
+	followersStore:OnUpdate(function()
 		p.followers = followersStore:Get(0)
 
 		-- fire the client to display the number of followers the player has
@@ -112,24 +112,24 @@ end
 
 --[[
 	When a payer leaves, remove everything that is not needed anymore
-	
+
 	@param playerName : string, the name of the player who is leaving
 ]]--
 function ServerModule.onLeave(playerName)
-	local p = players[playerName] 
+	local p = players[playerName]
 
 	-- remove the player module from the server module
-	if p then		
+	if p then
 		p:onLeave()
 
 		players[playerName] = nil
-	end	
+	end
 end
 
 
 --[[
 	Fires when the player clicks or touches the screen to post
-	
+
 	@param playerName : string, the name of the player who is leaving
 ]]--
 PlayerClickedRE.OnServerEvent:Connect(function(plr : Player)
@@ -139,7 +139,7 @@ end)
 
 --[[
 	When a player wants to buy a post, we make sure he has enough followers and unlock it
-	
+
 	@param plr : Player, the player who wants to buy the post
 	@param post : number, the post (representing the level the player wants to buy)
 ]]--
@@ -163,13 +163,21 @@ UnlockPostRF.OnServerInvoke = function(plr : Player, post : number)
 end
 
 
+CollectPlayTimeRewardRF.OnServerInvoke = function (plr : Player)
+	local p = players[plr.Name]
+	if p then
+		return p.playTimeRewards:CollectReward()
+	end
+end
+
+
 --[[
 	Post for each player once the cooldown is over
 ]]--
 coroutine.wrap(function()
 	while true do
 
-		local now : number = math.round(tick() * 1_000)		
+		local now : number = math.round(tick() * 1_000)
 
 		-- for each player if it has been more than autoPostInterval since the last auto post, we post
 		for _,p in pairs(players) do

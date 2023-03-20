@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local PlotModule = require(ServerScriptService:WaitForChild("PlotModule"))
 local PostModule = require(ServerScriptService:WaitForChild("PostModule"))
+local PlayTimeRewards = require(ServerScriptService:WaitForChild("PlayTimeRewards"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
 DataStore2.Combine("SMS", "followers", "coins")
@@ -14,17 +15,17 @@ DataStore2.Combine("SMS", "followers", "coins")
 
 --[[
 	Create a player module when a player joins the game
-	
+
 	@param plr : Player, the player who joined the game
 ]]--
 function Player.new(plr : Player)
 	local p = {}
-	
+
 	p.player = plr
-	
+
 	--DataStore2("followers", plr):Set(nil)
 	--DataStore2("coins", plr):Set(nil)
-	
+
 	p.followers = DataStore2("followers", plr):Get(0)
 	p.nextFollowerGoal = math.pow(10, math.ceil(math.log10(p.followers))) -- find the next power of 10
 
@@ -32,17 +33,21 @@ function Player.new(plr : Player)
 	if p.nextFollowerGoal < 100 then
 		p.nextFollowerGoal = 100
 	end
-	
+
 	p.coins = DataStore2("coins", plr):Get(0)
-	
+
 	p.plotModule = PlotModule.new()
-	
+
 	p.postModule = PostModule.new(plr)
-	
+
+	p.playTimeRewards = PlayTimeRewards.new(plr)
+	p.playTimeRewards:LoadData()
+	p.playTimeRewards:StartTimer()
+
 	--p.coins = DataStore2("coins", plr):Get(0)
-	
+
 	p.maid = Maid.new()
-	
+
 	return setmetatable(p, Player)
 end
 
@@ -51,12 +56,14 @@ end
 	When a player leaves, remove all their connections and remove them from the module metatable
 ]]--
 function Player:onLeave()
-	
+
 	-- remove the plot for the player
 	self.plotModule:onLeave()
-	
+
 	self.postModule:onLeave()
-	
+
+	self.playTimeRewards:onLeave()
+
 	-- clean all the connections
 	self.maid:DoCleaning()
 

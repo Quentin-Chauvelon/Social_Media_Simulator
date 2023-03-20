@@ -4,34 +4,61 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 
-local PlayerClickedRE = ReplicatedStorage:WaitForChild("PlayerClicked")
-local PostRE = ReplicatedStorage:WaitForChild("Post")
-local LoadingScreenRE = ReplicatedStorage:WaitForChild("LoadingScreen")
-local UpgradePostsRE = ReplicatedStorage:WaitForChild("UpgradePosts")
-local FollowersRE = ReplicatedStorage:WaitForChild("Followers")
-local UnlockPostRF = ReplicatedStorage:WaitForChild("UnlockPost")
-local InformationRE = ReplicatedStorage:WaitForChild("Information")
-local ParticleRE = ReplicatedStorage:WaitForChild("Particle")
+local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
+local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
+local LoadingScreenRE : RemoteEvent = ReplicatedStorage:WaitForChild("LoadingScreen")
+local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
+local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
+local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
+local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("Information")
+local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
+local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local PostModule = require(StarterPlayer:WaitForChild("StarterPlayerScripts"):WaitForChild("PostModule"))
+local PlayTimeRewards = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PlayTimeRewards"))
+local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility"))
 
 local lplr = Players.LocalPlayer
-local currentCamera = workspace.CurrentCamera
 
-local menu : ScreenGui = lplr.PlayerGui:WaitForChild("Menu")
+local currentCamera : Camera = workspace.CurrentCamera
+
+local playerGui : PlayerGui = lplr.PlayerGui
+
+local menu : ScreenGui = playerGui:WaitForChild("Menu")
 local followersText : TextLabel = menu:WaitForChild("FollowersContainer"):WaitForChild("FollowersText")
 local informationText : TextLabel = menu:WaitForChild("Information")
 
 local blurEffect : BlurEffect = game:GetService("Lighting"):WaitForChild("Blur")
-local blurWhiteBackground : ScreenGui = lplr.PlayerGui:WaitForChild("BackgroundBlur")
+local blurWhiteBackground : ScreenGui = playerGui:WaitForChild("BackgroundBlur")
 
-local upgradePosts : ScreenGui = lplr.PlayerGui:WaitForChild("UpgradePosts")
+local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
 local upgradePostsBackground : Frame = upgradePosts:WaitForChild("Background")
 local upgradePostsCloseButton : TextButton = upgradePostsBackground:WaitForChild("Close")
 local upgradePostsClickConnection = {}
 
+local playTimeRewardsUI : ScreenGui = playerGui:WaitForChild("PlayTimeRewards")
+local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
+local nextRewardTimer : TextLabel = playTimeRewardsUI.NextReward:WaitForChild("Timer")
+
+
 local UPGRADE_POSTS_TWEEN_DURATION = 0.2
+
+
+local playTimeRewards
+
+
+-- resize the next reward timer (at the top of the screen) when the screen size changes
+Utility.ResizeUIOnWindowResize(function()
+	nextRewardTimer.TextSize = nextRewardChest.AbsoluteSize.Y / 3
+	nextRewardTimer.Position = UDim2.new(0, 0, 1, nextRewardTimer.AbsoluteSize.Y / 2)
+
+	if currentCamera.ViewportSize.X < 1000 or currentCamera.ViewportSize.Y < 500 then
+		nextRewardTimer.UIStroke.Thickness = 2
+	else
+		nextRewardTimer.UIStroke.Thickness = 3
+	end
+end)
 
 
 --[[
@@ -48,6 +75,7 @@ local function characterAdded(character : Model)
 		currentCamera.CFrame = CFrame.lookAt(currentCamera.CFrame.Position, currentCamera.CFrame.Position + character:WaitForChild("HumanoidRootPart").CFrame.LookVector)
 	end)
 end
+
 
 lplr.CharacterAdded:Connect(characterAdded)
 
@@ -377,3 +405,24 @@ coroutine.wrap(function()
 		lastPosts[1]:Destroy()
 	end
 end)()
+
+
+--[[
+	Sync the timePlayedToday when the server fires the event.
+	If playTimeRewards hasn't been defined yet, instantiate it and start the timer
+]]--
+PlayTimeRewardsTimerSyncRE.OnClientEvent:Connect(function(timePlayedToday : number)
+	if not playTimeRewards then
+		-- wait for next reward to exist so that we know what the next reward is
+		lplr:WaitForChild("NextReward")
+
+		-- display the play time rewards ui
+		playTimeRewardsUI.Enabled = true
+
+		playTimeRewards = PlayTimeRewards.new(timePlayedToday, nextRewardTimer)
+		playTimeRewards:StartTimer()
+		playTimeRewards:NextRewardClick()
+	end
+
+	playTimeRewards:SyncTimer(timePlayedToday)
+end)

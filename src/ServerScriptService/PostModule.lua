@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local PostRE = ReplicatedStorage:WaitForChild("Post")
+local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 
@@ -134,7 +134,7 @@ function PostModule.new(plr : Player)
 
 	local postStats = DataStore2("postStats", plr):Get(defaultPostStats)
 	
-	DataStore2("level", plr):Set(nil)
+	-- DataStore2("level", plr):Set(nil)
 	
 	postModule.nextAutoPost = 0
 	postModule.nextClickPost = 0
