@@ -118,8 +118,8 @@ function PlayTimeRewards:StartTimer()
 				resolve()
 			end
 			
-			-- if the player has played long enough to get a reward
-			if self.timePlayedToday >= self.nextRewards[1] then
+			-- if the player has played long enough to get a reward (still check if the table is not empty, even if the promise is resolved before, because sometimes it takes time and code still has time to execute)
+			if #self.nextRewards > 0 and self.timePlayedToday >= self.nextRewards[1] then
 				-- mark the reward to collect, so that when the client wants to get the reward, we can give it to them
 				self.rewardToCollect = self.nextRewards[1]
 
@@ -139,9 +139,9 @@ end
 --[[
 	Returns a random reward based on the tier of reward the player is at
 
-	@return
+	@return the reward
 ]]--
-function PlayTimeRewards:CollectReward()
+function PlayTimeRewards:CollectReward() : {[string] : string | number}
 	if self.rewardToCollect ~= 0 then
 		local reward = Rewards.GetReward(self.rewardToCollect)
 

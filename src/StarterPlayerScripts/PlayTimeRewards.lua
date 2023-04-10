@@ -14,21 +14,18 @@ local lplr = Players.LocalPlayer
 local playerGui : PlayerGui = lplr.PlayerGui
 
 local playTimeRewardsUI : ScreenGui = playerGui:WaitForChild("PlayTimeRewards")
+local allRewards : Frame = playTimeRewardsUI:WaitForChild("AllRewards")
 local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
 local collectedReward : Frame = playTimeRewardsUI:WaitForChild("CollectedReward")
 
+local defaultRewards : {number} = {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}
+
 
 -- TODO: use module for the code inside the local script (post module mainly)
--- TODO: for all remote events, first the client fire to tell he is connected, then the server responds if necessary
--- TODO initiare the playTImeRewards.timerText to the text label
--- TODO remote event spamming (check all events)
--- TODO check all connects to disconnect them when not needed
 -- TODO rework the follower gui (color (outline gradient) and size for mobile) responsivness
--- TODO test mouse enter, mouse leave (does overrinding the tween works) + utility module to bind ui to the events (MouseEnterScaleUp and MouseEnterScaleDown)
--- TODO typecheck everything (functions, modules, tables...)
--- TODO review all code...
--- TODO see all rewards probabilities for the play time rewards
--- TODO check all promises since resolve doesn't work as first thought it did (+ add an oncancel method for the ones that have connections and things lke that)
+
+-- TODO utility module to bind ui to the events (MouseEnterScaleUp and MouseEnterScaleDown)
+-- TODO make a utility function to tween all the ui on click (for those where it's a simple tween (bigger/smaller)), will help improve readability especially because the promise takes to hide the element takes at least 5 lines
 
 
 --[[
@@ -85,7 +82,7 @@ function PlayTimeRewards:NextRewardClick()
             self.nextReward = lplr.NextReward.Value
 
             self:StartTimer()
-
+            
             if reward.reward == "followers" then
                 collectedReward.Reward.Image = ""
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(209, 44, 255)
@@ -96,6 +93,29 @@ function PlayTimeRewards:NextRewardClick()
             end
 
             collectedReward.Reward.TextLabel.Text = tostring(reward.value)
+            
+            -- since self.nextReward is equal to the next reward and we want the previous one, we take it from the table
+            local timePlayed : number = 0
+            for i,v : number in pairs(defaultRewards) do
+
+                if v == self.nextReward then
+                    -- if i is equal to 1, return the first value of the table since we can't return the 0th value
+                    timePlayed = (i > 1) and defaultRewards[i - 1] or defaultRewards[1]
+                end
+            end
+
+            -- if the value couldn't be found, which would happen if nextReward is equal to math.huge (when the players has collected all the rewards), we return the last value
+            if timePlayed == 0 then
+                timePlayed = defaultRewards[#defaultRewards]
+            end
+            
+            -- make the tick image visible and hide the timer in the all rewards frame, run this before updating self.nextReward
+            for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewards.Background:GetChildren()) do
+                if reward:IsA("Frame") and reward:GetAttribute("TimePlayed") == timePlayed then
+                    reward.Timer.Visible = false
+                    reward.Collected.Visible = true
+                end
+            end
 
             collectedReward.Visible = true
             collectedReward:TweenSize(UDim2.new(0.8, 0, 0.8, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.5)
@@ -137,13 +157,47 @@ function PlayTimeRewards:NextRewardClick()
                 end)
             end)
 
-            Promise.new(function(resolve)
-                
-            end)
-
         -- else if there is no reward to collect, display all the times left for all rewards
         else
-            print("add this later")
+                
+            -- if the frame is hidden, display it
+            if not allRewards.Visible then
+                allRewards.Visible = true
+                allRewards:TweenPosition(UDim2.new(0.5, 0, 0, 5), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.3)
+
+                Promise.new(function(resolve)
+                    local closeClickedConnection : RBXScriptConnection
+                    closeClickedConnection = allRewards.Close.MouseButton1Down:Connect(function()
+                        -- disconnect the event
+                        closeClickedConnection:Disconnect()
+                        
+                        allRewards:TweenPosition(UDim2.new(0.5, 0, -1, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.3)
+
+                        resolve()
+                    end)
+
+                    while true do
+                        -- change the tween time of all the frames
+                        for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewards.Background:GetChildren()) do
+                            if reward:IsA("Frame") and reward.Timer.Visible then
+                                reward.Timer.Text = FormatTimeForTimer(reward:GetAttribute("TimePlayed") - self.timePlayedToday)
+                            end
+                        end
+
+                        task.wait(1)
+                    end
+                end)
+                :finally(function()
+                    -- hide the frame after the tween completes
+                    Promise.new(function(resolve)
+                        task.wait(0.3)
+                        allRewards.Visible = false
+                        
+                        resolve()
+                    end)
+                end
+                )
+            end
         end
     end)
 end
@@ -195,7 +249,6 @@ function PlayTimeRewards:SyncTimer(timePlayedToday : number)
         self.promise:cancel()
 
         -- hide the timer text
-        print("hide text")
         self.nextRewardTimer.Visible = false
 
         -- shake the chest

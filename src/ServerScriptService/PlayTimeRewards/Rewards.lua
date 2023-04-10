@@ -34,7 +34,7 @@ function Rewards.GetReward(rewardToCollect : number) : {[string] : string | numb
         end
     end
 
-    return {followers = 100} -- default reward
+    return {reward = "followers", value = 100} -- default reward
 end
 
 

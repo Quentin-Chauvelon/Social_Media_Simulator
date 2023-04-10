@@ -38,6 +38,9 @@ local upgradePostsCloseButton : TextButton = upgradePostsBackground:WaitForChild
 local upgradePostsClickConnection = {}
 
 local playTimeRewardsUI : ScreenGui = playerGui:WaitForChild("PlayTimeRewards")
+local allRewardsBackground : Frame = playTimeRewardsUI:WaitForChild("AllRewards"):WaitForChild("Background")
+local allRewardsUiGridLayout : UIGridLayout = allRewardsBackground:WaitForChild("UIGridLayout")
+local allRewardsFirstReward : Frame = allRewardsBackground:WaitForChild("Reward")
 local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
 local nextRewardTimer : TextLabel = playTimeRewardsUI.NextReward:WaitForChild("Timer")
 
@@ -61,13 +64,39 @@ Utility.ResizeUIOnWindowResize(function()
 end)
 
 
+-- resize the all rewards uigridlayout cell padding (to evenly space out all the rewards)
+Utility.ResizeUIOnWindowResize(function()
+	allRewardsUiGridLayout.CellPadding = UDim2.new(
+		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
+		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
+	)
+end)
+
+
+-- resize all the rewards in the all rewards frame
+for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewardsBackground:GetChildren()) do
+	if reward:IsA("Frame") then
+		Utility.ResizeUIOnWindowResize(function()
+			reward.Timer.TextSize = reward.Chest.AbsoluteSize.Y / 3
+			reward.Timer.Position = UDim2.new(0, 0, 1, reward.Timer.AbsoluteSize.Y / 2)
+
+			if currentCamera.ViewportSize.X < 1000 or currentCamera.ViewportSize.Y < 500 then
+				reward.Timer.UIStroke.Thickness = 2
+			else
+				reward.Timer.UIStroke.Thickness = 3
+			end
+		end)
+	end
+end
+
+
 --[[
 	Change the camera orientation when the character resets to face the player's phone
 	
 	@param character : Model, the character that got added
 ]]--
 local function characterAdded(character : Model)
-	Promise.new(function(resolve, reject)
+	Promise.new(function(resolve)
 		task.wait(0.7)
 		resolve()
 	end)

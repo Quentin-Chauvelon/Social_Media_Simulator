@@ -11,6 +11,7 @@ local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 
 DataStore2.Combine("SMS", "level", "postStats")
 
+
 local defaultPostStats = {
 	autoPostInterval = 3 * 1_000,
 	clickPostInterval = 0.3 * 1_000
@@ -33,16 +34,16 @@ local posts = {
 	function () return "Do you all like pizzas?" end,
 	function () return "My favourite food is pasta." end,
 	function () return "You have a 5% chance of seeing this" end,
-	function (p) return string.format("I have %s followers.", p.followers) end,
-	function (p) return string.format("I have %s coins.", p.coins) end,
-	--function (p) return string.format("I'm prestige %s.", p.prestige) end
+	function (p : number) return string.format("I have %s followers.", p.followers) end,
+	function (p : number) return string.format("I have %s coins.", p.coins) end,
+	--function (p : number) return string.format("I'm prestige %s.", p.prestige) end
 }
 
 
 local dialogs = {
 	function () return "How are you?", {"Fine", "Good", "Not bad", "I'm doing well", "I've been better", "Great"} end,
 	function () return "Have a nice day.", {"Thanks", "You too.", "Thanks, you too!"} end,
-	function (playerName) return string.format("@%s do you want to be friends?", playerName), {"Yes", "No", "Sure", "Why not"} end,
+	function (playerName : number) return string.format("@%s do you want to be friends?", playerName), {"Yes", "No", "Sure", "Why not"} end,
 	function () return "Let's go play Adopt me", {"Alright", "No", "Ok, let's go", "In 2 minutes", "Let me just finish something before"} end,
 	function () return "I love Roblox", {"Same", "Me too!", "♥", "I ♥ it too", "I love it too"} end,
 	function () return "What is your favourite food?", {"Pasta", "Pizza", "Ice cream", "I love pasta", "I love pizza", "I love ice cream", "Mine is pasta", "Mine is pizza", "Mine is ice cream"} end,
@@ -53,9 +54,9 @@ local dialogs = {
 local replies = {
 	function () return "Mom! I'm famous!", {"No"} end,
 	function () return "Social Media Simulator is the best game!", {"Agreed", "For sure", "Yes", "No"} end,
-	function (p) return string.format("I have %s followers", p.followers), {"Wow", "Impressive", "Great", string.format("I have %s", p.followers), "That's it?", "ez"} end,
-	function (p) return string.format("I have %s coins", p.coins), {"Wow", "Impressive", "Great", string.format("I have %s", p.coins), "That's it?", "ez"} end,
-	--function (p) return string.format("I'm prestige %s", p.prestige), {"Wow", "Impressive", "Great", string.format("I have %s", p.prestige), "That's it?", "ez"} end
+	function (p : number) return string.format("I have %s followers", p.followers), {"Wow", "Impressive", "Great", string.format("I have %s", p.followers), "That's it?", "ez"} end,
+	function (p : number) return string.format("I have %s coins", p.coins), {"Wow", "Impressive", "Great", string.format("I have %s", p.coins), "That's it?", "ez"} end,
+	--function (p : number) return string.format("I'm prestige %s", p.prestige), {"Wow", "Impressive", "Great", string.format("I have %s", p.prestige), "That's it?", "ez"} end
 }
 
 
