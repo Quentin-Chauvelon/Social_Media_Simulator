@@ -16,7 +16,6 @@ end)
 
 --[[
 	BUGS
- 
 
 	IMPORTANT
 
@@ -24,6 +23,8 @@ end)
 	IMPROVEMENTS
 	TODO players can buy colors for their phones (back)
 	TODO light/dark mode
+	TODO playTimeRewards responsive
+	TODO remove localization on some textLabels (timers for exemaple)
 
 
 	TEST

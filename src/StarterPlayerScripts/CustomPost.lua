@@ -1,0 +1,7 @@
+local CustomPost = {}
+
+
+
+
+
+return CustomPost

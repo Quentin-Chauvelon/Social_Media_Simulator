@@ -44,6 +44,11 @@ local allRewardsFirstReward : Frame = allRewardsBackground:WaitForChild("Reward"
 local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
 local nextRewardTimer : TextLabel = playTimeRewardsUI.NextReward:WaitForChild("Timer")
 
+local customPosts : ScreenGui = playerGui:WaitForChild("CustomPosts")
+local customPostsButton : ImageButton = customPosts:WaitForChild("CustomPostsButton")
+local customPostsBackground : Frame = customPosts:WaitForChild("Background")
+local customPostsCloseButton : TextButton = customPostsBackground:WaitForChild("Close")
+
 
 local UPGRADE_POSTS_TWEEN_DURATION = 0.2
 
@@ -70,6 +75,12 @@ Utility.ResizeUIOnWindowResize(function()
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
 	)
+end)
+
+
+Utility.ResizeUIOnWindowResize(function()
+	customPostsBackground.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.8, 0.5), 0, 0.6, 0)
+
 end)
 
 
@@ -371,7 +382,6 @@ UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean)
 		-- listen to the click to close the gui
 		table.insert(upgradePostsClickConnection, upgradePostsCloseButton.MouseButton1Down:Connect(function()
 			BlurBackground(false)
-			
 			CloseUpgradePostsGui()
 		end))
 		
@@ -454,4 +464,56 @@ PlayTimeRewardsTimerSyncRE.OnClientEvent:Connect(function(timePlayedToday : numb
 	end
 
 	playTimeRewards:SyncTimer(timePlayedToday)
+end)
+
+
+
+
+
+
+
+-- CUSTOM POSTS
+
+local function CloseCustomPostGui()
+	Promise.new(function(resolve)
+		customPostsBackground:TweenSize(
+			UDim2.new(0,0,0,0),
+			Enum.EasingDirection.InOut,
+			Enum.EasingStyle.Linear,
+			UPGRADE_POSTS_TWEEN_DURATION
+		)
+
+		task.wait(UPGRADE_POSTS_TWEEN_DURATION)
+		resolve()
+	end)
+	:andThen(function()
+		customPostsBackground.Visible = false
+	end)
+end
+
+
+local function OpenCustomPostGui()
+	BlurBackground(true)
+	customPostsBackground.Visible = true
+	
+	customPostsBackground:TweenSize(
+		UDim2.new(0.5,0,0.5,0),
+		Enum.EasingDirection.InOut,
+		Enum.EasingStyle.Linear,
+		UPGRADE_POSTS_TWEEN_DURATION
+	)
+
+
+	-- TODO : disconnect the following connection
+	customPostsCloseButton.MouseButton1Down:Connect(function()
+		BlurBackground(false)
+		CloseCustomPostGui()
+	end)
+end
+
+
+customPostsButton.MouseButton1Down:Connect(function()
+	if not customPostsBackground.Visible then
+		OpenCustomPostGui()
+	end
 end)
