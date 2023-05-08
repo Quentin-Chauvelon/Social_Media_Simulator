@@ -1,9 +1,68 @@
-local ProximityPromptService = game:GetService("ProximityPromptService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Utility = {}
+
+local Players = game:GetService("Players")
+local TextService = game:GetService("TextService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+
+local InformationNotificationRE : RemoteEvent = ReplicatedStorage:WaitForChild("InformationNotification")
+local ErrorNotificationRE : RemoteEvent = ReplicatedStorage:WaitForChild("ErrorNotification")
+
+local lplr = Players.LocalPlayer
+local playerGui : PlayerGui = lplr.PlayerGui
+local currentCamera : Camera = workspace.CurrentCamera
+
+local blurEffect : BlurEffect = game:GetService("Lighting"):WaitForChild("Blur")
+local blurWhiteBackground : ScreenGui = playerGui:WaitForChild("BackgroundBlur")
+
+local notification : TextLabel = playerGui:WaitForChild("Menu"):WaitForChild("Notification")
+local notificationImage : ImageLabel = notification:WaitForChild("Image")
+local notificationClose : TextButton = notification:WaitForChild("Close")
+local notificationUIPadding : UIPadding = notification:WaitForChild("UIPadding")
 
 local uiToResize = {}
 local debounce = true
+
+
+function Utility.new()
+    Utility.ResizeUIOnWindowResize(function()
+        notification.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.45, 0.2), 0, 0.1, 0)
+        notification.Position = UDim2.new(1, notification.AbsoluteSize.X + 10, 0, 20)
+        
+        local iconSize : number = Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 20, 40)
+        local iconUDim : UDim = UDim.new(0, iconSize)
+        notificationImage.Size = UDim2.new(iconUDim, iconUDim)
+        notificationClose.Size = UDim2.new(iconUDim, iconUDim)
+
+        notificationUIPadding.PaddingLeft = UDim.new(0, 20 + iconSize)
+        notificationUIPadding.PaddingRight = UDim.new(0, 35 + iconSize)
+        notificationImage.Position = UDim2.new(0, -notificationUIPadding.PaddingLeft.Offset + 10, 0.5, 0)
+        notificationClose.Position = UDim2.new(1, notificationUIPadding.PaddingRight.Offset - 15, 0.5, 0)
+
+        notification.TextSize = iconSize * 0.625
+    end)
+
+    InformationNotificationRE.OnClientEvent:Connect(function(text :string, duration : number)
+        Utility:DisplayInformation(text, duration)
+    end)
+
+    ErrorNotificationRE.OnClientEvent:Connect(function(text :string, duration : number)
+        Utility:DisplayError(text, duration)
+    end)
+end
+
+
+--[[
+	Blur the background and displays a semi-transparent white frame in the background (it helps have
+	a better focus on the displayed gui)
+	
+	@param visible : boolean, true if the ui should be displayed, false otherwise
+]]--
+function Utility.BlurBackground(enabled : boolean)
+	blurEffect.Enabled = enabled
+	blurWhiteBackground.Enabled = enabled
+end
 
 
 --[[
@@ -36,11 +95,7 @@ function Utility.GetNumberInRangeProportionally(a : number, X : number, b : numb
     if X <= a then return minRange end
     if X >= b then return maxRange end
 
-    if maxRange > minRange then
-        return (((maxRange - minRange) / (b - a)) * (X + a)) + (maxRange - minRange)
-    else
-        return ((maxRange - math.abs(((maxRange - minRange) / (b - a)) * (X + a))) + maxRange)
-    end
+    return (((X - a) / (b - a)) * (maxRange - minRange) + minRange)
 end
 
 
@@ -80,8 +135,75 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(functio
 
         debounce = true
     end
-
 end)
+
+
+--[[
+    Display the given text on the right upper hand of the screen for the given duration 
+
+    @param text : string, the text to display
+    @param duration : number?, the duration in seconds for how long the text should be displayed or default (8)
+]]--
+local function DisplayNotification(text : string, duration : number)
+
+    local textSize : Vector2 = TextService:GetTextSize(text, notification.TextSize, Enum.Font.SourceSansBold, Vector2.new(notification.AbsoluteSize.X, 2000))
+
+    notification.Size = UDim2.new(notification.Size.X, UDim.new(0, math.max(textSize.Y + 20, notificationClose.AbsoluteSize.Y + 20)))
+    notification.Text = text
+
+    if not notification.Visible then
+        
+        notification.Visible = true
+        notification:TweenPosition(
+            UDim2.new(1, 10, 0, 20),
+            Enum.EasingDirection.InOut,
+            Enum.EasingStyle.Quad,
+            0.3
+        )
+
+        Promise.new(function(resolve)
+            local notificationCloseConnection : RBXScriptSignal
+            notificationCloseConnection = notificationClose.MouseButton1Down:Connect(function()
+                notificationCloseConnection:Disconnect()
+                resolve()
+            end)
+            
+            task.wait(duration or 8)
+
+            resolve()
+        end)
+        :andThen(function()
+            notification:TweenPosition(
+            UDim2.new(1, notification.AbsoluteSize.X + 10, 0, 20),
+            Enum.EasingDirection.InOut,
+            Enum.EasingStyle.Quad,
+            0.3,
+            true,
+            function()
+                notification.Visible = false
+            end
+        )
+        end)
+    end
+end
+
+
+function Utility:DisplayInformation(text : string, duration : number)
+    notification.BackgroundColor3 = Color3.fromRGB(175, 213, 240)
+    notificationImage.ImageColor3 = Color3.fromRGB(97, 154, 240)
+    notificationClose.BackgroundColor3 = Color3.fromRGB(97, 154, 240)
+
+    DisplayNotification(text, duration)
+end
+
+
+function Utility:DisplayError(text : string, duration : number)
+    notification.BackgroundColor3 = Color3.fromRGB(255, 79, 79)
+    notificationImage.ImageColor3 = Color3.new(1,1,1)
+    notificationClose.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+
+    DisplayNotification(text, duration)
+end
 
 
 return Utility

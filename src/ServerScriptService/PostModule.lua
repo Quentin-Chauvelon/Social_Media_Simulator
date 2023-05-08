@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
+local Types = require(ServerScriptService:WaitForChild("Types"))
 
 DataStore2.Combine("SMS", "level", "postStats")
 
@@ -18,51 +19,10 @@ local defaultPostStats = {
 }
 
 
-local posts = {
-	function () return "Hi!" end,
-	function () return "Hello world!" end,
-	function () return "Mom! I'm famous!" end,
-	function () return "Roses are red,\nViolets are blue,\nSugar is sweet,\nAnd so are you." end,
-	function () return "Let's go play Adopt me" end,
-	function () return "I love Roblox" end,
-	function () return "I love Social Media Simulator!" end,
-	function () return "Social Media Simulator is the best game ever!" end,
-	function () return "Have a nice day." end,
-	function () return "If at first you don't succeed, try again." end,
-	function () return "Never forget that someone cares for you." end,
-	function () return "Bonjour" end,
-	function () return "Do you all like pizzas?" end,
-	function () return "My favourite food is pasta." end,
-	function () return "You have a 5% chance of seeing this" end,
-	function (p : number) return string.format("I have %s followers.", p.followers) end,
-	function (p : number) return string.format("I have %s coins.", p.coins) end,
-	--function (p : number) return string.format("I'm prestige %s.", p.prestige) end
-}
-
-
-local dialogs = {
-	function () return "How are you?", {"Fine", "Good", "Not bad", "I'm doing well", "I've been better", "Great"} end,
-	function () return "Have a nice day.", {"Thanks", "You too.", "Thanks, you too!"} end,
-	function (playerName : number) return string.format("@%s do you want to be friends?", playerName), {"Yes", "No", "Sure", "Why not"} end,
-	function () return "Let's go play Adopt me", {"Alright", "No", "Ok, let's go", "In 2 minutes", "Let me just finish something before"} end,
-	function () return "I love Roblox", {"Same", "Me too!", "♥", "I ♥ it too", "I love it too"} end,
-	function () return "What is your favourite food?", {"Pasta", "Pizza", "Ice cream", "I love pasta", "I love pizza", "I love ice cream", "Mine is pasta", "Mine is pizza", "Mine is ice cream"} end,
-	function () return "What is your favourite sport?", {"Basketball", "Football", "Soccer", "Golf", "Baseball"} end
-}
-
-
-local replies = {
-	function () return "Mom! I'm famous!", {"No"} end,
-	function () return "Social Media Simulator is the best game!", {"Agreed", "For sure", "Yes", "No"} end,
-	function (p : number) return string.format("I have %s followers", p.followers), {"Wow", "Impressive", "Great", string.format("I have %s", p.followers), "That's it?", "ez"} end,
-	function (p : number) return string.format("I have %s coins", p.coins), {"Wow", "Impressive", "Great", string.format("I have %s", p.coins), "That's it?", "ez"} end,
-	--function (p : number) return string.format("I'm prestige %s", p.prestige), {"Wow", "Impressive", "Great", string.format("I have %s", p.prestige), "That's it?", "ez"} end
-}
-
-
 local react = {
 	"http://www.roblox.com/asset/?id=12576610566"
 }
+local numberOfReact : number = #react
 
 
 local followersGained : {number} = {
@@ -131,7 +91,7 @@ end
 
 
 function PostModule.new(plr : Player)
-	local postModule = {}
+	local postModule : Types.PostModule = {}
 
 	local postStats = DataStore2("postStats", plr):Get(defaultPostStats)
 	
@@ -148,6 +108,50 @@ function PostModule.new(plr : Player)
 	postModule.postedLastTime = true -- indicates if the player posted (post, dialog, reply...) or not (like, react) the very last time something was done
 	postModule.postStates = {}
 
+	postModule.posts = {
+		function () return "Hi!" end,
+		function () return "Hello world!" end,
+		function () return "Mom! I'm famous!" end,
+		function () return "Roses are red,\nViolets are blue,\nSugar is sweet,\nAnd so are you." end,
+		function () return "Let's go play Adopt me" end,
+		function () return "I love Roblox" end,
+		function () return "I love Social Media Simulator!" end,
+		function () return "Social Media Simulator is the best game ever!" end,
+		function () return "Have a nice day." end,
+		function () return "If at first you don't succeed, try again." end,
+		function () return "Never forget that someone cares for you." end,
+		function () return "Bonjour" end,
+		function () return "Do you all like pizzas?" end,
+		function () return "My favourite food is pasta." end,
+		function () return "You have a 5% chance of seeing this" end,
+		function (p : number) return string.format("I have %s followers.", p.followers) end,
+		function (p : number) return string.format("I have %s coins.", p.coins) end,
+		--function (p : number) return string.format("I'm prestige %s.", p.prestige) end
+	}
+	
+	
+	postModule.dialogs = {
+		function () return "How are you?", {"Fine", "Good", "Not bad", "I'm doing well", "I've been better", "Great"} end,
+		function () return "Have a nice day.", {"Thanks", "You too.", "Thanks, you too!"} end,
+		function (playerName : number) return string.format("@%s do you want to be friends?", playerName), {"Yes", "No", "Sure", "Why not"} end,
+		function () return "Let's go play Adopt me", {"Alright", "No", "Ok, let's go", "In 2 minutes", "Let me just finish something before"} end,
+		function () return "I love Roblox", {"Same", "Me too!", "♥", "I ♥ it too", "I love it too"} end,
+		function () return "What is your favourite food?", {"Pasta", "Pizza", "Ice cream", "I love pasta", "I love pizza", "I love ice cream", "Mine is pasta", "Mine is pizza", "Mine is ice cream"} end,
+		function () return "What is your favourite sport?", {"Basketball", "Football", "Soccer", "Golf", "Baseball"} end
+	}
+	
+	
+	postModule.replies = {
+		function () return "Mom! I'm famous!", {"No"} end,
+		function () return "Social Media Simulator is the best game!", {"Agreed", "For sure", "Yes", "No"} end,
+		function (p : number) return string.format("I have %s followers", p.followers), {"Wow", "Impressive", "Great", string.format("I have %s", p.followers), "That's it?", "ez"} end,
+		function (p : number) return string.format("I have %s coins", p.coins), {"Wow", "Impressive", "Great", string.format("I have %s", p.coins), "That's it?", "ez"} end,
+		--function (p : number) return string.format("I'm prestige %s", p.prestige), {"Wow", "Impressive", "Great", string.format("I have %s", p.prestige), "That's it?", "ez"} end
+	}
+
+	postModule.numberOfPosts = #postModule.posts
+	postModule.numberOfDialogs = #postModule.dialogs
+	postModule.numberOfReplies = #postModule.replies
 
 	return setmetatable(postModule, PostModule)
 end
@@ -163,9 +167,9 @@ function PostModule:GenerateDialog(p, tableToUse : string)
 	
 	local startPhrase : string, possibleAnswers : {string}
 	if tableToUse == "dialog" then
-		startPhrase, possibleAnswers = dialogs[math.random(1, #dialogs)](GetRandomPlayer(p.player).Name)
+		startPhrase, possibleAnswers = self.dialogs[math.random(1, self.numberOfDialogs)](GetRandomPlayer(p.player).Name)
 	else
-		startPhrase, possibleAnswers = replies[math.random(1, #replies)](p)
+		startPhrase, possibleAnswers = self.replies[math.random(1, self.numberOfReplies)](p)
 	end
 	
 	-- random boolean to know if a random player starts the dialog or answers
@@ -198,9 +202,9 @@ function PostModule:Post(p)
 			if randomNumber > 0.5 then
 
 				-- instead of picking a random number again for a 50/50 chance of liking or reacting, we reuse the randum number
-				-- used before (and since it can't be less than 0.5 50/50 is 0.25)
+				-- used before (and since it can't be less than 0.5 50/50 is 0.75)
 				if self.level >= 5 and randomNumber > 0.75 then
-					PostRE:FireAllClients("react", p.plotModule.screen, plr, react[math.random(1, #react)])
+					PostRE:FireAllClients("react", p.plotModule.screen, plr, react[math.random(1, numberOfReact)])
 				else
 					PostRE:FireAllClients("like", p.plotModule.screen, plr)
 				end
@@ -222,7 +226,7 @@ function PostModule:Post(p)
 	self.currentState = nextState
 
 	if nextState == "post" then
-		local post : string = posts[math.random(1, #posts)](p)
+		local post : string = self.posts[math.random(1, self.numberOfPosts)](p)
 
 		PostRE:FireAllClients("post", p.plotModule.screen, plr, post)
 
@@ -362,7 +366,7 @@ function PostModule:GenerateStateMachine()
 end
 
 
-function PostModule:onLeave()
+function PostModule:OnLeave()
 	setmetatable(self, nil)
 	self = nil
 end

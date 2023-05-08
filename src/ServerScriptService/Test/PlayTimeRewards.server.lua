@@ -97,4 +97,4 @@ local function test()
 	print("All tests passed !")
 end
 
--- test()
+test()

@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local PlotModule = require(ServerScriptService:WaitForChild("PlotModule"))
 local PostModule = require(ServerScriptService:WaitForChild("PostModule"))
+local CustomPost = require(ServerScriptService:WaitForChild("CustomPost"))
 local PlayTimeRewards = require(ServerScriptService:WaitForChild("PlayTimeRewards"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -40,6 +41,8 @@ function Player.new(plr : Player)
 
 	p.postModule = PostModule.new(plr)
 
+	p.customPosts = CustomPost.new(plr, p.postModule)
+
 	p.playTimeRewards = PlayTimeRewards.new(plr)
 	p.playTimeRewards:LoadData()
 	p.playTimeRewards:StartTimer()
@@ -55,14 +58,16 @@ end
 --[[
 	When a player leaves, remove all their connections and remove them from the module metatable
 ]]--
-function Player:onLeave()
+function Player:OnLeave()
 
 	-- remove the plot for the player
-	self.plotModule:onLeave()
+	self.plotModule:OnLeave()
 
-	self.postModule:onLeave()
+	self.postModule:OnLeave()
 
-	self.playTimeRewards:onLeave()
+	self.customPosts:OnLeave()
+
+	self.playTimeRewards:OnLeave()
 
 	-- clean all the connections
 	self.maid:DoCleaning()

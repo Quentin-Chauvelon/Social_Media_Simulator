@@ -12,9 +12,10 @@ local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClic
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
 local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
-local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("Information")
+local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("InformationNotification")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("CollectPlayTimeReward")
+local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
@@ -120,7 +121,7 @@ function ServerModule.onLeave(playerName)
 
 	-- remove the player module from the server module
 	if p then
-		p:onLeave()
+		p:OnLeave()
 
 		players[playerName] = nil
 	end
@@ -130,10 +131,13 @@ end
 --[[
 	Fires when the player clicks or touches the screen to post
 
-	@param playerName : string, the name of the player who is leaving
+	@param plr : Player, the player who is leaving
 ]]--
 PlayerClickedRE.OnServerEvent:Connect(function(plr : Player)
-	players[plr.Name].postModule:PlayerClicked(players[plr.Name])
+	local p = players[plr.Name]
+	if p then
+		p.postModule:PlayerClicked(p)
+	end
 end)
 
 
@@ -163,10 +167,40 @@ UnlockPostRF.OnServerInvoke = function(plr : Player, post : number)
 end
 
 
+--[[
+	Fires when the player clicks the play time rewards and can collect it
+
+	@param plr : Player, the player who clicked the play time rewards button
+]]--
 CollectPlayTimeRewardRF.OnServerInvoke = function (plr : Player)
 	local p = players[plr.Name]
 	if p then
 		return p.playTimeRewards:CollectReward()
+	end
+end
+
+
+--[[
+	Fires when the player creates a new post or modify an existing one
+
+	@param plr : Player, the player who wants to save a post
+	@param postType : string, the type of post the player is saving
+	@param text1 : string, the first text of the post
+	@param text2 : string, the second text of the post (empty if postType == "post")
+	@param id : number?, the id of the post if the player is modifying one, null if he is creating one
+]]--
+SaveCustomPostRF.OnServerInvoke = function(plr : Player, postType : string?, text1 : string?, text2 : string?, id : number?)
+	local p = players[plr.Name]
+	if p then
+		if id then
+			if postType then
+				return p.customPosts:SavePost(id, postType, text1, text2)
+			else 
+				return p.customPosts:DeletePost(id)
+			end
+		else
+			return p.customPosts:CreatePost(postType, text1, text2)
+		end
 	end
 end
 

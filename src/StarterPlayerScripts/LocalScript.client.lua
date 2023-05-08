@@ -6,11 +6,9 @@ local StarterPlayer = game:GetService("StarterPlayer")
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
-local LoadingScreenRE : RemoteEvent = ReplicatedStorage:WaitForChild("LoadingScreen")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
 local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
-local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("Information")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
 
@@ -18,6 +16,7 @@ local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local PostModule = require(StarterPlayer:WaitForChild("StarterPlayerScripts"):WaitForChild("PostModule"))
 local PlayTimeRewards = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PlayTimeRewards"))
 local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility"))
+local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CustomPost"))
 
 local lplr = Players.LocalPlayer
 
@@ -27,10 +26,6 @@ local playerGui : PlayerGui = lplr.PlayerGui
 
 local menu : ScreenGui = playerGui:WaitForChild("Menu")
 local followersText : TextLabel = menu:WaitForChild("FollowersContainer"):WaitForChild("FollowersText")
-local informationText : TextLabel = menu:WaitForChild("Information")
-
-local blurEffect : BlurEffect = game:GetService("Lighting"):WaitForChild("Blur")
-local blurWhiteBackground : ScreenGui = playerGui:WaitForChild("BackgroundBlur")
 
 local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
 local upgradePostsBackground : Frame = upgradePosts:WaitForChild("Background")
@@ -44,16 +39,13 @@ local allRewardsFirstReward : Frame = allRewardsBackground:WaitForChild("Reward"
 local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
 local nextRewardTimer : TextLabel = playTimeRewardsUI.NextReward:WaitForChild("Timer")
 
-local customPosts : ScreenGui = playerGui:WaitForChild("CustomPosts")
-local customPostsButton : ImageButton = customPosts:WaitForChild("CustomPostsButton")
-local customPostsBackground : Frame = customPosts:WaitForChild("Background")
-local customPostsCloseButton : TextButton = customPostsBackground:WaitForChild("Close")
-
-
-local UPGRADE_POSTS_TWEEN_DURATION = 0.2
-
+local UPGRADE_POSTS_TWEEN_DURATION : number = 0.2
 
 local playTimeRewards
+
+
+Utility.new()
+CustomPost.new(Utility)
 
 
 -- resize the next reward timer (at the top of the screen) when the screen size changes
@@ -75,12 +67,6 @@ Utility.ResizeUIOnWindowResize(function()
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
 	)
-end)
-
-
-Utility.ResizeUIOnWindowResize(function()
-	customPostsBackground.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.8, 0.5), 0, 0.6, 0)
-
 end)
 
 
@@ -159,78 +145,6 @@ end)
 
 
 --[[
-	Display the given text at the top of the screen for the given duration 
-	
-	@param text : string, the text to display
-	@param duration : number?, the duration in seconds for how long the text should be displayed or default (8)
-]]--
-InformationRE.OnClientEvent:Connect(function(text : string, duration : number?)
-	informationText.Text = text
-	
-	-- tween (fade in) the text and ui stroke transparency
-	TweenService:Create(
-		informationText,
-		TweenInfo.new(
-			1,
-			Enum.EasingStyle.Linear,
-			Enum.EasingDirection.InOut
-		),
-		{
-			TextTransparency = 0
-		}
-	)
-	:Play()
-	
-	TweenService:Create(
-		informationText.UIStroke,
-		TweenInfo.new(
-			1,
-			Enum.EasingStyle.Linear,
-			Enum.EasingDirection.InOut
-		),
-		{
-			Transparency = 0
-		}
-	)
-	:Play()
-		
-	Promise.new(function(resolve)
-		task.wait(duration or 8)
-		resolve()
-	end)
-	:andThen(function()
-		
-		-- tween (fade out) the text and ui stroke transparency
-		TweenService:Create(
-			informationText,
-			TweenInfo.new(
-				1,
-				Enum.EasingStyle.Linear,
-				Enum.EasingDirection.InOut
-			),
-			{
-				TextTransparency = 1
-			}
-		)
-		:Play()
-
-		TweenService:Create(
-			informationText.UIStroke,
-			TweenInfo.new(
-				1,
-				Enum.EasingStyle.Linear,
-				Enum.EasingDirection.InOut
-			),
-			{
-				Transparency = 1
-			}
-		)
-		:Play()
-	end)
-end)
-
-
---[[
 	Play the rainbow firework particle effect around the player 
 ]]--
 ParticleRE.OnClientEvent:Connect(function()
@@ -292,18 +206,6 @@ ParticleRE.OnClientEvent:Connect(function()
 end)
 
 
---[[
-	Blur the background and displays a semi-transparent white frame in the background (it helps have
-	a better focus on the displayed gui)
-	
-	@param visible : boolean, true if the ui should be displayed, false otherwise
-]]--
-local function BlurBackground(enabled : boolean)
-	blurEffect.Enabled = enabled
-	blurWhiteBackground.Enabled = enabled
-end
-
-
 local function CloseUpgradePostsGui()
 	-- disconnect all the clicks connection from the upgrade posts gui
 	for _,upgradePostClickConnection : RBXScriptConnection in pairs(upgradePostsClickConnection) do
@@ -336,7 +238,7 @@ end
 	@param visible : boolean, true if the gui should be displayed, false otherwise
 ]]--
 UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean)
-	BlurBackground(visible)
+	Utility.BlurBackground(visible)
 	
 	if visible and not upgradePosts.Enabled then
 		upgradePosts.Enabled = true
@@ -381,7 +283,7 @@ UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean)
 		
 		-- listen to the click to close the gui
 		table.insert(upgradePostsClickConnection, upgradePostsCloseButton.MouseButton1Down:Connect(function()
-			BlurBackground(false)
+			Utility.BlurBackground(false)
 			CloseUpgradePostsGui()
 		end))
 		
@@ -464,56 +366,4 @@ PlayTimeRewardsTimerSyncRE.OnClientEvent:Connect(function(timePlayedToday : numb
 	end
 
 	playTimeRewards:SyncTimer(timePlayedToday)
-end)
-
-
-
-
-
-
-
--- CUSTOM POSTS
-
-local function CloseCustomPostGui()
-	Promise.new(function(resolve)
-		customPostsBackground:TweenSize(
-			UDim2.new(0,0,0,0),
-			Enum.EasingDirection.InOut,
-			Enum.EasingStyle.Linear,
-			UPGRADE_POSTS_TWEEN_DURATION
-		)
-
-		task.wait(UPGRADE_POSTS_TWEEN_DURATION)
-		resolve()
-	end)
-	:andThen(function()
-		customPostsBackground.Visible = false
-	end)
-end
-
-
-local function OpenCustomPostGui()
-	BlurBackground(true)
-	customPostsBackground.Visible = true
-	
-	customPostsBackground:TweenSize(
-		UDim2.new(0.5,0,0.5,0),
-		Enum.EasingDirection.InOut,
-		Enum.EasingStyle.Linear,
-		UPGRADE_POSTS_TWEEN_DURATION
-	)
-
-
-	-- TODO : disconnect the following connection
-	customPostsCloseButton.MouseButton1Down:Connect(function()
-		BlurBackground(false)
-		CloseCustomPostGui()
-	end)
-end
-
-
-customPostsButton.MouseButton1Down:Connect(function()
-	if not customPostsBackground.Visible then
-		OpenCustomPostGui()
-	end
 end)

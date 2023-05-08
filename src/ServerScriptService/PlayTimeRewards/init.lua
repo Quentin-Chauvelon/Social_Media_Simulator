@@ -155,7 +155,7 @@ function PlayTimeRewards:CollectReward() : {[string] : string | number}
 end
 
 
-function PlayTimeRewards:onLeave()
+function PlayTimeRewards:OnLeave()
 	-- stop the promise
 	self.promise:cancel()
 

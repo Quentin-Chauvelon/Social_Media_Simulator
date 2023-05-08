@@ -81,7 +81,7 @@ end
 --[[
 	Unassign the plot from the player when he leaves 
 ]]--
-function PlotModule:onLeave()
+function PlotModule:OnLeave()
 	if self and self.phone and self.screen then
 		self.phone.Owner.Value = ""
 
