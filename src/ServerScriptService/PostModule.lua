@@ -1,6 +1,3 @@
-local PostModule = {}
-PostModule.__index = PostModule
-
 local Players = game:GetService("Players")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8,7 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
-local Types = require(ServerScriptService:WaitForChild("Types"))
+local PlayerModule = require(ServerScriptService:WaitForChild("Player"))
 
 DataStore2.Combine("SMS", "level", "postStats")
 
@@ -90,8 +87,37 @@ local function GetRandomFollowerAmount() : number
 end
 
 
+export type PostModule = {
+    nextAutoPost : number,
+	nextClickPost : number,
+	autoPostInverval : number,
+	clickPostInterval : number,
+	dialog : {},
+	currentState : string,
+	level : number,
+	postedLastTime : boolean,
+	postStates : {},
+	posts : {(number) -> string},
+	dialogs : {(number) -> string},
+	replies : {(number) -> string},
+	numberOfPosts : number,
+	numberOfDialogs : number,
+	numberOfReplies : number,
+	new : (plr : Player) -> PostModule,
+	GenerateDialog : (self : PostModule, p : PlayerModule.PlayerModule, tableToUse : string) -> nil,
+    Post : (self : PostModule, p : PlayerModule.PlayerModule) -> nil,
+    PlayerClicked : (self : PostModule, p : PlayerModule.PlayerModule) -> nil,
+    GenerateStateMachine : (self : PostModule) -> nil,
+    OnLeave : (self : PostModule) -> nil
+}
+
+
+local PostModule : PostModule = {}
+PostModule.__index = PostModule
+
+
 function PostModule.new(plr : Player)
-	local postModule : Types.PostModule = {}
+	local postModule : PostModule = {}
 
 	local postStats = DataStore2("postStats", plr):Get(defaultPostStats)
 	

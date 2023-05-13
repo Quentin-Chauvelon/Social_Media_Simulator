@@ -1,10 +1,8 @@
-local CustomPost = {}
-CustomPost.__index = CustomPost
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+local Utility = require(script.Parent:WaitForChild("Utility"))
 
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCustomPosts")
@@ -115,6 +113,91 @@ local function selectPostType(postType : string)
 end
 
 
+export type CustomPost = {
+    posts : {post},
+    currentPost : post?,
+    postListConnections : {RBXScriptSignal},
+    utility : Utility.Utility,
+    new : (utility : Utility.Utility) -> CustomPost,
+    SavePost : (self : CustomPost) -> nil,
+    CloseCustomPostGui : (self : CustomPost) -> nil,
+    OpenCustomPostGui : (self : CustomPost) -> nil,
+    ResizePost : (self : CustomPost, post : Frame) -> nil,
+    AddPostFrameToList : (self : CustomPost, post : post) -> nil,
+    ListAllPosts : (self : CustomPost, type : string, id : number, posts : {post}) -> nil,
+    EditPost : (self : CustomPost, id : number) -> nil,
+    DeletePost : (self : CustomPost, id : number) -> nil,
+
+}
+
+type post = {
+    id : number,
+    postType : string,
+    text1 : string,
+    text2 : string
+}
+
+
+local CustomPost : CustomPost = {}
+CustomPost.__index = CustomPost
+
+
+function CustomPost.new(utility)
+    local customPost = {}
+
+    customPost.posts = {}
+    customPost.currentPost = nil
+    customPost.postListConnections = {}
+    customPost.utility = utility
+
+    setmetatable(customPost, CustomPost)
+
+    -- update the list of custom posts when fired from the server
+    ListCustomPostsRE.OnClientEvent:Connect(function(type, id, posts)
+        customPost:ListAllPosts(type, id, posts)
+    end)
+
+    utility.ResizeUIOnWindowResize(function()
+        customPostsBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.8, 0.5), 0, 0.6, 0)
+
+        local customPostsCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.12, 0.15), 0)
+        customPostsCloseButton.Size = UDim2.new(customPostsCloseButtonUDim, customPostsCloseButtonUDim)
+
+        customPostsCreatePostPlusText.TextSize = customPostsCreatePostButton.AbsoluteSize.Y * 1.5
+        customPostsCreatePostPlusTextUIPadding.PaddingLeft = UDim.new((customPostsCreatePostPlusText.TextSize - 25) * 0.0011, 0)
+
+        for _,customPostsScrollingFramePost : Frame | UIListLayout in ipairs(customPostsScrollingFrame:GetChildren()) do
+            if customPostsScrollingFramePost:IsA("Frame") then
+                customPost:ResizePost(customPostsScrollingFramePost)
+            end
+        end
+
+        if currentCamera.ViewportSize.X < 1000 then
+            customPostsTitleUIStroke.Thickness = 2.5
+            customPostsCreatePostText.Position = UDim2.new(1, 8, 0.5, 0)
+        else
+            customPostsTitleUIStroke.Thickness = 3
+            customPostsCreatePostText.Position = UDim2.new(1, 10, 0.5, 0)
+        end
+
+        postMessage.TextSize = postMessage.AbsoluteSize.Y / 3
+        dialogPost1Message.TextSize = dialogPost1Message.AbsoluteSize.Y / 3 * 2.5
+        dialogPost2Mesage.TextSize = dialogPost2Mesage.AbsoluteSize.Y / 3 * 2.5
+        replyPostMessage.TextSize = replyPostMessage.AbsoluteSize.Y / 3 * 2.5
+        repliedPostMessage.TextSize = repliedPostMessage.AbsoluteSize.Y / 3 * 2.5
+    end)
+
+
+    customPostsButton.MouseButton1Down:Connect(function()
+        if not customPostsBackground.Visible then
+            customPost:OpenCustomPostGui()
+        end
+    end)
+
+    return customPost
+end
+
+
 function CustomPost:SavePost()
     customPostsBackground.Visible = false
     createPost.Visible = true
@@ -175,17 +258,17 @@ function CustomPost:SavePost()
         end
 
         if #self.posts >= 10 then
-            self.utility:DisplayError("You can't create more than 10 Posts")
+            self.utility.DisplayError("You can't create more than 10 Posts")
             return
         end
 
         if text1.Text == "" or text2.Text == "" then
-            self.utility:DisplayError("You can't create an empty post")
+            self.utility.DisplayError("You can't create an empty post")
             return
         end
 
         if #text1.Text >= 200 or #text2.Text >= 200 then
-            self.utility:DisplayError("Your post length should not exceed 200 characters")
+            self.utility.DisplayError("Your post length should not exceed 200 characters")
             return
         end
 
@@ -198,18 +281,18 @@ function CustomPost:SavePost()
 
         if not result then
             if self.currentPost then
-                self.utility:DisplayError("Sorry, your post could not be saved. Please try again later.")
+                self.utility.DisplayError("Sorry, your post could not be saved. Please try again later.")
             else
-                self.utility:DisplayError("Sorry, your post could not be created. Please try again later.")
+                self.utility.DisplayError("Sorry, your post could not be created. Please try again later.")
             end
 
             return
         end
 
         if self.currentPost then
-            self.utility:DisplayInformation("Post saved!")
+            self.utility.DisplayInformation("Post saved!")
         else
-            self.utility:DisplayInformation("New post created!")
+            self.utility.DisplayInformation("New post created!")
         end
 
         postTypeConnection:Disconnect()
@@ -328,7 +411,7 @@ function CustomPost:ResizePost(post : Frame)
 end
 
 
-function CustomPost:AddPostFrameToList(post)
+function CustomPost:AddPostFrameToList(post : post)
     local id : number = post.id
 
     local customPost = customPostTemplate:Clone()
@@ -349,13 +432,13 @@ function CustomPost:AddPostFrameToList(post)
 end
 
 
-function CustomPost:ListAllPosts(type : string, id : number, posts)
+function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
     
     if type == "delete" then
         for _,post : Frame | UIListLayout in ipairs(customPostsScrollingFrame:GetChildren()) do
             if post:IsA("Frame") and post.Id.Value == id then
                 
-                for i : number, post in pairs(self.posts) do
+                for i : number, post : post in pairs(self.posts) do
                     if post.id == id then
                         table.remove(self.posts, i)
                         break
@@ -382,7 +465,7 @@ function CustomPost:ListAllPosts(type : string, id : number, posts)
     elseif type == "modify" then
         if posts and posts.id and posts.id == id then
 
-            for _,post in pairs(self.posts) do
+            for _,post : post in pairs(self.posts) do
                 if post.id == id then
                     post.postType = posts.postType
                     post.text1 = posts.text1
@@ -414,7 +497,7 @@ function CustomPost:ListAllPosts(type : string, id : number, posts)
             end
         end
 
-        for _,post in pairs(posts) do
+        for _,post : post in pairs(posts) do
             self:AddPostFrameToList(post)
         end
     end
@@ -426,7 +509,7 @@ end
 
 
 function CustomPost:EditPost(id : number)
-    for _,post in pairs(self.posts) do
+    for _,post : post in pairs(self.posts) do
         if post.id == id then
             self.currentPost = post
             self:SavePost()
@@ -438,62 +521,6 @@ end
 
 function CustomPost:DeletePost(id : number)
     SaveCustomPostRF:InvokeServer(nil, nil, nil, id)
-end
-
-
-function CustomPost.new(utility)
-    local customPost = {}
-
-    customPost.posts = {}
-    customPost.currentPost = nil
-    customPost.postListConnections = {}
-    customPost.utility = utility
-
-    setmetatable(customPost, CustomPost)
-
-    -- update the list of custom posts when fired from the server
-    ListCustomPostsRE.OnClientEvent:Connect(function(type, id, posts)
-        customPost:ListAllPosts(type, id, posts)
-    end)
-
-    utility.ResizeUIOnWindowResize(function()
-        customPostsBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.8, 0.5), 0, 0.6, 0)
-
-        local customPostsCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.12, 0.15), 0)
-        customPostsCloseButton.Size = UDim2.new(customPostsCloseButtonUDim, customPostsCloseButtonUDim)
-
-        customPostsCreatePostPlusText.TextSize = customPostsCreatePostButton.AbsoluteSize.Y * 1.5
-        customPostsCreatePostPlusTextUIPadding.PaddingLeft = UDim.new((customPostsCreatePostPlusText.TextSize - 25) * 0.0011, 0)
-
-        for _,customPostsScrollingFramePost : Frame | UIListLayout in ipairs(customPostsScrollingFrame:GetChildren()) do
-            if customPostsScrollingFramePost:IsA("Frame") then
-                customPost:ResizePost(customPostsScrollingFramePost)
-            end
-        end
-
-        if currentCamera.ViewportSize.X < 1000 then
-            customPostsTitleUIStroke.Thickness = 2.5
-            customPostsCreatePostText.Position = UDim2.new(1, 8, 0.5, 0)
-        else
-            customPostsTitleUIStroke.Thickness = 3
-            customPostsCreatePostText.Position = UDim2.new(1, 10, 0.5, 0)
-        end
-
-        postMessage.TextSize = postMessage.AbsoluteSize.Y / 3
-        dialogPost1Message.TextSize = dialogPost1Message.AbsoluteSize.Y / 3 * 2.5
-        dialogPost2Mesage.TextSize = dialogPost2Mesage.AbsoluteSize.Y / 3 * 2.5
-        replyPostMessage.TextSize = replyPostMessage.AbsoluteSize.Y / 3 * 2.5
-        repliedPostMessage.TextSize = repliedPostMessage.AbsoluteSize.Y / 3 * 2.5
-    end)
-
-
-    customPostsButton.MouseButton1Down:Connect(function()
-        if not customPostsBackground.Visible then
-            customPost:OpenCustomPostGui()
-        end
-    end)
-
-    return customPost
 end
 
 

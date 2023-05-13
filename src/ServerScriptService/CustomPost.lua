@@ -1,28 +1,52 @@
-local CustomPost = {}
-CustomPost.__index = CustomPost
-
 local TextService = game:GetService("TextService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local PostModule = require(ServerScriptService:WaitForChild("PostModule"))
-local Types = require(ServerScriptService:WaitForChild("Types"))
 
 local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCustomPosts")
 
 DataStore2.Combine("SMS", "customPosts")
 
 
-function CustomPost.new(plr : Player, postModule : Types.PostModule)
-    local customPost : Types.CustomPost = {}
+export type CustomPost = {
+	__index : CustomPost,
+	player : Player,
+	nextId : number,
+	posts : {post},
+	postModule : PostModule.PostModule,
+	listCustomPostConnection : {RBXScriptSignal},
+    new : (plr : Player, postModule : PostModule.PostModule) -> CustomPost,
+	CreatePost : (self : CustomPost, postType : string, text1 : string, text2 : string) -> nil,
+    SavePost : (self : CustomPost, id : number, postType : string, text1 : string, text2 : string) -> boolean,
+    DeletePost : (self : CustomPost, id : number) -> nil,
+    GetPostWithId : (self : CustomPost, id : number) -> nil,
+    GetAllPosts : (self : CustomPost, type : string, id : number?) -> nil,
+    OnLeave : (self : CustomPost) -> nil
+}
+
+type post = {
+    id : number,
+    postType : string,
+    text1 : string,
+    text2 : string
+}
+
+
+local CustomPost : CustomPost = {}
+CustomPost.__index = CustomPost
+
+
+function CustomPost.new(plr : Player, postModule : {})
+    local customPost : CustomPost = setmetatable({}, CustomPost)
 
     customPost.player = plr
     customPost.nextId = 1
     customPost.posts = DataStore2("customPosts", plr):Get({})
     customPost.postModule = postModule
 
-    for _,post : Types.post in ipairs(customPost.posts) do
+    for _,post : post in ipairs(customPost.posts) do
         if post.postType == "post" then
             table.insert(customPost.postModule.posts, function()
                 return post.text1
@@ -60,7 +84,7 @@ function CustomPost.new(plr : Player, postModule : Types.PostModule)
         customPost:GetAllPosts("all")
     end)
 
-    return setmetatable(customPost, CustomPost)
+    return customPost
 end
 
 
@@ -72,7 +96,7 @@ function CustomPost:CreatePost(postType : string, text1 : string, text2 : string
             if #self.posts >= 10 then
                 return false
             end
-
+            
             -- post texts should not be empty nor be more than 200 characters long
             if text1 == "" or #text1 >= 200 or text2 == "" or #text2 >= 200 then
                 return false
@@ -133,7 +157,7 @@ function CustomPost:CreatePost(postType : string, text1 : string, text2 : string
 end
 
 
-function CustomPost:SavePost(id : number, postType : string, text1 : string, text2 : string)
+function CustomPost:SavePost(id : number, postType : string, text1 : string, text2 : string) : boolean
     if id and typeof(id) == "number" and postType and typeof(postType) == "string" and text1 and typeof(text1) == "string" and text2 and typeof(text2) == "string" then
         if postType == "post" or postType == "reply" or postType == "dialog" then
 
@@ -145,7 +169,7 @@ function CustomPost:SavePost(id : number, postType : string, text1 : string, tex
 
             -- get the post with the given id
             local foundPost : boolean = false
-            for i : number,post : Types.post in pairs(self.posts) do
+            for i : number,post : post in pairs(self.posts) do
                 if post.id == id then
                     oldText1 = post.text1
                     oldText2 = post.text2

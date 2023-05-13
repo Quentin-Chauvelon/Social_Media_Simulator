@@ -1,10 +1,22 @@
-local PlotModule = {}
-PlotModule.__index = PlotModule
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local plots : Folder = workspace:WaitForChild("Plots")
+
+
+export type PlotModule = {
+	phone : Model,
+	screen : Frame,
+	followerGoal : Frame,
+	new : () -> PlotModule,
+	AssignPlayerToPlot : (self : PlotModule, playerName : string) -> boolean,
+	AssignPlot : (self : PlotModule, plr : Player) -> boolean,
+	OnLeave : (self : PlotModule) -> nil
+}
+
+
+local PlotModule : PlotModule = {}
+PlotModule.__index = PlotModule
 
 
 function PlotModule.new()
@@ -17,10 +29,10 @@ end
 --[[
 	Assigns plr to the first free plot and teleports them to the plot
 	
-	@param playerName, the name of the player whom to assign the plot to
+	@param playerName string, the name of the player whom to assign the plot to
 	@return true if the player has been assigned to a plot, false otherwise (if all plots were taken)
 ]]--
-function PlotModule:AssignPlayerToPlot(playerName)
+function PlotModule:AssignPlayerToPlot(playerName : string) : boolean
 	for _,plot : Model in ipairs(plots:GetChildren()) do
 
 		-- if the plot is free, assign the player to it

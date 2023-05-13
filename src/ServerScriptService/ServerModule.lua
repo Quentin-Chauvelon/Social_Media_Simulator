@@ -1,5 +1,3 @@
-local ServerModule = {}
-
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -20,6 +18,15 @@ local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCu
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
 local players = {}
+
+
+export type ServerModule = {
+	onJoin : (plr : Player) -> nil,
+	onLeave : (playerName : string) -> nil
+}
+
+
+local ServerModule : ServerModule = {}
 
 
 local function PlayerReachedFollowerGoal(p)

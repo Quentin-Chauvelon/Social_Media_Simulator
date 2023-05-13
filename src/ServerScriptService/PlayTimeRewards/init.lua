@@ -1,6 +1,3 @@
-local PlayTimeRewards = {}
-PlayTimeRewards.__index = PlayTimeRewards
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -18,6 +15,36 @@ local defaultPlayTimeRewardsStats = {
 }
 
 local defaultRewards : {number} = {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}
+
+
+export type PlayTimeRewards = {
+	lastDayPlayed : number,
+	timePlayedToday : number,
+	nextRewards : {number},
+	rewardToCollect : number,
+	promise : Promise.Promise,
+	plr : Player,
+	new : (Player) -> PlayTimeRewards,
+	GetDataToSave : (self : PlayTimeRewards) -> PlayTimeRewardsStats,
+	LoadData : (self : PlayTimeRewards) -> nil,
+	StartTimer : (self : PlayTimeRewards) -> nil,
+	CollectReward : (self : PlayTimeRewards) -> PlayTimeReward,
+	OnLeave : (self : PlayTimeRewards) -> nil
+}
+
+type PlayTimeRewardsStats = {
+	lastDayPlayed : number,
+	timePlayedToday : number
+}
+
+type PlayTimeReward = {
+	reward : string,
+	value : number
+}
+
+
+local PlayTimeRewards : PlayTimeRewards = {}
+PlayTimeRewards.__index = PlayTimeRewards
 
 
 function PlayTimeRewards.new(plr : Player)
@@ -44,7 +71,7 @@ end
 
 	@return {number}, the table containing the data to save
 ]]--
-function PlayTimeRewards:GetDataToSave() : {number}
+function PlayTimeRewards:GetDataToSave()
 	return {
 		lastDayPlayed = self.lastDayPlayed,
 		timePlayedToday = self.timePlayedToday
@@ -141,7 +168,7 @@ end
 
 	@return the reward
 ]]--
-function PlayTimeRewards:CollectReward() : {[string] : string | number}
+function PlayTimeRewards:CollectReward()
 	if self.rewardToCollect ~= 0 then
 		local reward = Rewards.GetReward(self.rewardToCollect)
 

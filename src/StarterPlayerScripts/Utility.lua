@@ -1,4 +1,3 @@
-local Utility = {}
 
 local Players = game:GetService("Players")
 local TextService = game:GetService("TextService")
@@ -25,6 +24,22 @@ local uiToResize = {}
 local debounce = true
 
 
+export type Utility = {
+    new : () -> nil,
+    BlurBackgruond : (enabled : boolean) -> nil,
+    ResizeUIOnWindowResize : (() -> nil) -> nil,
+    GetNumberInRangeProportionally : (a : number, X : number, b : number, minRange : number, maxRange : number) -> number,
+    GetNumberInRangeProportionallyDefaultWidth : (X : number, minRange : number, maxRange : number) -> number,
+    GetNumberInRangeProportionallyDefaultHeight : (X : number, minRange : number, maxRange : number) -> number,
+    DisplayInformation : (text : string, duration : number) -> nil,
+    DisplayError : (text : string, duration : number) -> nil
+
+}
+
+
+local Utility : Utility = {}
+
+
 function Utility.new()
     Utility.ResizeUIOnWindowResize(function()
         notification.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.45, 0.2), 0, 0.1, 0)
@@ -44,11 +59,11 @@ function Utility.new()
     end)
 
     InformationNotificationRE.OnClientEvent:Connect(function(text :string, duration : number)
-        Utility:DisplayInformation(text, duration)
+        Utility.DisplayInformation(text, duration)
     end)
 
     ErrorNotificationRE.OnClientEvent:Connect(function(text :string, duration : number)
-        Utility:DisplayError(text, duration)
+        Utility.DisplayError(text, duration)
     end)
 end
 
@@ -57,7 +72,7 @@ end
 	Blur the background and displays a semi-transparent white frame in the background (it helps have
 	a better focus on the displayed gui)
 	
-	@param visible : boolean, true if the ui should be displayed, false otherwise
+	@param enabled : boolean, true if the ui should be displayed, false otherwise
 ]]--
 function Utility.BlurBackground(enabled : boolean)
 	blurEffect.Enabled = enabled
@@ -188,7 +203,7 @@ local function DisplayNotification(text : string, duration : number)
 end
 
 
-function Utility:DisplayInformation(text : string, duration : number)
+function Utility.DisplayInformation(text : string, duration : number)
     notification.BackgroundColor3 = Color3.fromRGB(175, 213, 240)
     notificationImage.ImageColor3 = Color3.fromRGB(97, 154, 240)
     notificationClose.BackgroundColor3 = Color3.fromRGB(97, 154, 240)
@@ -197,7 +212,7 @@ function Utility:DisplayInformation(text : string, duration : number)
 end
 
 
-function Utility:DisplayError(text : string, duration : number)
+function Utility.DisplayError(text : string, duration : number)
     notification.BackgroundColor3 = Color3.fromRGB(255, 79, 79)
     notificationImage.ImageColor3 = Color3.new(1,1,1)
     notificationClose.BackgroundColor3 = Color3.fromRGB(255, 0, 0)

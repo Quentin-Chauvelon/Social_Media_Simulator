@@ -57,5 +57,11 @@ end)
 	TODO add nostrict ? and then strict ? (what if an exploiter fires a remote event with the wrong argument type)
 	TODO thumbnail doesn't seem to be working anymore on the phone when posting + hide guildname if there is none
 
+-- TODO: use module for the code inside the local script (post module mainly)
+-- TODO rework the follower gui (color (outline gradient) and size for mobile) responsivness
+-- TODO utility module to bind ui to the events (MouseEnterScaleUp and MouseEnterScaleDown)
+-- TODO make a utility function to tween all the ui on click (for those where it's a simple tween (bigger/smaller)), will help improve readability especially because the promise takes to hide the element takes at least 5 lines
+
+
 	TEST
 ]]--

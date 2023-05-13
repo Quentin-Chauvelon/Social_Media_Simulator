@@ -2,6 +2,47 @@
 	An implementation of Promises similar to Promise/A+.
 ]]
 
+
+export type Promise = {
+	_thread : any,
+	_source : any,
+	_status : any,
+	_values : any,
+	_valuesLength : any,
+	_unhandledRejection : any,
+	_queuedResolve : any,
+	_queuedReject : any,
+	_queuedFinally : any,
+	_cancellationHook : any,
+	_parent : any,
+	_consumers : any,
+	new : (any) -> Promise,
+	__tostring : (any) -> string,
+	defer : (any) -> Promise,
+	resolve : (any) -> Promise,
+	reject : (any) -> Promise,
+	_try : (any) -> Promise,
+	try : (any) -> Promise,
+	_all : (any) -> Promise,
+	all : (any) -> Promise,
+	fold : (any) -> any,
+	some : (any) -> Promise,
+	any : (any) -> Promise,
+	any : (any) -> Promise,
+	allSettled : (any) -> Promise,
+	race : (any) -> Promise,
+	each : (any) -> Promise,
+	is : (any) -> boolean,
+	promisify : (any) -> Promise,
+	delay : (number) -> any,
+	each : (any) -> Promise,
+	retry : (any) -> Promise,
+	retryWithDelay : (any) -> Promise,
+	fromEvent : (any) -> Promise,
+	onUnhandledRejection : (any) -> (() -> ()),
+}
+
+
 local ERROR_NON_PROMISE_IN_LIST = "Non-promise value passed into %s at index %s"
 local ERROR_NON_LIST = "Please pass a list of promises to %s"
 local ERROR_NON_FUNCTION = "Please pass a handler function to %s!"

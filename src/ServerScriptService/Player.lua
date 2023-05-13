@@ -1,6 +1,3 @@
-local Player = {}
-Player.__index = Player
-
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -12,6 +9,25 @@ local PlayTimeRewards = require(ServerScriptService:WaitForChild("PlayTimeReward
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
 DataStore2.Combine("SMS", "followers", "coins")
+
+
+export type PlayerModule = {
+	player : Player,
+	followers : number,
+	nextFollowerGoal : number,
+	coins : number,
+	plotModule : PlotModule.PlotModule,
+	postModule : PostModule.PostModule,
+	customPosts : CustomPost.CustomPost,
+	playTimeRewards : PlayTimeRewards.PlayTimeRewards,
+	maid : Maid.Maid,
+	new : (plr : Player) -> PlayerModule,
+	OnLeave : (self : PlayerModule) -> nil
+}
+
+
+local Player : PlayerModule = {}
+Player.__index = Player
 
 
 --[[

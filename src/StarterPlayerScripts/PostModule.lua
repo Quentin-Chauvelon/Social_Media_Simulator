@@ -1,4 +1,3 @@
-local PostModule = {}
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -206,6 +205,13 @@ local function UpdatePostContent(post : Frame, screen : Frame, plr : Player, mes
 	end
 end
 
+
+export type PostModule = {
+	Post : (self : PostModule, postType : string, screen : Frame, plr : Player, message : string, start : boolean?) -> nil
+}
+
+
+local PostModule : PostModule = {}
 
 
 --[[

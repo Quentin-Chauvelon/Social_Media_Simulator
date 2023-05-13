@@ -1,6 +1,3 @@
-local PlayTimeRewards = {}
-PlayTimeRewards.__index = PlayTimeRewards
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -21,11 +18,28 @@ local collectedReward : Frame = playTimeRewardsUI:WaitForChild("CollectedReward"
 local defaultRewards : {number} = {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}
 
 
--- TODO: use module for the code inside the local script (post module mainly)
--- TODO rework the follower gui (color (outline gradient) and size for mobile) responsivness
+export type PlayTimeRewards = {
+    timePlayedToday : number,
+    nextReward : number,
+    isNextRewardReady : boolean,
+    nextRewardTimer : TextLabel,
+    promise : Promise.Promise,
+    tweenChest : Promise.Promise,
+    new : (timePlayedToday : number, nextRewardTimer : TextLabel) -> PlayTimeRewards,
+    FormatTimeForTimer : (self : PlayTimeRewards, timeUntilNextReward : number) -> string,
+    NextRewardClick : (self : PlayTimeRewards) -> nil,
+    StartTimer : (self : PlayTimeRewards) -> nil,
+    SyncTimer : (timePlayedToday : number) -> nil,
+}
 
--- TODO utility module to bind ui to the events (MouseEnterScaleUp and MouseEnterScaleDown)
--- TODO make a utility function to tween all the ui on click (for those where it's a simple tween (bigger/smaller)), will help improve readability especially because the promise takes to hide the element takes at least 5 lines
+type PlayTimeReward = {
+    reward : string,
+    value : number
+}
+
+
+local PlayTimeRewards : PlayTimeRewards = {}
+PlayTimeRewards.__index = PlayTimeRewards
 
 
 --[[
@@ -74,7 +88,7 @@ end
 ]]--
 function PlayTimeRewards:NextRewardClick()
     nextRewardChest.MouseButton1Down:Connect(function()
-        local reward : {[string] : string | number} = CollectPlayTimeRewardRF:InvokeServer()
+        local reward : PlayTimeReward = CollectPlayTimeRewardRF:InvokeServer()
 
         -- if there was a reward to collect
         if reward then
@@ -82,7 +96,7 @@ function PlayTimeRewards:NextRewardClick()
             self.nextReward = lplr.NextReward.Value
 
             self:StartTimer()
-            
+
             if reward.reward == "followers" then
                 collectedReward.Reward.Image = ""
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(209, 44, 255)

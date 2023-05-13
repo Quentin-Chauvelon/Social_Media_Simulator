@@ -1,6 +1,20 @@
 local Maid = {}
 Maid.ClassName = "Maid"
 
+
+export type Maid = {
+	_tasks : {},
+	new : () -> Maid,
+	isMaid : (any) -> boolean,
+	__index : (any) -> any,
+	__newindex : (any, any) -> nil,
+	GiveTask : (any, any) -> number,
+	GivePromise : ({}) -> {},
+	DoCleaning : () -> nil,
+	Destroy : () -> nil
+}
+
+
 --[=[
 	Constructs a new Maid object
 
