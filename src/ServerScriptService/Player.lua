@@ -148,7 +148,11 @@ function Player:OnLeave()
 
 	self.customPosts:OnLeave()
 
+	self.upgradeModule:OnLeave()
+
 	self.playTimeRewards:OnLeave()
+
+	self.gamepassModule:OnLeave()
 
 	-- clean all the connections
 	self.maid:DoCleaning()

@@ -4,6 +4,7 @@ export type GamepassModule = {
     new : () -> GamepassModule,
     GetCoinsMultiplier : () -> number,
     GetFollowersMultiplier : () -> number,
+    OnLeave : (self : GamepassModule) -> nil
 }
 
 
@@ -30,6 +31,12 @@ end
 
 function GamepassModule:GetFollowersMultiplier()
     return self.boughtFollowersMultiplier and 20 or 0
+end
+
+
+function GamepassModule:OnLeave()
+	setmetatable(self, nil)
+	self = nil
 end
 
 

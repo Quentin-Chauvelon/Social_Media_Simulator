@@ -220,9 +220,11 @@ end
 	@param id : nmuber, the id of the upgrade that has been clicked
 ]]--
 UpgradeRF.OnServerInvoke = function(plr : Player, id : number)
-	local p : Player.PlayerModule = players[plr.Name]
-	if p then
-		return p.upgradeModule:Upgrade(p, id)
+	if id and typeof(id) == "number" then
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			return p.upgradeModule:Upgrade(p, id)
+		end
 	end
 end
 

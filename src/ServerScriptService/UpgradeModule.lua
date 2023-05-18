@@ -58,8 +58,9 @@ export type UpgradeModule = {
     CanUpgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, upgrade : upgrade, id : number) -> boolean,
     ApplyUpgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, upgrade : upgrade) -> nil,
     ApplyUpgrades : (self : UpgradeModule, p : PlayerModule.PlayerModule) -> nil,
-    Upgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, id : number) -> {upgrade} | upgrade,
-    GetUpgradeWithId : (self : UpgradeModule, id : number) -> upgrade?
+    Upgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, id : number) -> {upgrade} | upgrade | nil,
+    GetUpgradeWithId : (self : UpgradeModule, id : number) -> upgrade?,
+    OnLeave : (self : UpgradeModule) -> nil
 }
 
 type upgrade = {
@@ -86,6 +87,13 @@ function UpgradeModule.new(plr : Player) : UpgradeModule
 end
 
 
+--[[
+    Returns a boolean indicating if the player can upgrade the upgrade
+
+    @param upgrade : upgrade, the upgrade to upgrade
+    @param id : number, the id of the upgrade
+    @return boolean, true if the player can upgrade, false otherwise
+]]--
 function UpgradeModule:CanUpgrade(upgrade : upgrade, id : number) : boolean
     if upgrade.id == id then
         if upgrade.level + 1 < upgrade.maxLevel then
@@ -97,6 +105,12 @@ function UpgradeModule:CanUpgrade(upgrade : upgrade, id : number) : boolean
 end
 
 
+--[[
+    Applies the upgrade (to the player or its character)
+
+    @param p : PlayerModule, the PlayerModule representing the player to whom we want to apply the upgrade
+    @param upgrade : upgrade, the upgrade to apply
+]]--
 function UpgradeModule:ApplyUpgrade(p : PlayerModule.PlayerModule, upgrade : upgrade)
     if upgrade.id == 1 then
         if p.player.Character then
@@ -115,6 +129,12 @@ function UpgradeModule:ApplyUpgrade(p : PlayerModule.PlayerModule, upgrade : upg
 end
 
 
+--[[
+    Applies all the upgrades (to the player or its character).
+    Used when the player joins the game or when we want to "refresh" the upgrades
+
+    @param p : PlayerModule,  the PlayerModule reprensenting the player to whom we want to apply the upgrades
+]]--
 function UpgradeModule:ApplyUpgrades(p : PlayerModule.PlayerModule)
     for _,upgrade : upgrade in pairs(self.upgrades) do
         self:ApplyUpgrade(p, upgrade)
@@ -122,7 +142,15 @@ function UpgradeModule:ApplyUpgrades(p : PlayerModule.PlayerModule)
 end
 
 
-function UpgradeModule:Upgrade(p : PlayerModule.PlayerModule, id : number) : {upgrade} | upgrade
+--[[
+    Upgrades one of the upgrade of the player
+
+    @param p : PlayerModule,  the PlayerModule reprensenting the player to whom we want to apply the upgrades
+    @param id : number, the id of the upgrade
+    @return {upgrade} | upgrade, returns all the upgrades if self.firstFire is true, returns the upgraded upgrade
+    if the upgrade could be upgraded, nil otherwise
+]]--
+function UpgradeModule:Upgrade(p : PlayerModule.PlayerModule, id : number) : {upgrade} | upgrade | nil
     if self.firstFire then
         self.firstFire = nil
 
@@ -147,9 +175,17 @@ function UpgradeModule:Upgrade(p : PlayerModule.PlayerModule, id : number) : {up
             end
         end
     end
+
+    return nil
 end
 
 
+--[[
+    Gets the upgrade matching the given id if found
+
+    @param id : number, the id of the upgrade
+    @return upgrade?, the upgrade matching the id if it was found, nil otherwise
+]]--
 function UpgradeModule:GetUpgradeWithId(id : number) : upgrade?
     -- for i,upgrade : upgrade in self.upgrades do
     --     if upgrade.id == id then
@@ -162,6 +198,12 @@ function UpgradeModule:GetUpgradeWithId(id : number) : upgrade?
     end
 
     return nil
+end
+
+
+function UpgradeModule:OnLeave()
+	setmetatable(self, nil)
+	self = nil
 end
 
 
