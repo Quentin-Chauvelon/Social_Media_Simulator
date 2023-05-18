@@ -1,7 +1,7 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
-local PlayerModule = require(ServerScriptService:WaitForChild("Player"))
+local Types = require(ServerScriptService:WaitForChild("Types"))
 
 DataStore2.Combine("SMS", "upgrades")
 
@@ -54,10 +54,10 @@ export type UpgradeModule = {
     upgrades : {upgrade},
     firstFire : boolean?,
     new : (plr : Player) -> UpgradeModule,
-    CanUpgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, upgrade : upgrade, id : number) -> boolean,
-    ApplyUpgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, upgrade : upgrade) -> nil,
-    ApplyUpgrades : (self : UpgradeModule, p : PlayerModule.PlayerModule) -> nil,
-    Upgrade : (self : UpgradeModule, p : PlayerModule.PlayerModule, id : number) -> {upgrade} | upgrade | nil,
+    CanUpgrade : (self : UpgradeModule, p : Types.PlayerModule, upgrade : upgrade, id : number) -> boolean,
+    ApplyUpgrade : (self : UpgradeModule, p : Types.PlayerModule, upgrade : upgrade) -> nil,
+    ApplyUpgrades : (self : UpgradeModule, p : Types.PlayerModule) -> nil,
+    Upgrade : (self : UpgradeModule, p : Types.PlayerModule, id : number) -> {upgrade} | upgrade | nil,
     GetUpgradeWithId : (self : UpgradeModule, id : number) -> upgrade?,
     OnLeave : (self : UpgradeModule) -> nil
 }
@@ -110,7 +110,7 @@ end
     @param p : PlayerModule, the PlayerModule representing the player to whom we want to apply the upgrade
     @param upgrade : upgrade, the upgrade to apply
 ]]--
-function UpgradeModule:ApplyUpgrade(p : PlayerModule.PlayerModule, upgrade : upgrade)
+function UpgradeModule:ApplyUpgrade(p : Types.PlayerModule, upgrade : upgrade)
     if upgrade.id == 1 then
         if p.player.Character then
             p.player.Character.Humanoid.WalkSpeed = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]
@@ -134,7 +134,7 @@ end
 
     @param p : PlayerModule,  the PlayerModule reprensenting the player to whom we want to apply the upgrades
 ]]--
-function UpgradeModule:ApplyUpgrades(p : PlayerModule.PlayerModule)
+function UpgradeModule:ApplyUpgrades(p : Types.PlayerModule)
     for _,upgrade : upgrade in pairs(self.upgrades) do
         self:ApplyUpgrade(p, upgrade)
     end
@@ -149,7 +149,7 @@ end
     @return {upgrade} | upgrade, returns all the upgrades if self.firstFire is true, returns the upgraded upgrade
     if the upgrade could be upgraded, nil otherwise
 ]]--
-function UpgradeModule:Upgrade(p : PlayerModule.PlayerModule, id : number) : {upgrade} | upgrade | nil
+function UpgradeModule:Upgrade(p : Types.PlayerModule, id : number) : {upgrade} | upgrade | nil
     if self.firstFire then
         self.firstFire = nil
 

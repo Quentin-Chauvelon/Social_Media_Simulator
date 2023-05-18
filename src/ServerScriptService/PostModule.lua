@@ -5,7 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
-local PlayerModule = require(ServerScriptService:WaitForChild("Player"))
+local Types = require(ServerScriptService:WaitForChild("Types"))
 
 DataStore2.Combine("SMS", "level", "postStats")
 
@@ -104,9 +104,9 @@ export type PostModule = {
 	numberOfDialogs : number,
 	numberOfReplies : number,
 	new : (plr : Player) -> PostModule,
-	GenerateDialog : (self : PostModule, p : PlayerModule.PlayerModule, tableToUse : string) -> nil,
-    Post : (self : PostModule, p : PlayerModule.PlayerModule) -> nil,
-    PlayerClicked : (self : PostModule, p : PlayerModule.PlayerModule) -> nil,
+	GenerateDialog : (self : PostModule, p : Types.PlayerModule, tableToUse : string) -> nil,
+    Post : (self : PostModule, p : Types.PlayerModule) -> nil,
+    PlayerClicked : (self : PostModule, p : Types.PlayerModule) -> nil,
     GenerateStateMachine : (self : PostModule) -> nil,
     OnLeave : (self : PostModule) -> nil
 }
@@ -189,7 +189,7 @@ end
 	@param p, the player module
 	@param tableToUse : string, a string indicated the table to use to generate the dialog
 ]]--
-function PostModule:GenerateDialog(p : PlayerModule.PlayerModule, tableToUse : string)
+function PostModule:GenerateDialog(p : Types.PlayerModule, tableToUse : string)
 	
 	local startPhrase : string, possibleAnswers : {string}
 	if tableToUse == "dialog" then
@@ -209,7 +209,7 @@ end
 	Goes to a random possible state from the last one, take a random sentence from that state and
 	fires to the client to update the phone UI
 ]]--
-function PostModule:Post(p : PlayerModule.PlayerModule)
+function PostModule:Post(p : Types.PlayerModule)
 	local plr : Player = p.player
 	local nextState : string = self.currentState
 
@@ -294,7 +294,7 @@ end
 	
 	@param p, the player Module
 ]]--
-function PostModule:PlayerClicked(p : PlayerModule.PlayerModule)
+function PostModule:PlayerClicked(p : Types.PlayerModule)
 	local now : number = math.round(tick() * 1_000)
 
 	-- if it has been enough time (clickPostInterval) and the autoPostInterval is not about to post (do not fire if now = nextAutoPost +- clickPostInterval, otherwise it fires too fast and the phone ui glitches)
