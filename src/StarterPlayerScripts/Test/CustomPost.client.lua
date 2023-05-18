@@ -3,7 +3,7 @@ local CustomPost = require(script.Parent.Parent:WaitForChild("CustomPost"))
 local Utility = require(script.Parent.Parent:WaitForChild("Utility"))
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 local DeleteDataTestRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteDataTest")
-print("test")
+
 
 Utility.new()
 

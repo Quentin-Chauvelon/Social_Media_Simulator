@@ -8,10 +8,10 @@ export type Maid = {
 	isMaid : (any) -> boolean,
 	__index : (any) -> any,
 	__newindex : (any, any) -> nil,
-	GiveTask : (any, any) -> number,
-	GivePromise : ({}) -> {},
-	DoCleaning : () -> nil,
-	Destroy : () -> nil
+	GiveTask : (self : Maid, any) -> number,
+	GivePromise : (self : Maid, {}) -> {},
+	DoCleaning : (self : Maid) -> nil,
+	Destroy : (self : Maid) -> nil
 }
 
 

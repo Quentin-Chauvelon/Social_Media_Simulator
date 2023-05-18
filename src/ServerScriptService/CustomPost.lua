@@ -16,7 +16,7 @@ export type CustomPost = {
 	nextId : number,
 	posts : {post},
 	postModule : PostModule.PostModule,
-	listCustomPostConnection : {RBXScriptSignal},
+	listCustomPostConnection : {RBXScriptSignal}?,
     new : (plr : Player, postModule : PostModule.PostModule) -> CustomPost,
 	CreatePost : (self : CustomPost, postType : string, text1 : string, text2 : string) -> nil,
     SavePost : (self : CustomPost, id : number, postType : string, text1 : string, text2 : string) -> boolean,
@@ -39,7 +39,7 @@ CustomPost.__index = CustomPost
 
 
 function CustomPost.new(plr : Player, postModule : {})
-    local customPost : CustomPost = setmetatable({}, CustomPost)
+    local customPost : CustomPost = {}
 
     customPost.player = plr
     customPost.nextId = 1
@@ -75,16 +75,18 @@ function CustomPost.new(plr : Player, postModule : {})
         end
     end
 
-    customPost.listCustomPostConnection = ListCustomPostsRE.OnServerEvent:Connect(function()
-        if customPost.listCustomPostConnection then
-            customPost.listCustomPostConnection:Disconnect()
-            customPost.listCustomPostConnection = nil
-        end
+    customPost.listCustomPostConnection = ListCustomPostsRE.OnServerEvent:Connect(function(player : Player)
+        if plr == player then
+            if customPost.listCustomPostConnection then
+                customPost.listCustomPostConnection:Disconnect()
+                customPost.listCustomPostConnection = nil
+            end
 
-        customPost:GetAllPosts("all")
+            customPost:GetAllPosts("all")
+        end
     end)
 
-    return customPost
+    return setmetatable(customPost, CustomPost)
 end
 
 

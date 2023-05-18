@@ -11,7 +11,7 @@ DataStore2.Combine("SMS", "level", "postStats")
 
 
 local defaultPostStats = {
-	autoPostInterval = 3 * 1_000,
+	autoPostInterval = 3 * 1_000, -- this value is also defined in ServerScriptService/UpgradeModule.lua:25 (in upgrade.baseValue)
 	clickPostInterval = 0.3 * 1_000
 }
 
@@ -189,7 +189,7 @@ end
 	@param p, the player module
 	@param tableToUse : string, a string indicated the table to use to generate the dialog
 ]]--
-function PostModule:GenerateDialog(p, tableToUse : string)
+function PostModule:GenerateDialog(p : PlayerModule.PlayerModule, tableToUse : string)
 	
 	local startPhrase : string, possibleAnswers : {string}
 	if tableToUse == "dialog" then
@@ -209,14 +209,14 @@ end
 	Goes to a random possible state from the last one, take a random sentence from that state and
 	fires to the client to update the phone UI
 ]]--
-function PostModule:Post(p)
+function PostModule:Post(p : PlayerModule.PlayerModule)
 	local plr : Player = p.player
 	local nextState : string = self.currentState
 
-	DataStore2("followers", plr):Increment(GetRandomFollowerAmount())
+	p:UpdateFolowersAmount(GetRandomFollowerAmount())
 
 	if math.random() > 0.5 then
-		DataStore2("coins", plr):Increment(1)
+		DataStore2("coins", plr):Increment(1, p.coins)
 	end
 
 	-- 1/3 chance of liking or reacting (not using a state for these, because we can't change state if we are in the middle
@@ -294,7 +294,7 @@ end
 	
 	@param p, the player Module
 ]]--
-function PostModule:PlayerClicked(p)
+function PostModule:PlayerClicked(p : PlayerModule.PlayerModule)
 	local now : number = math.round(tick() * 1_000)
 
 	-- if it has been enough time (clickPostInterval) and the autoPostInterval is not about to post (do not fire if now = nextAutoPost +- clickPostInterval, otherwise it fires too fast and the phone ui glitches)

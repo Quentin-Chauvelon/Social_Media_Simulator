@@ -14,10 +14,11 @@ local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("InformationN
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("CollectPlayTimeReward")
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
+local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
-local players = {}
+local players : {Player.PlayerModule} = {}
 
 
 export type ServerModule = {
@@ -29,7 +30,7 @@ export type ServerModule = {
 local ServerModule : ServerModule = {}
 
 
-local function PlayerReachedFollowerGoal(p)
+local function PlayerReachedFollowerGoal(p : Player.PlayerModule)
 	-- fire the client to display the congratulations text
 	InformationRE:FireClient(p.player, "Congratulations! You reached " .. tostring(p.nextFollowerGoal) .. " followers!", 8)
 
@@ -48,7 +49,7 @@ end
 	@param plr : Player, the player who joined the game
 ]]--
 function ServerModule.onJoin(plr : Player)
-	local p = Player.new(plr)
+	local p : Player.PlayerModule = Player.new(plr)
 
 	-- save the player module on the server module
 	players[plr.Name] = p
@@ -124,7 +125,7 @@ end
 	@param playerName : string, the name of the player who is leaving
 ]]--
 function ServerModule.onLeave(playerName)
-	local p = players[playerName]
+	local p : Player.PlayerModule = players[playerName]
 
 	-- remove the player module from the server module
 	if p then
@@ -141,7 +142,7 @@ end
 	@param plr : Player, the player who is leaving
 ]]--
 PlayerClickedRE.OnServerEvent:Connect(function(plr : Player)
-	local p = players[plr.Name]
+	local p : Player.PlayerModule = players[plr.Name]
 	if p then
 		p.postModule:PlayerClicked(p)
 	end
@@ -157,10 +158,10 @@ end)
 UnlockPostRF.OnServerInvoke = function(plr : Player, post : number)
 	if typeof(post) == "number" and post > 0 and post < 8 then
 
-		local p = players[plr.Name]
+		local p : Player.PlayerModule = players[plr.Name]
 		if p then
 
-			if p.postModule.level < post and p.followers > upgradePostsRequiredFollowers[post] then
+			if p.postModule.level < post and p:HasEnoughFollowers(upgradePostsRequiredFollowers[post]) then
 				p.postModule.level = post
 
 				p.postModule:GenerateStateMachine()
@@ -180,7 +181,7 @@ end
 	@param plr : Player, the player who clicked the play time rewards button
 ]]--
 CollectPlayTimeRewardRF.OnServerInvoke = function (plr : Player)
-	local p = players[plr.Name]
+	local p : Player.PlayerModule = players[plr.Name]
 	if p then
 		return p.playTimeRewards:CollectReward()
 	end
@@ -197,7 +198,7 @@ end
 	@param id : number?, the id of the post if the player is modifying one, null if he is creating one
 ]]--
 SaveCustomPostRF.OnServerInvoke = function(plr : Player, postType : string?, text1 : string?, text2 : string?, id : number?)
-	local p = players[plr.Name]
+	local p : Player.PlayerModule = players[plr.Name]
 	if p then
 		if id then
 			if postType then
@@ -208,6 +209,20 @@ SaveCustomPostRF.OnServerInvoke = function(plr : Player, postType : string?, tex
 		else
 			return p.customPosts:CreatePost(postType, text1, text2)
 		end
+	end
+end
+
+
+--[[
+	Fires when the player clicks the upgrade button in the upgrades list ui
+
+	@param plr : Player, the player who clicked the upgrade button
+	@param id : nmuber, the id of the upgrade that has been clicked
+]]--
+UpgradeRF.OnServerInvoke = function(plr : Player, id : number)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		return p.upgradeModule:Upgrade(p, id)
 	end
 end
 
