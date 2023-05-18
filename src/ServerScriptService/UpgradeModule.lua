@@ -14,7 +14,7 @@ local defaultUpgrades : {upgrade} = {
         level = 1,
         maxLevel = 10,
         baseValue = 16,
-        upgradeValues = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+        upgradeValues = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18},
         costs = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
     },
     
@@ -24,7 +24,7 @@ local defaultUpgrades : {upgrade} = {
         level = 1,
         maxLevel = 10,
         baseValue = 3000,
-        upgradeValues = {2950, 2900, 2850, 2800, 2750, 2700, 2650, 2600, 2550, 2500},
+        upgradeValues = {0, 50, 100, 150, 200, 250, 300, 350, 400, 450},
         costs = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
     },
     
@@ -47,7 +47,6 @@ local defaultUpgrades : {upgrade} = {
         upgradeValues = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
         costs = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100}
     },
-
 }
 
 
@@ -63,13 +62,13 @@ export type UpgradeModule = {
     OnLeave : (self : UpgradeModule) -> nil
 }
 
-type upgrade = {
+export type upgrade = {
     id : number,
     level : number,
     maxLevel : number,
     baseValue : number,
-    upgradeValues : number,
-    costs : number
+    upgradeValues : {number},
+    costs : {number}
 }
 
 
@@ -96,7 +95,7 @@ end
 ]]--
 function UpgradeModule:CanUpgrade(upgrade : upgrade, id : number) : boolean
     if upgrade.id == id then
-        if upgrade.level + 1 < upgrade.maxLevel then
+        if upgrade.level + 1 <= upgrade.maxLevel then
             return true
         end
     end
@@ -114,7 +113,7 @@ end
 function UpgradeModule:ApplyUpgrade(p : PlayerModule.PlayerModule, upgrade : upgrade)
     if upgrade.id == 1 then
         if p.player.Character then
-            p.player.Character.WalkSpeed = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]
+            p.player.Character.Humanoid.WalkSpeed = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]
         end
 
     elseif upgrade.id == 2 then
@@ -161,7 +160,7 @@ function UpgradeModule:Upgrade(p : PlayerModule.PlayerModule, id : number) : {up
     local upgrade : upgrade? = self:GetUpgradeWithId(id)
 
     if upgrade then
-        if self:CanUpgrade(upgrade) then
+        if self:CanUpgrade(upgrade, id) then
             
             if p:HasEnoughCoins(upgrade.costs[upgrade.level + 1]) then
                 p:UpdateCoinsAmount(-upgrade.costs[upgrade.level + 1])

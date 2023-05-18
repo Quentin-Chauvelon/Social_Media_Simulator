@@ -16,8 +16,8 @@ type upgrade = {
     level : number,
     maxLevel : number,
     baseValue : number,
-    upgradeValues : number,
-    costs : number
+    upgradeValues : {number},
+    costs : {number}
 }
 
 

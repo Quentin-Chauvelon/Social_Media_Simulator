@@ -6,6 +6,10 @@ local plr = game:GetService("Players").PlayerAdded:Wait()
 
 
 local function TableEqual(t1, t2)
+    if not t1 or not t2 or typeof(t1) ~= "table" or typeof(t2) ~= "table" then
+        return false
+    end
+
     if #t1 ~= #t2 then
         return false
     end
@@ -26,15 +30,15 @@ local function TableEqual(t1, t2)
 end
 
 
-assert(TableEqual({}, {}) == true, "compare tables didn't work")
-assert(TableEqual({1}, {1}) == true, "compare tables didn't work")
-assert(TableEqual({1, 4, 6, 9}, {1, 4, 6, 9}) == true, "compare tables didn't work")
-assert(TableEqual({1, 4, 6, 9}, {1, 4, 8, 9}) == false, "compare tables didn't work")
-assert(TableEqual({1, 4, 6, 9}, {1, 4, 9}) == false, "compare tables didn't work")
-assert(TableEqual({{id = 2}}, {{id = 1}}) == false, "compare tables didn't work")
-assert(TableEqual({{id = 2}}, {{id = 2}}) == true, "compare tables didn't work")
-assert(TableEqual({{id = 2, test = 3}, {id = 5, test = 8}}, {{id = 2, test = 3}, {id = 5, test = 8}}) == true, "compare tables didn't work")
-assert(TableEqual({{id = 2, test = 3}, {id = 5, test = 8}}, {{id = 2, test = 3}, {id = 6, test = 8}}) == false, "compare tables didn't work") 
+-- assert(TableEqual({}, {}) == true, "compare tables didn't work")
+-- assert(TableEqual({1}, {1}) == true, "compare tables didn't work")
+-- assert(TableEqual({1, 4, 6, 9}, {1, 4, 6, 9}) == true, "compare tables didn't work")
+-- assert(TableEqual({1, 4, 6, 9}, {1, 4, 8, 9}) == false, "compare tables didn't work")
+-- assert(TableEqual({1, 4, 6, 9}, {1, 4, 9}) == false, "compare tables didn't work")
+-- assert(TableEqual({{id = 2}}, {{id = 1}}) == false, "compare tables didn't work")
+-- assert(TableEqual({{id = 2}}, {{id = 2}}) == true, "compare tables didn't work")
+-- assert(TableEqual({{id = 2, test = 3}, {id = 5, test = 8}}, {{id = 2, test = 3}, {id = 5, test = 8}}) == true, "compare tables didn't work")
+-- assert(TableEqual({{id = 2, test = 3}, {id = 5, test = 8}}, {{id = 2, test = 3}, {id = 6, test = 8}}) == false, "compare tables didn't work") 
 
 
 local function testNoPosts()

@@ -5,6 +5,10 @@ local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local plr = game:GetService("Players").PlayerAdded:Wait()
 
 local function TableEqual(t1, t2)
+    if not t1 or not t2 or typeof(t1) ~= "table" or typeof(t2) ~= "table" then
+        return false
+    end
+
     if #t1 ~= #t2 then
         return false
     end
