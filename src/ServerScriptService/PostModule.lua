@@ -215,7 +215,10 @@ function PostModule:Post(p : Types.PlayerModule)
 
 	p:UpdateFolowersAmount(GetRandomFollowerAmount())
 
-	if math.random() > 0.5 then
+	local randomNumber : number = math.random()
+	
+	-- 1/20 chance to get a coin
+	if randomNumber <= 0.05 then
 		DataStore2("coins", plr):Increment(1, p.coins)
 	end
 
@@ -224,7 +227,6 @@ function PostModule:Post(p : Types.PlayerModule)
 	if self.postedLastTime then
 		if self.level >= 4 then
 
-			local randomNumber : number = math.random()
 			if randomNumber > 0.5 then
 
 				-- instead of picking a random number again for a 50/50 chance of liking or reacting, we reuse the randum number
