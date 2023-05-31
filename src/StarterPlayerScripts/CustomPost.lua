@@ -289,12 +289,6 @@ function CustomPost:SavePost()
             return
         end
 
-        if self.currentPost then
-            self.utility.DisplayInformation("Post saved!")
-        else
-            self.utility.DisplayInformation("New post created!")
-        end
-
         postTypeConnection:Disconnect()
         replyTypeConnection:Disconnect()
         dialogTypeConnection:Disconnect()
@@ -503,8 +497,6 @@ function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
     end
 
     customPostsCreatePostText.Text = "Create post (" .. tostring(#self.posts) .. "/10)"
-
-    print(self.postListConnections)
 end
 
 
