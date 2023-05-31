@@ -17,6 +17,7 @@ local PostModule = require(StarterPlayer:WaitForChild("StarterPlayerScripts"):Wa
 local PlayTimeRewards = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PlayTimeRewards"))
 local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility"))
 local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CustomPost"))
+local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("UpgradeModule"))
 
 local lplr = Players.LocalPlayer
 
@@ -46,6 +47,8 @@ local playTimeRewards
 
 Utility.new()
 CustomPost.new(Utility)
+local upgradeModule : UpgradeModule.UpgradeModule = UpgradeModule.new(Utility)
+upgradeModule:LoadUpgrades()
 
 
 -- resize the next reward timer (at the top of the screen) when the screen size changes
