@@ -105,7 +105,7 @@ end
 	@param amount : number, the amount of followers to add
 ]]--
 function Player:UpdateFolowersAmount(amount : number)
-	local increment : number = math.round(amount * self.followersMultiplier)
+	local increment : number = if amount <= 0 then amount else math.round(amount * self.followersMultiplier)
 
 	self.followers += increment
 	DataStore2("followers", self.player):Increment(increment, self.followers)
@@ -129,7 +129,7 @@ end
 	@param amount : number, the amount of coins to add
 ]]--
 function Player:UpdateCoinsAmount(amount : number)
-	local increment : number = math.round(amount * self.coinsMultiplier)
+	local increment : number = if amount <= 0 then amount else math.round(amount * self.coinsMultiplier)
 
 	self.coins += increment
 	DataStore2("coins", self.player):Increment(increment, self.coins)
