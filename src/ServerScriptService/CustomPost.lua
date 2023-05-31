@@ -16,7 +16,7 @@ export type CustomPost = {
 	nextId : number,
 	posts : {post},
 	postModule : PostModule.PostModule,
-	listCustomPostConnection : {RBXScriptSignal}?,
+	listCustomPostConnection : {RBXScriptConnection}?,
     new : (plr : Player, postModule : PostModule.PostModule) -> CustomPost,
 	CreatePost : (self : CustomPost, postType : string, text1 : string, text2 : string) -> boolean,
     SavePost : (self : CustomPost, id : number, postType : string, text1 : string, text2 : string) -> boolean,

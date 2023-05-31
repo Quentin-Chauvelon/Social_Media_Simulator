@@ -116,7 +116,7 @@ end
 export type CustomPost = {
     posts : {post},
     currentPost : post?,
-    postListConnections : {RBXScriptSignal},
+    postListConnections : {RBXScriptConnection},
     utility : Utility.Utility,
     new : (utility : Utility.Utility) -> CustomPost,
     SavePost : (self : CustomPost) -> nil,
@@ -142,7 +142,7 @@ local CustomPost : CustomPost = {}
 CustomPost.__index = CustomPost
 
 
-function CustomPost.new(utility)
+function CustomPost.new(utility : Utility.Utility)
     local customPost = {}
 
     customPost.posts = {}

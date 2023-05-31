@@ -26,7 +26,7 @@ local debounce = true
 
 export type Utility = {
     new : () -> nil,
-    BlurBackgruond : (enabled : boolean) -> nil,
+    BlurBackground : (enabled : boolean) -> nil,
     ResizeUIOnWindowResize : (() -> nil) -> nil,
     GetNumberInRangeProportionally : (a : number, X : number, b : number, minRange : number, maxRange : number) -> number,
     GetNumberInRangeProportionallyDefaultWidth : (X : number, minRange : number, maxRange : number) -> number,
@@ -177,7 +177,7 @@ local function DisplayNotification(text : string, duration : number)
         )
 
         Promise.new(function(resolve)
-            local notificationCloseConnection : RBXScriptSignal
+            local notificationCloseConnection : RBXScriptConnection
             notificationCloseConnection = notificationClose.MouseButton1Down:Connect(function()
                 notificationCloseConnection:Disconnect()
                 resolve()
