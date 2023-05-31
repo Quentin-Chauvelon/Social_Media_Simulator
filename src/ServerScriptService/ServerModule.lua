@@ -13,6 +13,7 @@ local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
 local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("InformationNotification")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("CollectPlayTimeReward")
+local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCustomPosts")
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 
@@ -116,6 +117,13 @@ function ServerModule.onJoin(plr : Player)
 
 		p.plotModule.followerGoal.Size = UDim2.new(0.7,0, ((p.followers / p.nextFollowerGoal) * 0.97), 0) -- multiply by 0.97 because we don't want the frame to be 1 in y scale, we want it to go up to 0.97
 	end)
+
+
+	local coinsStore = DataStore2("coins", plr)
+
+	coinsStore:OnUpdate(function()
+		p.coins = coinsStore:Get(0)
+	end)
 end
 
 
@@ -188,6 +196,14 @@ CollectPlayTimeRewardRF.OnServerInvoke = function (plr : Player)
 end
 
 
+ListCustomPostsRE.OnServerEvent:Connect(function(plr : Player)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		p.customPosts:GetAllPosts("all")
+	end
+end)
+
+
 --[[
 	Fires when the player creates a new post or modify an existing one
 
@@ -202,7 +218,7 @@ SaveCustomPostRF.OnServerInvoke = function(plr : Player, postType : string?, tex
 	if p then
 		if id then
 			if postType then
-				return p.customPosts:SavePost(id, postType, text1, text2)
+				return p.customPosts:SavePost(p, id, postType, text1, text2)
 			else 
 				return p.customPosts:DeletePost(id)
 			end
