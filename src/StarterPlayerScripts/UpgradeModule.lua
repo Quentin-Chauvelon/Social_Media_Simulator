@@ -73,13 +73,17 @@ function UpgradeModule.new(utility : Utility.Utility) : UpgradeModule
 
     upgradeModule.upgradesMachineTouchDetector.Touched:Connect(function(hit : BasePart)
         if hit and hit.Parent and hit.Name == "HumanoidRootPart" then
-            upgradeModule:OpenUpgradesGui()
+            if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                upgradeModule:OpenUpgradesGui()
+            end
         end
     end)
     
     upgradeModule.upgradesMachineTouchDetector.TouchEnded:Connect(function(hit : BasePart)
         if hit and hit.Parent and hit.Name == "HumanoidRootPart" then
-            upgradeModule:CloseUpgradesGui()
+            if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                upgradeModule:CloseUpgradesGui()
+            end
         end
     end)
 
