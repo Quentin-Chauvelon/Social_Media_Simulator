@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local PostModule = require(ServerScriptService:WaitForChild("PostModule"))
+local Types = require(ServerScriptService:WaitForChild("Types"))
 
 local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCustomPosts")
 
@@ -19,7 +20,7 @@ export type CustomPost = {
 	listCustomPostConnection : {RBXScriptConnection}?,
     new : (plr : Player, postModule : PostModule.PostModule) -> CustomPost,
 	CreatePost : (self : CustomPost, postType : string, text1 : string, text2 : string) -> boolean,
-    SavePost : (self : CustomPost, id : number, postType : string, text1 : string, text2 : string) -> boolean,
+    SavePost : (self : CustomPost, p : Types.PlayerModule, id : number, postType : string, text1 : string, text2 : string) -> boolean,
     DeletePost : (self : CustomPost, id : number) -> nil,
     GetPostWithId : (self : CustomPost, id : number) -> post?,
     GetAllPosts : (self : CustomPost, type : string, id : number?) -> nil,
@@ -182,7 +183,7 @@ end
     @param text2 : string, the second text of the post to create (if postType == post, text2 = text1)
     @return boolean, true if the post could be saved, false otherwise
 ]]--
-function CustomPost:SavePost(id : number, postType : string, text1 : string, text2 : string) : boolean
+function CustomPost:SavePost(p : Types.PlayerModule, id : number, postType : string, text1 : string, text2 : string) : boolean
     if id and typeof(id) == "number" and postType and typeof(postType) == "string" and text1 and typeof(text1) == "string" and text2 and typeof(text2) == "string" then
         if postType == "post" or postType == "reply" or postType == "dialog" then
 
@@ -221,7 +222,7 @@ function CustomPost:SavePost(id : number, postType : string, text1 : string, tex
             -- add the post to the corresponding post table in the post module
             if postType == "post" then
                 for i : number, simplePost : (number) -> string in pairs(self.postModule.posts) do
-                    if simplePost() == oldText1 then
+                    if simplePost(p) == oldText1 then
                         self.postModule.posts[i] = function()
                             return text1
                         end
@@ -230,7 +231,7 @@ function CustomPost:SavePost(id : number, postType : string, text1 : string, tex
 
             elseif postType == "dialog" then
                 for i : number, dialog : (number) -> (string, {string}) in pairs(self.postModule.dialogs) do
-                    local dialogText1, dialogTable2 = dialog()
+                    local dialogText1, dialogTable2 = dialog(p)
 
                     if dialogText1 == oldText1 and #dialogTable2 > 0 and dialogTable2[1] == oldText2 then
                         self.postModule.dialogs[i] = function()
