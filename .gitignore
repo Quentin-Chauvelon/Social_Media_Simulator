@@ -8,4 +8,6 @@ SMS.rbxl
 
 /images.txt
 
+/.vscode
+
 src/ServerScriptService/Types.lua
