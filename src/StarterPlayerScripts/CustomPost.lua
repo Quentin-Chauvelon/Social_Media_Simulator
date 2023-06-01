@@ -49,6 +49,9 @@ local CUSTOM_POSTS_TWEEN_DURATION : number = 0.2
 local AlreadyOpenedOnce : boolean = false
 
 
+--[[
+    Loads the guis with the player details (name, thumbnail...)
+]]--
 local function LoadPlayerDetailsForPost()
     local displayName : string = lplr.DisplayName
     local playerName : string = "@" .. lplr.Name
@@ -82,6 +85,11 @@ local function LoadPlayerDetailsForPost()
 end
 
 
+--[[
+    Selects and changes the ui for the selected post type
+
+    @param postType : string, the selected post type
+]]--
 local function selectPostType(postType : string)
     createPostPostType.BackgroundColor3 = Color3.fromRGB(186, 186, 186)
     createPostReplyType.BackgroundColor3 = Color3.fromRGB(186, 186, 186)
@@ -110,6 +118,18 @@ local function selectPostType(postType : string)
         createPostDialogType.UIScale.Scale = 1.15
         dialogContainer.Visible = true
     end
+end
+
+
+local function Reset()
+    postMessage.Text = ""
+    repliedPostMessage.Text = ""
+    replyPostMessage.Text = ""
+    dialogPost1Message.Text = ""
+    dialogPost2Mesage.Text = ""
+
+    customPostsBackground.Visible = true
+    createPost.Visible = false
 end
 
 
@@ -198,6 +218,9 @@ function CustomPost.new(utility : Utility.Utility)
 end
 
 
+--[[
+    Opens a post and allows to update and save it
+]]--
 function CustomPost:SavePost()
     customPostsBackground.Visible = false
     createPost.Visible = true
@@ -205,6 +228,7 @@ function CustomPost:SavePost()
     local selectedPostType : string = "post"
     createPostCreateButton.Text = "CREATE"
 
+    -- displays the right post texts
     if self.currentPost then
         selectedPostType = self.currentPost.postType
         createPostCreateButton.Text = "SAVE"
@@ -220,6 +244,7 @@ function CustomPost:SavePost()
         end
     end
 
+    -- displays the right post type
     selectPostType(selectedPostType)
 
     local postTypeConnection : RBXScriptConnection
@@ -228,6 +253,7 @@ function CustomPost:SavePost()
     local createPostCancelConnection : RBXScriptConnection
     local createPostCreateConnection : RBXScriptConnection
 
+    -- change the post type on click
     postTypeConnection = createPostPostType.MouseButton1Down:Connect(function()
         selectedPostType = "post"
         selectPostType(selectedPostType)
@@ -243,6 +269,7 @@ function CustomPost:SavePost()
         selectPostType(selectedPostType)
     end)
 
+    -- on create click, update and save the post with the information entered
     createPostCreateConnection = createPostCreateButton.MouseButton1Down:Connect(function()
 
         local text1 : TextBox, text2 : TextBox
@@ -257,21 +284,25 @@ function CustomPost:SavePost()
             text2 = dialogPost2Mesage
         end
 
+        -- can't create more than 10 custom posts
         if #self.posts >= 10 then
             self.utility.DisplayError("You can't create more than 10 Posts")
             return
         end
 
+        -- can't create an empty post
         if text1.Text == "" or text2.Text == "" then
             self.utility.DisplayError("You can't create an empty post")
             return
         end
 
+        -- can't create posts more than 200 characters long
         if #text1.Text >= 200 or #text2.Text >= 200 then
             self.utility.DisplayError("Your post length should not exceed 200 characters")
             return
         end
 
+        -- fire the server to update and save the post
         local result : boolean
         if self.currentPost then
             result = SaveCustomPostRF:InvokeServer(selectedPostType, text1.Text, text2.Text, self.currentPost.id)
@@ -279,6 +310,7 @@ function CustomPost:SavePost()
             result = SaveCustomPostRF:InvokeServer(selectedPostType, text1.Text, text2.Text)
         end
 
+        -- if there was an error saving the post
         if not result then
             if self.currentPost then
                 self.utility.DisplayError("Sorry, your post could not be saved. Please try again later.")
@@ -295,14 +327,7 @@ function CustomPost:SavePost()
         createPostCreateConnection:Disconnect()
         createPostCancelConnection:Disconnect()
 
-        postMessage.Text = ""
-        repliedPostMessage.Text = ""
-        replyPostMessage.Text = ""
-        dialogPost1Message.Text = ""
-        dialogPost2Mesage.Text = ""
-
-        customPostsBackground.Visible = true
-        createPost.Visible = false
+        Reset()
     end)
 
     createPostCancelConnection = createPostCancelButton.MouseButton1Down:Connect(function()
@@ -312,14 +337,7 @@ function CustomPost:SavePost()
         createPostCreateConnection:Disconnect()
         createPostCancelConnection:Disconnect()
         
-        postMessage.Text = ""
-        repliedPostMessage.Text = ""
-        replyPostMessage.Text = ""
-        dialogPost1Message.Text = ""
-        dialogPost2Mesage.Text = ""
-
-        customPostsBackground.Visible = true
-        createPost.Visible = false
+        Reset()
     end)
 end
 
@@ -350,6 +368,9 @@ function CustomPost:CloseCustomPostGui()
 end
 
 
+--[[
+    Opens the custom post gui
+]]--
 function CustomPost:OpenCustomPostGui()
     -- the ui doesn't have a size of 0 because it is kept at a normal size (this allows the ui to be able to be resized even when it's hidden (if the player resizes it's game window))
     local customPostsOriginalSize : UDim2 = customPostsBackground.Size
@@ -405,6 +426,11 @@ function CustomPost:ResizePost(post : Frame)
 end
 
 
+--[[
+    Adds a post to the frame's list gui
+
+    @param post : post, the post to add to the list
+]]--
 function CustomPost:AddPostFrameToList(post : post)
     local id : number = post.id
 
@@ -426,8 +452,16 @@ function CustomPost:AddPostFrameToList(post : post)
 end
 
 
+--[[
+    Lists all the posts based on the last action the player did (create, delete...)
+
+    @param type : string, the action the player last did
+    @param id : number, the id of the post
+    @param posts : {post}, a table of the posts to list
+]]--
 function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
     
+    -- remove the post corresponding to the given id
     if type == "delete" then
         for _,post : Frame | UIListLayout in ipairs(customPostsScrollingFrame:GetChildren()) do
             if post:IsA("Frame") and post.Id.Value == id then
@@ -449,6 +483,7 @@ function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
             end
         end
 
+    -- add the created post to the list
     elseif type == "create" then
         if posts and posts.id and posts.id == id then
             table.insert(self.posts, posts)
@@ -456,6 +491,7 @@ function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
             self:AddPostFrameToList(posts)
         end
 
+    -- modify the post with the given id
     elseif type == "modify" then
         if posts and posts.id and posts.id == id then
 
@@ -481,6 +517,7 @@ function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
             end
         end
 
+    -- list all posts
     else
         self.posts = posts
 
@@ -500,6 +537,11 @@ function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
 end
 
 
+--[[
+    Edits the post with the given id
+
+    @param id : number, the id of the post to edit
+]]--
 function CustomPost:EditPost(id : number)
     for _,post : post in pairs(self.posts) do
         if post.id == id then
@@ -511,6 +553,11 @@ function CustomPost:EditPost(id : number)
 end
 
 
+--[[
+    Deletes the post with the given it
+
+    @param id : number, the id of the post to delete
+]]--
 function CustomPost:DeletePost(id : number)
     SaveCustomPostRF:InvokeServer(nil, nil, nil, id)
 end
