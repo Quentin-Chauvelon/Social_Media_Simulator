@@ -20,14 +20,14 @@ local notificationImage : ImageLabel = notification:WaitForChild("Image")
 local notificationClose : TextButton = notification:WaitForChild("Close")
 local notificationUIPadding : UIPadding = notification:WaitForChild("UIPadding")
 
-local uiToResize = {}
+local uiToResize : {(viewportSize : Vector2) -> nil} = {}
 local debounce = true
 
 
 export type Utility = {
     new : () -> nil,
     BlurBackground : (enabled : boolean) -> nil,
-    ResizeUIOnWindowResize : (() -> nil) -> nil,
+    ResizeUIOnWindowResize : ((viewportSize : Vector2) -> nil) -> nil,
     GetNumberInRangeProportionally : (a : number, X : number, b : number, minRange : number, maxRange : number) -> number,
     GetNumberInRangeProportionallyDefaultWidth : (X : number, minRange : number, maxRange : number) -> number,
     GetNumberInRangeProportionallyDefaultHeight : (X : number, minRange : number, maxRange : number) -> number,
@@ -41,11 +41,11 @@ local Utility : Utility = {}
 
 
 function Utility.new()
-    Utility.ResizeUIOnWindowResize(function()
-        notification.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.45, 0.2), 0, 0.1, 0)
+    Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+        notification.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.45, 0.2), 0, 0.1, 0)
         notification.Position = UDim2.new(1, notification.AbsoluteSize.X + 10, 0, 20)
         
-        local iconSize : number = Utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 20, 40)
+        local iconSize : number = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 20, 40)
         local iconUDim : UDim = UDim.new(0, iconSize)
         notificationImage.Size = UDim2.new(iconUDim, iconUDim)
         notificationClose.Size = UDim2.new(iconUDim, iconUDim)
@@ -85,8 +85,8 @@ end
 
     @param func : function, the function to run when the window is resized
 ]]--
-function Utility.ResizeUIOnWindowResize(func)
-    func()
+function Utility.ResizeUIOnWindowResize(func : (viewportSize : Vector2) -> nil)
+    func(currentCamera.ViewportSize)
 
     table.insert(uiToResize, func)
 end
@@ -144,8 +144,10 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(functio
         debounce = false
         task.wait(1)
 
-        for _,func in pairs(uiToResize) do
-            func()
+        local viewportSize : Vector2 = currentCamera.ViewportSize
+
+        for _,func : (viewportSize : Vector2) -> nil in pairs(uiToResize) do
+            func(viewportSize)
         end
 
         debounce = true

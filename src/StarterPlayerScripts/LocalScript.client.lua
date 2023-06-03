@@ -61,11 +61,11 @@ upgradeModule:LoadUpgrades()
 
 
 -- resize the next reward timer (at the top of the screen) when the screen size changes
-Utility.ResizeUIOnWindowResize(function()
+Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 	nextRewardTimer.TextSize = nextRewardChest.AbsoluteSize.Y / 3
 	nextRewardTimer.Position = UDim2.new(0, 0, 1, nextRewardTimer.AbsoluteSize.Y / 2)
 
-	if currentCamera.ViewportSize.X < 1000 or currentCamera.ViewportSize.Y < 500 then
+	if viewportSize.X < 1000 or viewportSize.Y < 500 then
 		nextRewardTimer.UIStroke.Thickness = 2
 	else
 		nextRewardTimer.UIStroke.Thickness = 3
@@ -85,11 +85,11 @@ end)
 -- resize all the rewards in the all rewards frame
 for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewardsBackground:GetChildren()) do
 	if reward:IsA("Frame") then
-		Utility.ResizeUIOnWindowResize(function()
+		Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 			reward.Timer.TextSize = reward.Chest.AbsoluteSize.Y / 3
 			reward.Timer.Position = UDim2.new(0, 0, 1, reward.Timer.AbsoluteSize.Y / 2)
 
-			if currentCamera.ViewportSize.X < 1000 or currentCamera.ViewportSize.Y < 500 then
+			if viewportSize.X < 1000 or viewportSize.Y < 500 then
 				reward.Timer.UIStroke.Thickness = 2
 			else
 				reward.Timer.UIStroke.Thickness = 3

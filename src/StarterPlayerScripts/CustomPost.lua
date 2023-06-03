@@ -177,10 +177,10 @@ function CustomPost.new(utility : Utility.Utility)
         customPost:ListAllPosts(type, id, posts)
     end)
 
-    utility.ResizeUIOnWindowResize(function()
-        customPostsBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.8, 0.5), 0, 0.6, 0)
+    utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+        customPostsBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.8, 0.5), 0, 0.6, 0)
 
-        local customPostsCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.12, 0.15), 0)
+        local customPostsCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.12, 0.15), 0)
         customPostsCloseButton.Size = UDim2.new(customPostsCloseButtonUDim, customPostsCloseButtonUDim)
 
         customPostsCreatePostPlusText.TextSize = customPostsCreatePostButton.AbsoluteSize.Y * 1.5
@@ -192,7 +192,7 @@ function CustomPost.new(utility : Utility.Utility)
             end
         end
 
-        if currentCamera.ViewportSize.X < 1000 then
+        if viewportSize.X < 1000 then
             customPostsTitleUIStroke.Thickness = 2.5
             customPostsCreatePostText.Position = UDim2.new(1, 8, 0.5, 0)
         else
@@ -416,10 +416,12 @@ end
     @param post : Frame, the post to resize
 ]]--
 function CustomPost:ResizePost(post : Frame)
-    post.Size = UDim2.new(0.95, 0, 0, self.utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 20, 40))
-    post.PostText.TextSize = self.utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 13, 22)
+    local viewportSizeX : number = currentCamera.ViewportSize.X
 
-    local customPostsScrollingFramePostSpacing : number = -self.utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 5, 12)
+    post.Size = UDim2.new(0.95, 0, 0, self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 20, 40))
+    post.PostText.TextSize = self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 13, 22)
+
+    local customPostsScrollingFramePostSpacing : number = -self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 5, 12)
     post.PostDelete.Position = UDim2.new(1, customPostsScrollingFramePostSpacing, 0.5, 0)
     post.PostEdit.Position = UDim2.new(1, customPostsScrollingFramePostSpacing * 2 - post.PostDelete.AbsoluteSize.X, 0.5, 0)
     post.PostText.Size = UDim2.new(1, customPostsScrollingFramePostSpacing * 3 - post.PostDelete.AbsoluteSize.X * 2 - 10, 1, 0)

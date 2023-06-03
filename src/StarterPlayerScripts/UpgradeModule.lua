@@ -9,8 +9,6 @@ local lplr = Players.LocalPlayer
 
 local playerGui : PlayerGui = lplr.PlayerGui
 
-local currentCamera : Camera = workspace.CurrentCamera
-
 local upgradesScreenGui : ScreenGui = playerGui:WaitForChild("Upgrades")
 local upgradesBackground : Frame = upgradesScreenGui:WaitForChild("Background")
 local upgradesCloseButton : TextButton = upgradesBackground:WaitForChild("Close")
@@ -54,15 +52,15 @@ function UpgradeModule.new(utility : Utility.Utility) : UpgradeModule
     upgradeModule.upgradeButtonConnections = {}
     upgradeModule.upgradesMachineTouchDetector = workspace:WaitForChild("UpgradesMachine"):WaitForChild("TouchDetector")
 
-    utility.ResizeUIOnWindowResize(function()
-        upgradesBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.8, 0.5), 0, 0.7, 0)
+    utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+        upgradesBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.8, 0.5), 0, 0.7, 0)
 
-        local upgradeCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 0.12, 0.15), 0)
+        local upgradeCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.12, 0.15), 0)
         upgradesCloseButton.Size = UDim2.new(upgradeCloseButtonUDim, upgradeCloseButtonUDim)
 
         for _,upgradeBackground : Frame | UIListLayout in ipairs(upgradesContainer:GetChildren()) do
             if upgradeBackground:IsA("Frame") then
-                local padding : number = utility.GetNumberInRangeProportionallyDefaultWidth(currentCamera.ViewportSize.X, 5, 12)
+                local padding : number = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 5, 12)
                 upgradeBackground.ProgressContainer.Position = UDim2.new(0, padding, 0.5, 0)
 
                 upgradeBackground.Descriptions.Position = UDim2.new(0, padding * 2.5 + upgradeBackground.ProgressContainer.AbsoluteSize.X, 0, 0)
