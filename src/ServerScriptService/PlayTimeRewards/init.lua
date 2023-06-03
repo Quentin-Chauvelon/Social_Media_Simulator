@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+local TableUtilities = require(ReplicatedStorage:WaitForChild("TableUtilities"))
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local Rewards = require(script:WaitForChild("Rewards"))
 
@@ -57,7 +58,7 @@ function PlayTimeRewards.new(plr : Player)
 	playTimeRewards.timePlayedToday = playTimeRewardsStats.timePlayedToday
 
 	-- table of all the time needed to get a reward
-	playTimeRewards.nextRewards = defaultRewards
+	playTimeRewards.nextRewards = TableUtilities.clone(defaultRewards)
 	playTimeRewards.rewardToCollect = 0
 
 	playTimeRewards.plr = plr
