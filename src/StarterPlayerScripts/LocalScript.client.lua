@@ -1,5 +1,5 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
@@ -12,6 +12,16 @@ local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
 
+local lplr = Players.LocalPlayer
+
+-- wait for the server to be ready before loading in the client
+repeat RunService.Heartbeat:Wait()
+	
+until
+	ReplicatedStorage:WaitForChild("IsServerReady") and
+	ReplicatedStorage.IsServerReady.Value and
+	ReplicatedStorage.PlayersReady:WaitForChild(lplr.Name)
+
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local PostModule = require(StarterPlayer:WaitForChild("StarterPlayerScripts"):WaitForChild("PostModule"))
 local PlayTimeRewards = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PlayTimeRewards"))
@@ -19,7 +29,6 @@ local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility
 local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CustomPost"))
 local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("UpgradeModule"))
 
-local lplr = Players.LocalPlayer
 
 local currentCamera : Camera = workspace.CurrentCamera
 
@@ -213,10 +222,8 @@ local function CloseUpgradePostsGui()
 	-- disconnect all the clicks connection from the upgrade posts gui
 	for _,upgradePostClickConnection : RBXScriptConnection in pairs(upgradePostsClickConnection) do
 		upgradePostClickConnection:Disconnect()
-	end
-	
-
-	upgradePostsClickConnection = {}
+	end	
+	table.clear(upgradePostsClickConnection)
 
 	Promise.new(function(resolve)
 		upgradePostsBackground:TweenSize(

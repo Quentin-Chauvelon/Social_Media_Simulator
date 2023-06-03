@@ -19,6 +19,8 @@ local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
+local playersReady : Folder = ReplicatedStorage:WaitForChild("PlayersReady")
+
 local players : {Player.PlayerModule} = {}
 
 
@@ -124,6 +126,11 @@ function ServerModule.onJoin(plr : Player)
 	coinsStore:OnUpdate(function()
 		p.coins = coinsStore:Get(0)
 	end)
+
+	local playerReady : BoolValue = Instance.new("BoolValue")
+	playerReady.Name = plr.Name
+	playerReady.Value = true
+	playerReady.Parent = playersReady
 end
 
 
@@ -140,6 +147,10 @@ function ServerModule.onLeave(playerName)
 		p:OnLeave()
 
 		players[playerName] = nil
+
+		if playersReady:FindFirstChild(playerName) then
+			playersReady[playerName]:Destroy()
+		end
 	end
 end
 
@@ -196,6 +207,11 @@ CollectPlayTimeRewardRF.OnServerInvoke = function (plr : Player)
 end
 
 
+--[[
+	Fires when the player is ready to receive and data and wants to get the list of his custom posts
+
+	@param plr : Player, the player who clicked the play time rewards button
+]]--
 ListCustomPostsRE.OnServerEvent:Connect(function(plr : Player)
 	local p : Player.PlayerModule = players[plr.Name]
 	if p then
@@ -234,14 +250,18 @@ end
 
 	@param plr : Player, the player who clicked the upgrade button
 	@param id : nmuber, the id of the upgrade that has been clicked
+	@return {upgrade} | upgrade, the upgrades if it's the first time the player fires the event,
+	the upgrade corresponding to the id otherwise
 ]]--
-UpgradeRF.OnServerInvoke = function(plr : Player, id : number)
+UpgradeRF.OnServerInvoke = function(plr : Player, id : number) : {}
 	if id and typeof(id) == "number" then
 		local p : Player.PlayerModule = players[plr.Name]
 		if p then
 			return p.upgradeModule:Upgrade(p, id)
 		end
 	end
+
+	return {}
 end
 
 
@@ -265,6 +285,12 @@ coroutine.wrap(function()
 		RunService.Heartbeat:Wait()
 	end
 end)()
+
+
+-- once the server has finished loading, we change the IsServerReady value to true to tell all clients that it is ready
+if not ReplicatedStorage:WaitForChild("IsServerReady").Value then
+	ReplicatedStorage.IsServerReady.Value = true
+end
 
 
 return ServerModule
