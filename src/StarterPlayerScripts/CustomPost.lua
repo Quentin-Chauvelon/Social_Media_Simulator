@@ -191,13 +191,7 @@ function CustomPost.new(utility : Utility.Utility)
             end
         end
 
-        if viewportSize.X < 1000 then
-            customPostsTitleUIStroke.Thickness = 2.5
-            customPostsCreatePostText.Position = UDim2.new(1, 8, 0.5, 0)
-        else
-            customPostsTitleUIStroke.Thickness = 3
-            customPostsCreatePostText.Position = UDim2.new(1, 10, 0.5, 0)
-        end
+        customPostsTitleUIStroke.Thickness = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
 
         postMessage.TextSize = postMessage.AbsoluteSize.Y / 3
         dialogPost1Message.TextSize = dialogPost1Message.AbsoluteSize.Y / 3 * 2.5

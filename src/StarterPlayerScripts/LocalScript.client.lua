@@ -65,11 +65,7 @@ Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 	nextRewardTimer.TextSize = nextRewardChest.AbsoluteSize.Y / 3
 	nextRewardTimer.Position = UDim2.new(0, 0, 1, nextRewardTimer.AbsoluteSize.Y / 2)
 
-	if viewportSize.X < 1000 or viewportSize.Y < 500 then
-		nextRewardTimer.UIStroke.Thickness = 2
-	else
-		nextRewardTimer.UIStroke.Thickness = 3
-	end
+	nextRewardTimer.UIStroke.Thickness = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
 end)
 
 
@@ -89,11 +85,7 @@ for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewardsBackground:Ge
 			reward.Timer.TextSize = reward.Chest.AbsoluteSize.Y / 3
 			reward.Timer.Position = UDim2.new(0, 0, 1, reward.Timer.AbsoluteSize.Y / 2)
 
-			if viewportSize.X < 1000 or viewportSize.Y < 500 then
-				reward.Timer.UIStroke.Thickness = 2
-			else
-				reward.Timer.UIStroke.Thickness = 3
-			end
+			reward.Timer.UIStroke.Thickness = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
 		end)
 	end
 end

@@ -67,6 +67,8 @@ function UpgradeModule.new(utility : Utility.Utility) : UpgradeModule
                 upgradeBackground.UpgradePurchaseContainer.Position = UDim2.new(1, -padding, 0.95, 0)
             end
         end
+
+        upgradesBackground.Title.UIStroke.Thickness = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
     end)
 
     upgradeModule.upgradesMachineTouchDetector.Touched:Connect(function(hit : BasePart)
