@@ -132,7 +132,12 @@ function PlayTimeRewards:NextRewardClick()
             end
 
             collectedReward.Visible = true
-            collectedReward:TweenSize(UDim2.new(0.8, 0, 0.8, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.5)
+            collectedReward:TweenSize(
+                UDim2.new(0.8, 0, 0.8, 0),
+                Enum.EasingDirection.InOut,
+                Enum.EasingStyle.Linear,
+                0.5
+            )
 
             -- tween to spin the background foverer
             local backgroundTween : Tween = TweenService:Create(
@@ -155,20 +160,20 @@ function PlayTimeRewards:NextRewardClick()
                 -- disconnect the event
                 collectClick:Disconnect()
 
-                collectedReward:TweenSize(UDim2.new(0, 0, 0, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.5)
-
-                -- hide the collectedReward frame after the tween is completed
-                Promise.new(function(resolve)
-                    task.wait(0.5)
-
-                    -- hide the frame
-                    collectedReward.Visible = false
-
-                    -- cancel the background spinning tween
-                    backgroundTween:Cancel()
-
-                    resolve()
-                end)
+                collectedReward:TweenSize(
+                    UDim2.new(0, 0, 0, 0),
+                    Enum.EasingDirection.InOut,
+                    Enum.EasingStyle.Linear,
+                    0.5,
+                    false,
+                    function()
+                        -- hide the frame
+                        collectedReward.Visible = false
+        
+                        -- cancel the background spinning tween
+                        backgroundTween:Cancel()
+                    end
+                )
             end)
 
         -- else if there is no reward to collect, display all the times left for all rewards
@@ -177,7 +182,12 @@ function PlayTimeRewards:NextRewardClick()
             -- if the frame is hidden, display it
             if not allRewards.Visible then
                 allRewards.Visible = true
-                allRewards:TweenPosition(UDim2.new(0.5, 0, 0, 5), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.3)
+                allRewards:TweenPosition(
+                    UDim2.new(0.5, 0, 0, 5),
+                    Enum.EasingDirection.InOut,
+                    Enum.EasingStyle.Quad,
+                    0.3
+                )
 
                 Promise.new(function(resolve)
                     local closeClickedConnection : RBXScriptConnection
@@ -185,7 +195,16 @@ function PlayTimeRewards:NextRewardClick()
                         -- disconnect the event
                         closeClickedConnection:Disconnect()
                         
-                        allRewards:TweenPosition(UDim2.new(0.5, 0, -1, 0), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.3)
+                        allRewards:TweenPosition(
+                            UDim2.new(0.5, 0, -1, 0),
+                            Enum.EasingDirection.InOut,
+                            Enum.EasingStyle.Quad,
+                            0.3,
+                            false,
+                            function()
+                                allRewards.Visible = false
+                            end
+                        )
 
                         resolve()
                     end)
@@ -201,16 +220,6 @@ function PlayTimeRewards:NextRewardClick()
                         task.wait(1)
                     end
                 end)
-                :finally(function()
-                    -- hide the frame after the tween completes
-                    Promise.new(function(resolve)
-                        task.wait(0.3)
-                        allRewards.Visible = false
-                        
-                        resolve()
-                    end)
-                end
-                )
             end
         end
     end)

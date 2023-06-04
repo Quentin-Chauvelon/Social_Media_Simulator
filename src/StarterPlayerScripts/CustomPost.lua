@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local Utility = require(script.Parent:WaitForChild("Utility"))
 
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
@@ -347,24 +346,19 @@ function CustomPost:CloseCustomPostGui()
 
     local customPostsOriginalSize : UDim2 = customPostsBackground.Size
 
-	Promise.new(function(resolve)
-		customPostsBackground:TweenSize(
-			UDim2.new(0,0,0,0),
-			Enum.EasingDirection.InOut,
-			Enum.EasingStyle.Linear,
-			CUSTOM_POSTS_TWEEN_DURATION
-		)
-
-		task.wait(CUSTOM_POSTS_TWEEN_DURATION)
-
-        -- Change the ui size back to its original size, so that if the player resizes the window, it still works (instead of resizing something based on size of 0)
-        customPostsBackground.Size = customPostsOriginalSize
-
-		resolve()
-	end)
-	:andThen(function()
-		customPostsBackground.Visible = false
-	end)
+    customPostsBackground:TweenSize(
+        UDim2.new(0,0,0,0),
+        Enum.EasingDirection.InOut,
+        Enum.EasingStyle.Linear,
+        CUSTOM_POSTS_TWEEN_DURATION,
+        false,
+        function()
+            customPostsBackground.Visible = false
+            
+            -- Change the ui size back to its original size, so that if the player resizes the window, it still works (instead of resizing something based on size of 0)
+            customPostsBackground.Size = customPostsOriginalSize
+        end
+    )
 end
 
 

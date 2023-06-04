@@ -225,20 +225,16 @@ local function CloseUpgradePostsGui()
 	end	
 	table.clear(upgradePostsClickConnection)
 
-	Promise.new(function(resolve)
-		upgradePostsBackground:TweenSize(
-			UDim2.new(0,0,0,0),
-			Enum.EasingDirection.InOut,
-			Enum.EasingStyle.Linear,
-			UPGRADE_POSTS_TWEEN_DURATION
-		)
-
-		task.wait(UPGRADE_POSTS_TWEEN_DURATION)
-		resolve()
-	end)
-	:andThen(function()
-		upgradePosts.Enabled = false
-	end)
+	upgradePostsBackground:TweenSize(
+		UDim2.new(0,0,0,0),
+		Enum.EasingDirection.InOut,
+		Enum.EasingStyle.Linear,
+		UPGRADE_POSTS_TWEEN_DURATION,
+		true,
+        function()
+			upgradePosts.Enabled = false
+        end
+	)
 end
 
 
