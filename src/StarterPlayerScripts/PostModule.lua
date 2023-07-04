@@ -9,7 +9,7 @@ local playersThumbnails = {}
 local camera = workspace.CurrentCamera
 
 local THUMBNAIL_TYPE = Enum.ThumbnailType.AvatarBust
-local THUMBNAIL_SIZE = Enum.ThumbnailSize.Size180x180
+local THUMBNAIL_SIZE = Enum.ThumbnailSize.Size150x150
 local POSTS_ANIMATION_DURATION = 0.2
 
 
@@ -136,11 +136,11 @@ local function UpdatePostContent(post : Frame, screen : Frame, plr : Player, mes
 
 		-- add the player to the thumbnails table so that we don't have to use GetUserThumbnailAsync everytime
 		coroutine.wrap(function()
-			playerThumbnail = Players:GetUserThumbnailAsync(plr.UserId, THUMBNAIL_TYPE, THUMBNAIL_SIZE)
+			playersThumbnails[plr.UserId] = "" -- initialize the player's value so that the coroutine will not be called forever if the api is down
+			playersThumbnails[plr.UserId] = Players:GetUserThumbnailAsync(plr.UserId, THUMBNAIL_TYPE, THUMBNAIL_SIZE)
 		end)()
-		playersThumbnails[plr.UserId] = playerThumbnail
 	end
-
+	
 	post.Thumbnail.Image = playerThumbnail or ""
 	
 	local lastPost :Frame? = screen:FindFirstChild("LastPost")
