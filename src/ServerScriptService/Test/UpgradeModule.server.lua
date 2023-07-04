@@ -194,7 +194,7 @@ local function testApplyUpgrade2()
 
     playerModule.upgradeModule:ApplyUpgrade(playerModule, playerModule.upgradeModule.upgrades[2])
 
-    assert(playerModule.postModule.autoPostInverval == 2800, "player's autoPostInterval should be equal to 2800 but was equal to " .. playerModule.postModule.autoPostInverval)
+    assert(playerModule.postModule.autoPostInterval == 2800, "player's autoPostInterval should be equal to 2800 but was equal to " .. playerModule.postModule.autoPostInterval)
 end
 
 
@@ -239,7 +239,7 @@ local function testApplyUpgrades()
     playerModule.upgradeModule:ApplyUpgrades(playerModule)
 
     assert(plr.Character.Humanoid.WalkSpeed == 24, "player's walkspeed should be 24 but was " .. plr.Character.Humanoid.WalkSpeed)
-    assert(playerModule.postModule.autoPostInverval == 2800, "player's autoPostInterval should be equal to 2800 but was equal to " .. playerModule.postModule.autoPostInverval)
+    assert(playerModule.postModule.autoPostInterval == 2800, "player's autoPostInterval should be equal to 2800 but was equal to " .. playerModule.postModule.autoPostInterval)
     assert(playerModule.followersMultiplier == 9, "player's followersMultiplier should be equal to 9 but was equal to " .. playerModule.followersMultiplier)
     assert(playerModule.coinsMultiplier == 1, "player's coinsMultiplier should be equal to 1 but was equal to " .. playerModule.coinsMultiplier)
 end

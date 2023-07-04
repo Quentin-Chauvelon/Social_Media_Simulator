@@ -90,7 +90,7 @@ end
 export type PostModule = {
     nextAutoPost : number,
 	nextClickPost : number,
-	autoPostInverval : number,
+	autoPostInterval : number,
 	clickPostInterval : number,
 	dialog : {},
 	currentState : string,
