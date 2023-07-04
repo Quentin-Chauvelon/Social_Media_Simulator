@@ -219,7 +219,7 @@ function CustomPost:SavePost(p : Types.PlayerModule, id : number, postType : str
 
             elseif postType == "dialog" then
                 for i : number, dialog : (number) -> (string, {string}) in pairs(self.postModule.dialogs) do
-                    local dialogText1, dialogTable2 = dialog(p)
+                    local dialogText1, dialogTable2 = dialog(p.player.Name)
 
                     if dialogText1 == oldText1 and #dialogTable2 > 0 and dialogTable2[1] == oldText2 then
                         self.postModule.dialogs[i] = function()
@@ -230,7 +230,7 @@ function CustomPost:SavePost(p : Types.PlayerModule, id : number, postType : str
 
             else
                 for i : number, reply : (number) -> (string, {string}) in pairs(self.postModule.replies) do
-                    local replyText1, replyTable2 = reply()
+                    local replyText1, replyTable2 = reply(p)
 
                     if replyText1 == oldText1 and #replyTable2 > 0 and replyTable2[1] == oldText2 then
                         self.postModule.replies[i] = function()
