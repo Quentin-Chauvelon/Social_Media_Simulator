@@ -117,7 +117,7 @@ function UpgradeModule:ApplyUpgrade(p : Types.PlayerModule, upgrade : upgrade)
         end
 
     elseif upgrade.id == 2 then
-        p.postModule.autoPostInverval = upgrade.baseValue - upgrade.upgradeValues[upgrade.level]
+        p.postModule.autoPostInterval = upgrade.baseValue - upgrade.upgradeValues[upgrade.level]
 
     elseif upgrade.id == 3 then
         p.followersMultiplier = upgrade.baseValue + upgrade.upgradeValues[upgrade.level] + p.gamepassModule:GetFollowersMultiplier()
