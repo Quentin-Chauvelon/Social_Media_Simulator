@@ -10,6 +10,7 @@ local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClic
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
 local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
+local CoinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Coins")
 local InformationRE : RemoteEvent = ReplicatedStorage:WaitForChild("InformationNotification")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("CollectPlayTimeReward")
@@ -105,10 +106,9 @@ function ServerModule.onJoin(plr : Player)
 
 
 	local followersStore = DataStore2("followers", plr)
-
 	-- callback on followers store update
 	followersStore:OnUpdate(function()
-		p.followers = followersStore:Get(0)
+		p.followers = followersStore:Get(p.followers)
 
 		-- fire the client to display the number of followers the player has
 		FollowersRE:FireClient(p.player, p.followers)
@@ -122,10 +122,17 @@ function ServerModule.onJoin(plr : Player)
 
 
 	local coinsStore = DataStore2("coins", plr)
-
+	-- callback on coins store update
 	coinsStore:OnUpdate(function()
-		p.coins = coinsStore:Get(0)
+		p.coins = coinsStore:Get(p.coins)
+
+		-- fire the client to display the number of coins the player has
+		CoinsRE:FireClient(p.player, p.coins)
 	end)
+	
+	-- fire the followers and coins events once at the start to display the numbers
+	FollowersRE:FireClient(p.player, p.followers)
+	CoinsRE:FireClient(p.player, p.coins)
 
 	local playerReady : BoolValue = Instance.new("BoolValue")
 	playerReady.Name = plr.Name

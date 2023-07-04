@@ -7,7 +7,6 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
-local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
@@ -16,14 +15,14 @@ local lplr = Players.LocalPlayer
 
 -- wait for the server to be ready before loading in the client
 repeat RunService.Heartbeat:Wait()
-	
 until
 	ReplicatedStorage:WaitForChild("IsServerReady") and
 	ReplicatedStorage.IsServerReady.Value and
 	ReplicatedStorage.PlayersReady:WaitForChild(lplr.Name)
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
-local PostModule = require(StarterPlayer:WaitForChild("StarterPlayerScripts"):WaitForChild("PostModule"))
+local GuiTabsModule = require(StarterPlayer:WaitForChild("StarterPlayerScripts"):WaitForChild("GuiTabsModule"))
+local PostModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PostModule"))
 local PlayTimeRewards = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PlayTimeRewards"))
 local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility"))
 local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CustomPost"))
@@ -33,9 +32,6 @@ local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("U
 local currentCamera : Camera = workspace.CurrentCamera
 
 local playerGui : PlayerGui = lplr.PlayerGui
-
-local menu : ScreenGui = playerGui:WaitForChild("Menu")
-local followersText : TextLabel = menu:WaitForChild("FollowersContainer"):WaitForChild("FollowersText")
 
 local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
 local upgradePostsBackground : Frame = upgradePosts:WaitForChild("Background")
@@ -55,6 +51,7 @@ local playTimeRewards
 
 
 Utility.new()
+GuiTabsModule.new(Utility)
 CustomPost.new(Utility)
 local upgradeModule : UpgradeModule.UpgradeModule = UpgradeModule.new(Utility)
 upgradeModule:LoadUpgrades()
@@ -135,16 +132,6 @@ end)
 ]]--
 PostRE.OnClientEvent:Connect(function(postType : string, screen : Frame, plr : Player, message : string, start : boolean)
 	PostModule:Post(postType, screen, plr, message, start)
-end)
-
-
---[[
-	Display the number of followers the player has on the gui on the right of the screen 
-	
-	@param followers : number, the number of followers the player has
-]]--
-FollowersRE.OnClientEvent:Connect(function(followers : number)
-	followersText.Text = followers
 end)
 
 

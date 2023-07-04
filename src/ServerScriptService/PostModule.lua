@@ -219,7 +219,7 @@ function PostModule:Post(p : Types.PlayerModule)
 	
 	-- 1/20 chance to get a coin
 	if randomNumber <= 0.05 then
-		DataStore2("coins", plr):Increment(1, p.coins)
+		p:UpdateCoinsAmount(1)
 	end
 
 	-- 1/3 chance of liking or reacting (not using a state for these, because we can't change state if we are in the middle
