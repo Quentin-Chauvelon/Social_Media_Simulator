@@ -133,7 +133,7 @@ local function testUpgradeNotEnoughCoins()
     local playerModule : PlayerModule.PlayerModule = PlayerModule.new(plr)
 
     playerModule.upgradeModule.firstFire = nil
-    playerModule.coins = 2
+    playerModule.coins = 0
     local equalTo : {UpgradeModule.upgrade} = deepCopy(playerModule.upgradeModule.upgrades)
 
     local result : {UpgradeModule.upgrade} | UpgradeModule.upgrade | nil = playerModule.upgradeModule:Upgrade(playerModule, 1)
@@ -207,7 +207,7 @@ local function testApplyUpgrade3()
     playerModule.gamepassModule.boughtFollowersMultiplier = false
     playerModule.upgradeModule:ApplyUpgrade(playerModule, playerModule.upgradeModule.upgrades[3])
 
-    assert(playerModule.followersMultiplier == 9, "player's followersMultiplier should be equal to 9 but was equal to " .. playerModule.followersMultiplier)
+    assert(playerModule.upgradeModule.followersMultiplier == 0.8, "player's followersMultiplier should be equal to 0.8 but was equal to " .. playerModule.upgradeModule.followersMultiplier)
 end
 
 
@@ -218,7 +218,7 @@ local function testApplyUpgrade4()
     playerModule.gamepassModule.boughtCoinsMultiplier = false
     playerModule.upgradeModule:ApplyUpgrade(playerModule, playerModule.upgradeModule.upgrades[4])
 
-    assert(playerModule.coinsMultiplier == 1, "player's coinsMultiplier should be equal to 1 but was equal to " .. playerModule.coinsMultiplier)
+    assert(playerModule.upgradeModule.coinsMultiplier == 0, "player's coinsMultiplier should be equal to 0 but was equal to " .. playerModule.upgradeModule.coinsMultiplier)
 end
 
 
@@ -240,8 +240,8 @@ local function testApplyUpgrades()
 
     assert(plr.Character.Humanoid.WalkSpeed == 24, "player's walkspeed should be 24 but was " .. plr.Character.Humanoid.WalkSpeed)
     assert(playerModule.postModule.autoPostInterval == 2800, "player's autoPostInterval should be equal to 2800 but was equal to " .. playerModule.postModule.autoPostInterval)
-    assert(playerModule.followersMultiplier == 9, "player's followersMultiplier should be equal to 9 but was equal to " .. playerModule.followersMultiplier)
-    assert(playerModule.coinsMultiplier == 1, "player's coinsMultiplier should be equal to 1 but was equal to " .. playerModule.coinsMultiplier)
+    assert(playerModule.upgradeModule.followersMultiplier == 0.8, "player's followersMultiplier should be equal to 0.8 but was equal to " .. playerModule.upgradeModule.followersMultiplier)
+    assert(playerModule.upgradeModule.coinsMultiplier == 0, "player's coinsMultiplier should be equal to 0 but was equal to " .. playerModule.upgradeModule.coinsMultiplier)
 end
 
 

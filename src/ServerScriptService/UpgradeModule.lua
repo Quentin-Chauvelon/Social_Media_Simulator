@@ -33,8 +33,8 @@ local defaultUpgrades : {upgrade} = {
         id = 3,
         level = 1,
         maxLevel = 10,
-        baseValue = 1,
-        upgradeValues = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+        baseValue = 0,
+        upgradeValues = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9},
         costs = {5, 15, 40, 75, 125, 200, 300, 450, 675, 1000}
     },
     
@@ -43,8 +43,8 @@ local defaultUpgrades : {upgrade} = {
         id = 4,
         level = 1,
         maxLevel = 10,
-        baseValue = 1,
-        upgradeValues = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+        baseValue = 0,
+        upgradeValues = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9},
         costs = {10, 30, 80, 150, 250, 400, 600, 900, 1350, 2000}
     },
 }
@@ -53,7 +53,9 @@ local defaultUpgrades : {upgrade} = {
 export type UpgradeModule = {
     upgrades : {upgrade},
     firstFire : boolean?,
-    new : (plr : Player) -> UpgradeModule,
+    followersMultiplier : number,
+    coinsMultiplier : number,
+    new : (plr : Player) -> UpgradeModule,  
     CanUpgrade : (self : UpgradeModule, p : Types.PlayerModule, upgrade : upgrade, id : number) -> boolean,
     ApplyUpgrade : (self : UpgradeModule, p : Types.PlayerModule, upgrade : upgrade) -> nil,
     ApplyUpgrades : (self : UpgradeModule, p : Types.PlayerModule) -> nil,
@@ -81,6 +83,8 @@ function UpgradeModule.new(plr : Player) : UpgradeModule
 
     upgradeModule.upgrades = DataStore2("upgrades", plr):Get(defaultUpgrades)
     upgradeModule.firstFire = true
+    upgradeModule.followersMultiplier = 0
+    upgradeModule.coinsMultiplier = 0
 
     return setmetatable(upgradeModule, UpgradeModule)
 end
@@ -120,10 +124,12 @@ function UpgradeModule:ApplyUpgrade(p : Types.PlayerModule, upgrade : upgrade)
         p.postModule.autoPostInterval = upgrade.baseValue - upgrade.upgradeValues[upgrade.level]
 
     elseif upgrade.id == 3 then
-        p.followersMultiplier = upgrade.baseValue + upgrade.upgradeValues[upgrade.level] + p.gamepassModule:GetFollowersMultiplier()
+        self.followersMultiplier = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]
+        p:UpdateFollowersMultiplier()
 
     elseif upgrade.id == 4 then
-        p.coinsMultiplier = upgrade.baseValue + upgrade.upgradeValues[upgrade.level] + p.gamepassModule:GetCoinsMultiplier()
+        self.coinsMultiplier = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]
+        p:UpdateCoinsMultiplier()
     end
 end
 

@@ -25,12 +25,12 @@ end
 
 
 function GamepassModule:GetCoinsMultiplier()
-    return self.boughtCoinsMultiplier and 20 or 0
+    return self.boughtCoinsMultiplier and 2 or 0
 end
 
 
 function GamepassModule:GetFollowersMultiplier()
-    return self.boughtFollowersMultiplier and 20 or 0
+    return self.boughtFollowersMultiplier and 2 or 0
 end
 
 

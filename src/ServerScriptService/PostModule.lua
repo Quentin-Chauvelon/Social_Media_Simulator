@@ -22,7 +22,7 @@ local react = {
 local numberOfReact : number = #react
 
 
-local followersGained : {number} = {
+local followersGained : {number} = { -- average = 2.248
 	4000, -- 1
 	2500, -- 2
 	1500, -- 3
@@ -35,8 +35,6 @@ local followersGained : {number} = {
 	1 -- 10
 }
 
--- TODO remove the following line (used to get more followers to test)
-followersGained[45] = 100000
 
 -- calculate the overall weight of the table
 local followersGainedWeight : number = 0

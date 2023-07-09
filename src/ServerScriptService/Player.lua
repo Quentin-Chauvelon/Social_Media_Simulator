@@ -28,6 +28,8 @@ export type PlayerModule = {
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
+	UpdateFollowersMultiplier : (self : PlayerModule) -> nil,
+	UpdateCoinsMultiplier : (self : PlayerModule) -> nil,
 	HasEnoughFollowers : (self : PlayerModule, amount : number) -> boolean,
 	UpdateFolowersAmount : (self : PlayerModule, amount : number) -> nil,
 	HasEnoughCoins : (self : PlayerModule, amount : number) -> boolean,
@@ -89,6 +91,28 @@ end
 
 
 --[[
+	Updates the followers multiplier by adding all the differents multipliers together
+]]--
+function Player:UpdateFollowersMultiplier()
+	self.followersMultiplier =
+		1 +
+		self.upgradeModule.followersMultiplier +
+		self.gamepassModule:GetFollowersMultiplier()
+end
+
+
+--[[
+	Updates the coins multiplier by adding all the differents multipliers together
+]]--
+function Player:UpdateCoinsMultiplier()
+	self.coinsMultiplier =
+		1 +
+		self.upgradeModule.coinsMultiplier +
+		self.gamepassModule:GetCoinsMultiplier()
+end
+
+
+--[[
 	Returns true if the player has more followers than the given amount
 
 	@param amount : number, the amount of followers to check
@@ -106,6 +130,7 @@ end
 ]]--
 function Player:UpdateFolowersAmount(amount : number)
 	local increment : number = if amount <= 0 then amount else math.round(amount * self.followersMultiplier)
+	print(amount, self.followersMultiplier, increment)
 
 	self.followers += increment
 	DataStore2("followers", self.player):Increment(increment, self.followers)

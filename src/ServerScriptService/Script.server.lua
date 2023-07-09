@@ -39,26 +39,23 @@ end)
 
 --[[
 	BUGS
+	information notification is ugly (text too small + too long ? responsive?)
 
 	IMPORTANT
-	TODO memory leak on serverEvent in customPost.lua:80 (move it to serverModule instead)
 
 	IMPROVEMENTS
 	TODO players can buy colors for their phones (back)
 	TODO light/dark mode
-	TODO upgradepost responsive
-	TODO playTimeRewards responsive
-	TODO for all resize on screen size changed, make sure that the ui never has a size of 0, ohterwise it won't work
-	TODO use callback instead of promise for tweens
-	TODO filterasync all text
-	TODO for the resize function, do i need the : if < 480 and if > 1920
 	TODO list all images to make
-	TODO thumbnail doesn't seem to be working anymore on the phone when posting + hide guildname if there is none
-
-	TODO: use module for the code inside the local script (post module mainly)
-	TODO rework the follower gui (color (outline gradient) and size for mobile) responsivness
+	TODO hide guildname if there is none
 	TODO utility module to bind ui to the events (MouseEnterScaleUp and MouseEnterScaleDown)
-	TODO make a utility function to tween all the ui on click (for those where it's a simple tween (bigger/smaller)), will help improve readability especially because the promise takes to hide the element takes at least 5 lines
-
-	TEST
+	TODO make a utility function to tween all the ui on click (for those where it's a simple tween (bigger/smaller)), will help improve readability especially because the promise takes at least 5 lines
+	TODO make the rewards play time work (rewards not attributed so far)
+	TODO playTimeRewards responsive
+	TODO playTimeRewards random rewards or always the same (advantages of always having the same rewards: players know what the play for and if they really want something in particular, they are going to play longer to get it)
+	
+	change the followers gui text color (the gradient is too weird?)
+	change the followers gui z-index so that it's behind the other uis (custom post for example)
+	reduce the size of the followers gui a little bit ?
+	play time rewards animation sometimes stopping for no reason (reset orientation to 0 after collecting the reward so that it doesn't stay stuck)
 ]]--
