@@ -7,6 +7,7 @@ local PostModule = require(ServerScriptService:WaitForChild("PostModule"))
 local CustomPost = require(ServerScriptService:WaitForChild("CustomPost"))
 local PlayTimeRewards = require(ServerScriptService:WaitForChild("PlayTimeRewards"))
 local UpgradeModule = require(ServerScriptService:WaitForChild("UpgradeModule"))
+local RebirthModule = require(ServerScriptService:WaitForChild("RebirthModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -25,6 +26,7 @@ export type PlayerModule = {
 	upgradeModule : UpgradeModule.UpgradeModule,
 	customPosts : CustomPost.CustomPost,
 	playTimeRewards : PlayTimeRewards.PlayTimeRewards,
+	rebirthModule : RebirthModule.RebirthModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -80,11 +82,34 @@ function Player.new(plr : Player)
 	p.playTimeRewards:LoadData()
 	p.playTimeRewards:StartTimer()
 
+	p.rebirthModule = RebirthModule.new(plr)
+	p.rebirthModule:UpdateFollowersNeededToRebirth()
+
 	p.gamepassModule = GamepassModule.new()
 
 	--p.coins = DataStore2("coins", plr):Get(0)
 
 	p.maid = Maid.new()
+
+	-- create the followers and coins number values
+	local statsFolder = Instance.new("Folder")
+	statsFolder.Name = "Stats"
+	statsFolder.Parent = plr
+
+	local followerValue : NumberValue = Instance.new("NumberValue")
+	followerValue.Name = "Followers"
+	followerValue.Value = p.followers
+	followerValue.Parent = statsFolder
+
+	local coinsValue : NumberValue = Instance.new("NumberValue")
+	coinsValue.Name = "Coins"
+	coinsValue.Value = p.coins
+	coinsValue.Parent = statsFolder
+
+	local rebirthValue : NumberValue = Instance.new("NumberValue")
+	rebirthValue.Name = "Rebirth"
+	rebirthValue.Value = p.rebirthModule.rebirthLevel
+	rebirthValue.Parent = statsFolder
 
 	return setmetatable(p, Player)
 end
@@ -97,7 +122,11 @@ function Player:UpdateFollowersMultiplier()
 	self.followersMultiplier =
 		1 +
 		self.upgradeModule.followersMultiplier +
+		self.rebirthModule.followersMultiplier +
 		self.gamepassModule:GetFollowersMultiplier()
+
+	-- TODO: DELETE THE FOLLOWING LINE
+	self.followersMultiplier *= 100
 end
 
 
@@ -130,7 +159,6 @@ end
 ]]--
 function Player:UpdateFolowersAmount(amount : number)
 	local increment : number = if amount <= 0 then amount else math.round(amount * self.followersMultiplier)
-	print(amount, self.followersMultiplier, increment)
 
 	self.followers += increment
 	DataStore2("followers", self.player):Increment(increment, self.followers)

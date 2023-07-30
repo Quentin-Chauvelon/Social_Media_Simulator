@@ -10,6 +10,7 @@ export type PlayerModule = {
 	upgradeModule : UpgradeModule,
 	customPosts : CustomPost,
 	playTimeRewards : PlayTimeRewards,
+	rebirthModule : RebirthModule,
 	gamepassModule : GamepassModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -125,6 +126,15 @@ type PlayTimeRewardsStats = {
 type PlayTimeReward = {
 	reward : string,
 	value : number
+}
+
+export type RebirthModule = {
+    rebirthLevel : number,
+    followersMultiplier : number,
+    followersNeededToRebirth : number,
+    new : (plr : Player) -> RebirthModule,
+    Rebirth : () -> boolean,
+    UpdateFollowersNeededToRebirth : () -> number
 }
 
 export type GamepassModule = {

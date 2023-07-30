@@ -25,6 +25,8 @@ local debounce = true
 
 
 export type Utility = {
+    guisToClose : {GuiObject},
+    closeGuiConnection : RBXScriptConnection?,
     new : () -> nil,
     BlurBackground : (enabled : boolean) -> nil,
     ResizeUIOnWindowResize : ((viewportSize : Vector2) -> nil) -> nil,
@@ -32,13 +34,17 @@ export type Utility = {
     GetNumberInRangeProportionallyDefaultWidth : (X : number, minRange : number, maxRange : number) -> number,
     GetNumberInRangeProportionallyDefaultHeight : (X : number, minRange : number, maxRange : number) -> number,
     DisplayInformation : (text : string, duration : number) -> nil,
-    DisplayError : (text : string, duration : number) -> nil
-
+    DisplayError : (text : string, duration : number) -> nil,
+    OpenGui : (ui : GuiObject, duration : number?) -> boolean,
+    SetCloseGuiConnection : (closeConnection : RBXScriptConnection) -> nil,
+    CloseGui : (ui : GuiObject, duration : number?) -> nil,
+    CloseAllGuis : () -> boolean
 }
 
 
 local Utility : Utility = {}
 
+Utility.guisToClose = {}
 
 function Utility.new()
     Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
@@ -220,6 +226,107 @@ function Utility.DisplayError(text : string, duration : number)
     notificationClose.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 
     DisplayNotification(text, duration)
+end
+
+
+--[[
+    Tweens a gui to open it (from 0,0 to X,Y)
+
+    @param ui : GuiObject, the ui to tween
+    @param duration : number?, the duration of the tween or nil (0.2)
+    @return boolean, true if the gui has been opened, false if it was already open
+]]
+function Utility.OpenGui(ui : GuiObject, duration : number?) : boolean
+    if not ui.Visible then
+
+        -- close all guis before opening one
+        -- if one of them was opened, we wait for it to close before opening another one
+        if Utility.CloseAllGuis() then
+            task.wait(0.2)
+        end
+        
+        -- the ui doesn't have a size of 0 because it is kept at a normal size (this allows the ui to be able to be resized even when it's hidden (if the player resizes it's game window))
+        local uiOriginalSize : UDim2 = ui.Size
+        ui.Size = UDim2.new(0,0,0,0)
+        
+        Utility.BlurBackground(true)
+
+        ui.Visible = true
+        
+        ui:TweenSize(
+            uiOriginalSize,
+            Enum.EasingDirection.InOut,
+            Enum.EasingStyle.Linear,
+            duration or 0.2
+        )
+
+        return true
+    end
+
+    return false
+end
+
+
+--[[
+    Sets the gui connection to disconnect when closing the gui
+
+    @param closeConnection : RBXScriptConnection, the connection
+]]
+function Utility.SetCloseGuiConnection(closeConnection : RBXScriptConnection)
+    if not Utility.closeGuiConnection then
+        Utility.closeGuiConnection = closeConnection
+    end
+end
+
+
+--[[
+    Tweens a gui to close it (from X,Y to 0,0)
+
+    @param ui : GuiObject, the ui to tween
+    @param duration : number?, the duration of the tween or nil (default: 0.2)
+]]
+function Utility.CloseGui(ui : GuiObject, duration : number?)
+
+    -- disconnect the close gui connection
+    if Utility.closeGuiConnection then
+        Utility.closeGuiConnection:Disconnect()
+        Utility.closeGuiConnection = nil
+    end
+    
+    if ui.Visible then
+        local upgradesOriginalSize : UDim2 = ui.Size
+        
+        Utility.BlurBackground(false)
+
+        ui:TweenSize(
+            UDim2.new(0,0,0,0),
+            Enum.EasingDirection.InOut,
+            Enum.EasingStyle.Linear,
+            duration or 0.2,
+            false,
+            function()
+                ui.Visible = false
+                ui.Size = upgradesOriginalSize
+            end
+        )
+    end
+end
+
+
+--[[
+    Tweens all guis from the Utility.guisToClose table to close them (from X,Y to 0,0)
+]]
+function Utility.CloseAllGuis() : boolean
+    local wasOneGuiOpened : boolean = false
+
+    for _,ui : GuiObject in pairs(Utility.guisToClose) do
+        if ui.Visible then
+            wasOneGuiOpened = true
+            Utility.CloseGui(ui)
+        end
+    end
+
+    return wasOneGuiOpened
 end
 
 

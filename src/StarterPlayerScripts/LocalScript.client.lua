@@ -5,6 +5,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
+local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
+local coinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Coins")
 local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
@@ -27,11 +29,15 @@ local PlayTimeRewards = require(StarterPlayer.StarterPlayerScripts:WaitForChild(
 local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility"))
 local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CustomPost"))
 local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("UpgradeModule"))
+local RebirthModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("RebirthModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
 
 local playerGui : PlayerGui = lplr.PlayerGui
+
+local menu : ScreenGui = playerGui:WaitForChild("Menu")
+local menuSideButtons : Frame = menu:WaitForChild("SideButtons")
 
 local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
 local upgradePostsBackground : Frame = upgradePosts:WaitForChild("Background")
@@ -51,10 +57,16 @@ local playTimeRewards
 
 
 Utility.new()
+
 GuiTabsModule.new(Utility)
+
 CustomPost.new(Utility)
+
 local upgradeModule : UpgradeModule.UpgradeModule = UpgradeModule.new(Utility)
 upgradeModule:LoadUpgrades()
+
+local rebirthModule : RebirthModule.RebirthModule = RebirthModule.new(Utility)
+rebirthModule:UpdateFollowersNeededToRebirth()
 
 
 -- resize the next reward timer (at the top of the screen) when the screen size changes
@@ -67,11 +79,24 @@ end)
 
 
 -- resize the all rewards uigridlayout cell padding (to evenly space out all the rewards)
-Utility.ResizeUIOnWindowResize(function()
+Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 	allRewardsUiGridLayout.CellPadding = UDim2.new(
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
 	)
+end)
+
+
+-- resize the menu side buttons UI stroke
+Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+	local thickness : number = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 5)
+
+	for _,menuSideButton : GuiObject in ipairs(menuSideButtons:GetChildren()) do
+		if menuSideButton:IsA("ImageButton") then
+			menuSideButton.UIStroke.Thickness = thickness
+			menuSideButton.TextLabel.UIStroke.Thickness = thickness
+		end
+	end
 end)
 
 
@@ -111,6 +136,10 @@ if lplr.Character then
 end
 
 
+local followerValue : NumberValue = lplr:WaitForChild("Stats"):WaitForChild("Followers")
+local coinsValue : NumberValue = lplr:WaitForChild("Stats"):WaitForChild("Coins")
+
+
 --[[
 	Fires the server to post when the player clicks or touches the screen
 ]]--
@@ -119,6 +148,19 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		PlayerClickedRE:FireServer()
 	end
 end)
+
+
+FollowersRE.OnClientEvent:Connect(function(followers : number)
+	followerValue.Value = followers
+	GuiTabsModule.UpdateFollowers(followers)
+end)
+
+
+coinsRE.OnClientEvent:Connect(function(coins : number)
+	coinsValue.Value = coins
+	GuiTabsModule.UpdateCoins(coins)
+end)
+
 
 
 --[[

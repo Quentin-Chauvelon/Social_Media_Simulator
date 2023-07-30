@@ -17,6 +17,7 @@ local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild(
 local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCustomPosts")
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
+local RebirthRF : RemoteFunction = ReplicatedStorage:WaitForChild("Rebirth")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
@@ -269,6 +270,24 @@ UpgradeRF.OnServerInvoke = function(plr : Player, id : number) : {}
 	end
 
 	return {}
+end
+
+
+--[[
+	Fires when the player tries to rebirth
+]]--
+RebirthRF.OnServerInvoke = function(plr : Player)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		local rebirthSuccessful : boolean = p.rebirthModule:Rebirth(p.followers, p.player)
+		if rebirthSuccessful then
+			p.followers = 0
+			p:UpdateFollowersMultiplier()
+			DataStore2("followers", plr):Set(0)
+		end
+
+		return rebirthSuccessful
+	end
 end
 
 

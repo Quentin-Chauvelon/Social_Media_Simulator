@@ -215,10 +215,30 @@ function PostModule:Post(p : Types.PlayerModule)
 
 	local randomNumber : number = math.random()
 	
-	-- 1/20 chance to get a coin
-	if randomNumber <= 0.05 then
-		p:UpdateCoinsAmount(1)
+	-- if the player has a rebirth level less than 100, then we calculate the odds of getting 1 coin
+	if p.rebirthModule.rebirthLevel < 100 then
+		if randomNumber <= 0.05 + (p.rebirthModule.rebirthLevel / 100) then
+			p:UpdateCoinsAmount(1)
+		end
+
+	-- if the player has a rebirth level greater than 100, then we calculate the odds of getting 1 or more coin
+	else
+		local coinsToAdd : number = 0
+		for i=p.rebirthModule.rebirthLevel, 0, -100 do
+			if i > 100 then
+				coinsToAdd += 1
+			else
+				if randomNumber <= (i % 100) / 100 then
+					coinsToAdd += 1
+				end
+			end
+		end
+
+		if coinsToAdd >= 1 then
+			p:UpdateCoinsAmount(coinsToAdd)
+		end
 	end
+
 
 	-- 1/3 chance of liking or reacting (not using a state for these, because we can't change state if we are in the middle
 	-- of a dialog or reply which means that we could never like or react to the first post of a dialog or reply)

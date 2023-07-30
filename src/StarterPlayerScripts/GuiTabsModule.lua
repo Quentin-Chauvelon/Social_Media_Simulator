@@ -20,7 +20,9 @@ local coinsText : TextLabel = coinsContainer:WaitForChild("CoinsText")
 
 
 export type GuiTabsModule = {
-    new : (utility : Utility.Utility) -> GuiTabsModule
+    new : (utility : Utility.Utility) -> GuiTabsModule,
+	UpdateFollowers : (followers : number) -> nil,
+	UpdateCoins : (coins : number) -> nil
 }
 
 
@@ -41,9 +43,9 @@ end
 	
 	@param followers : number, the number of followers the player has
 ]]--
-FollowersRE.OnClientEvent:Connect(function(followers : number)
+function GuiTabsModule.UpdateFollowers(followers : number)
 	followersText.Text = followers
-end)
+end
 
 
 --[[
@@ -51,8 +53,8 @@ end)
 	
 	@param coins : number, the number of coins the player has
 ]]--
-coinsRE.OnClientEvent:Connect(function(coins : number)
+function GuiTabsModule.UpdateCoins(coins : number)
 	coinsText.Text = coins
-end)
+end
 
 return GuiTabsModule
