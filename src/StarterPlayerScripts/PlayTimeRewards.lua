@@ -29,7 +29,7 @@ export type PlayTimeRewards = {
     FormatTimeForTimer : (self : PlayTimeRewards, timeUntilNextReward : number) -> string,
     NextRewardClick : (self : PlayTimeRewards) -> nil,
     StartTimer : (self : PlayTimeRewards) -> nil,
-    SyncTimer : (timePlayedToday : number) -> nil,
+    SyncTimer : (self : PlayTimeRewards, timePlayedToday : number) -> nil,
 }
 
 type PlayTimeReward = {
