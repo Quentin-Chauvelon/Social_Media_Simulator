@@ -11,6 +11,7 @@ local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
+local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
 
 local lplr = Players.LocalPlayer
@@ -393,4 +394,19 @@ PlayTimeRewardsTimerSyncRE.OnClientEvent:Connect(function(timePlayedToday : numb
 	end
 
 	playTimeRewards:SyncTimer(timePlayedToday)
+end)
+
+
+--[[
+	Update the rebirth gui when the player rebirths
+]]
+RebirthRE.OnClientEvent:Connect(function()
+	-- increase the rebirth level for the player
+	rebirthModule.level += 1
+
+	-- update the amount of followers needed to rebirth the next time
+	rebirthModule:UpdateFollowersNeededToRebirth()
+
+	-- update the gui to update the values of the upgrades and progress
+	rebirthModule:UpdateGui()
 end)

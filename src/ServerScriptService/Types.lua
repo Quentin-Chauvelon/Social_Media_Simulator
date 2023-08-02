@@ -133,7 +133,8 @@ export type RebirthModule = {
     followersMultiplier : number,
     followersNeededToRebirth : number,
     new : (plr : Player) -> RebirthModule,
-    Rebirth : () -> boolean,
+    TryRebirth : (self : RebirthModule, followers : number, plr : Player) -> boolean,
+    Rebirth : (self : RebirthModule, plr : Player) -> boolean,
     UpdateFollowersNeededToRebirth : () -> number
 }
 

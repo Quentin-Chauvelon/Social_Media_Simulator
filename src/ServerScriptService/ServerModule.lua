@@ -1,10 +1,13 @@
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local Player = require(ServerScriptService:WaitForChild("Player"))
-local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
+local DeveloperProductModule = require(ServerScriptService:WaitForChild("DeveloperProductModule"))
+local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
@@ -17,7 +20,7 @@ local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild(
 local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCustomPosts")
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
-local RebirthRF : RemoteFunction = ReplicatedStorage:WaitForChild("Rebirth")
+local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
@@ -276,17 +279,38 @@ end
 --[[
 	Fires when the player tries to rebirth
 ]]--
-RebirthRF.OnServerInvoke = function(plr : Player)
+RebirthRE.OnServerEvent:Connect(function(plr : Player)
 	local p : Player.PlayerModule = players[plr.Name]
 	if p then
-		local rebirthSuccessful : boolean = p.rebirthModule:Rebirth(p.followers, p.player)
+		local rebirthSuccessful : boolean = p.rebirthModule:TryRebirth(p.followers, p.player)
 		if rebirthSuccessful then
 			p.followers = 0
-			p:UpdateFollowersMultiplier()
-			DataStore2("followers", plr):Set(0)
-		end
 
-		return rebirthSuccessful
+			-- reset the followers count
+			DataStore2("followers", plr):Set(0)
+			
+			p:UpdateFollowersMultiplier()
+
+			RebirthRE:FireClient(plr)
+		end
+	end
+end)
+
+
+--[[
+	Apply an upgrade when the player buys a developer product
+]]--
+MarketplaceService.ProcessReceipt = function(receiptInfo : table) : Enum.ProductPurchaseDecision
+	if receiptInfo and receiptInfo.PlayerId then
+		
+		local playerName : string = Players:GetNameFromUserIdAsync(receiptInfo.PlayerId)
+		if playerName then
+
+			local p : Player.PlayerModule = players[playerName]
+			if p then
+				return DeveloperProductModule.BoughtDeveloperProduct(receiptInfo, p)
+			end
+		end
 	end
 end
 

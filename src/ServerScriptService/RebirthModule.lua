@@ -113,7 +113,8 @@ export type RebirthModule = {
     followersMultiplier : number,
     followersNeededToRebirth : number,
     new : (plr : Player) -> RebirthModule,
-    Rebirth : (self : RebirthModule, followers : number, plr : Player) -> boolean,
+    TryRebirth : (self : RebirthModule, followers : number, plr : Player) -> boolean,
+    Rebirth : (self : RebirthModule, plr : Player) -> boolean,
     UpdateFollowersNeededToRebirth : (self : RebirthModule) -> number
 }
 
@@ -132,26 +133,30 @@ function RebirthModule.new(plr : Player) : RebirthModule
 end
 
 
-function RebirthModule:Rebirth(followers : number, plr : Player) : boolean
+function RebirthModule:TryRebirth(followers : number, plr : Player) : boolean
     if followers >= self.followersNeededToRebirth then
-
-        self.rebirthLevel += 1
-
-        -- save the new rebirth level for the player
-        DataStore2("rebirth", plr):Increment(1)
-        
-        plr.Stats.Rebirth.Value += 1
-
-        -- update the rebirth followers multiplier
-        self.followersMultiplier = self.rebirthLevel / 10
-
-        -- update the number of followers needed to rebirth the next time
-        self:UpdateFollowersNeededToRebirth()
-        
-        return true
+        return self:Rebirth(plr)
     end
 
     return false
+end
+
+
+function RebirthModule:Rebirth(plr : Player) : boolean
+    self.rebirthLevel += 1
+
+    -- save the new rebirth level for the player
+    DataStore2("rebirth", plr):Increment(1)
+
+    plr.Stats.Rebirth.Value += 1
+
+    -- update the rebirth followers multiplier
+    self.followersMultiplier = self.rebirthLevel / 10
+
+    -- update the number of followers needed to rebirth the next time
+    self:UpdateFollowersNeededToRebirth()
+
+    return true
 end
 
 

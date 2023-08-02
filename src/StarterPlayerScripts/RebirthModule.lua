@@ -1,15 +1,15 @@
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
+local RunService = game:GetService("RunService")
 local TextService = game:GetService("TextService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utility = require(script.Parent:WaitForChild("Utility"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
 local lplr = Players.LocalPlayer
 
-local RebirthRF : RemoteFunction = ReplicatedStorage:WaitForChild("Rebirth")
+local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 
 local playerGui : PlayerGui = lplr.PlayerGui
 
@@ -202,19 +202,8 @@ function RebirthModule.new(utility : Utility.Utility)
     -- fire the client when the player clicks the button to rebirth
     rebirthButton.MouseButton1Down:Connect(function()
         if lplr.Stats.Followers.Value >= rebirthModule.followersNeededToRebirth then
-            
-            -- if the player rebirthed successfully
-            if RebirthRF:InvokeServer() then
-
-                -- increase the rebirth level for the player
-                rebirthModule.level += 1
-
-                -- update the amount of followers needed to rebirth the next time
-                rebirthModule:UpdateFollowersNeededToRebirth()
-
-                -- update the gui to update the values of the upgrades and progress
-                rebirthModule:UpdateGui()
-            end
+            -- fire the server to rebirth
+            RebirthRE:FireServer()
         end
     end)
 
