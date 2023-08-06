@@ -33,6 +33,9 @@ function DeveloperProductModule.BoughtDeveloperProduct(receiptInfo : receiptInfo
         if receiptInfo.ProductId == 1590728129 then
             if p.rebirthModule:Rebirth(player) then
                 RebirthRE:FireClient(player)
+
+                p:SetFollowersAmount(0)
+
                 return Enum.ProductPurchaseDecision.PurchaseGranted
             end
         end
