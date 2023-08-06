@@ -33,7 +33,7 @@ export type PlayerModule = {
 	UpdateFollowersMultiplier : (self : PlayerModule) -> nil,
 	UpdateCoinsMultiplier : (self : PlayerModule) -> nil,
 	HasEnoughFollowers : (self : PlayerModule, amount : number) -> boolean,
-	UpdateFolowersAmount : (self : PlayerModule, amount : number) -> nil,
+	UpdateFollowersAmount : (self : PlayerModule, amount : number) -> nil,
 	HasEnoughCoins : (self : PlayerModule, amount : number) -> boolean,
 	UpdateCoinsAmount : (self : PlayerModule, amount : number) -> nil,
 	OnLeave : (self : PlayerModule) -> nil
@@ -157,7 +157,7 @@ end
 
 	@param amount : number, the amount of followers to add
 ]]--
-function Player:UpdateFolowersAmount(amount : number)
+function Player:UpdateFollowersAmount(amount : number)
 	local increment : number = if amount <= 0 then amount else math.round(amount * self.followersMultiplier)
 
 	self.followers += increment

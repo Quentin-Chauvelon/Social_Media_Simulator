@@ -211,7 +211,7 @@ function PostModule:Post(p : Types.PlayerModule)
 	local plr : Player = p.player
 	local nextState : string = self.currentState
 
-	p:UpdateFolowersAmount(GetRandomFollowerAmount())
+	p:UpdateFollowersAmount(GetRandomFollowerAmount())
 
 	local randomNumber : number = math.random()
 	
