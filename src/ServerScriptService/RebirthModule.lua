@@ -133,6 +133,13 @@ function RebirthModule.new(plr : Player) : RebirthModule
 end
 
 
+--[[
+	Called when the player clicks the rebirth button. Checks if the player has enough followers to rebirth and then rebirths
+	
+	@param followers : number, the amount  of followers the player has
+    @param plr : Player, the player that wants to rebirth
+    @return boolean, true if the player could rebirth, false otherwise
+]]--
 function RebirthModule:TryRebirth(followers : number, plr : Player) : boolean
     if followers >= self.followersNeededToRebirth then
         return self:Rebirth(plr)
@@ -142,7 +149,13 @@ function RebirthModule:TryRebirth(followers : number, plr : Player) : boolean
 end
 
 
+--[[
+	Rebirths the player.
+	
+	@param plr : Player, the player that rebirths
+]]--
 function RebirthModule:Rebirth(plr : Player) : boolean
+    -- increments the player's rebirth level
     self.rebirthLevel += 1
 
     -- save the new rebirth level for the player
@@ -160,6 +173,9 @@ function RebirthModule:Rebirth(plr : Player) : boolean
 end
 
 
+--[[
+	Updates the amount of followers needed to rebirth based on the rebirth level of the player
+]]--
 function RebirthModule:UpdateFollowersNeededToRebirth()
     local nextRebirthLevel : number = self.rebirthLevel + 1
 

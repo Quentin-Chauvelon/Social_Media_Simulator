@@ -135,7 +135,7 @@ local followersNeededToRebirth : {number} = {
     22814000
 }
 
-local REBIRTH_DEV_PRODUCT_ID : number = 1590728129
+local REBIRTH_DEV_PRODUCT_ID : number = 1590728129 -- ID for the rebirth's developer product
 
 
 export type RebirthModule = {
@@ -162,6 +162,7 @@ function RebirthModule.new(utility : Utility.Utility)
     rebirthModule.utility = utility
     rebirthModule.followersNeededToRebirth = 0
     
+    -- store all UIStroke in a table to change them easily later
     local rebirthsGuiUIStroke : {UIStroke} = {}
     for _,v : Instance in ipairs(rebirthsContentContainer:GetDescendants()) do
         if v:IsA("UIStroke") then
@@ -217,9 +218,13 @@ function RebirthModule.new(utility : Utility.Utility)
 end
 
 
+--[[
+	Updates the amount of followers needed to rebirth based on the rebirth level of the player
+]]--
 function RebirthModule:UpdateFollowersNeededToRebirth()
     local nextRebirthLevel : number = lplr:WaitForChild("Stats"):WaitForChild("Rebirth").Value + 1
 
+    -- if the player's rebirth level is less than 100, take the value from the table, otherwise use the formula to calculate the amount needed
     if followersNeededToRebirth[nextRebirthLevel] then
         self.followersNeededToRebirth = followersNeededToRebirth[nextRebirthLevel]
     else
@@ -228,6 +233,9 @@ function RebirthModule:UpdateFollowersNeededToRebirth()
 end
 
 
+--[[
+	Opens the rebirt gui
+]]--
 function RebirthModule:OpenGui()
     -- open the gui
     if self.utility.OpenGui(rebirthsBackground) then
@@ -245,6 +253,9 @@ function RebirthModule:OpenGui()
 end
 
 
+--[[
+	Updates the gui (follower count, button color...) every few frames until the player closes the gui
+]]--
 function RebirthModule:UpdateGui()
     self.updateGuiPromise = Promise.new(function(resolve)
         -- update the followers upgrade boost values
@@ -290,6 +301,9 @@ function RebirthModule:UpdateGui()
 end
 
 
+--[[
+	Closes the gui
+]]--
 function RebirthModule:CloseGui()
     self.utility.CloseGui(rebirthsBackground)
 end
