@@ -25,6 +25,9 @@ local DeveloperProductModule : DeveloperProductModule = {}
 DeveloperProductModule.__index = DeveloperProductModule
 
 
+--[[
+	Called when a player successfully purchases a developer product
+]]--
 function DeveloperProductModule.BoughtDeveloperProduct(receiptInfo : receiptInfo, p : Types.PlayerModule)
     local player = Players:GetPlayerByUserId(receiptInfo.PlayerId)
 	if player then
