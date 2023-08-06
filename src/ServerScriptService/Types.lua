@@ -17,9 +17,11 @@ export type PlayerModule = {
 	UpdateFollowersMultiplier : (self : PlayerModule) -> nil,
 	UpdateCoinsMultiplier : (self : PlayerModule) -> nil,
 	HasEnoughFollowers : (self : PlayerModule, amount : number) -> boolean,
-	UpdateFolowersAmount : (self : PlayerModule, amount : number) -> nil,
+	UpdateFollowersAmount : (self : PlayerModule, amount : number) -> nil,
+	SetFollowersAmount : (self : PlayerModule, amount : number) -> nil,
 	HasEnoughCoins : (self : PlayerModule, amount : number) -> boolean,
 	UpdateCoinsAmount : (self : PlayerModule, amount : number) -> nil,
+	SetCoinsAmount : (self : PlayerModule, amount : number) -> nil,
 	OnLeave : (self : PlayerModule) -> nil
 }
 

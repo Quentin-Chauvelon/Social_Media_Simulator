@@ -34,8 +34,10 @@ export type PlayerModule = {
 	UpdateCoinsMultiplier : (self : PlayerModule) -> nil,
 	HasEnoughFollowers : (self : PlayerModule, amount : number) -> boolean,
 	UpdateFollowersAmount : (self : PlayerModule, amount : number) -> nil,
+	SetFollowersAmount : (self : PlayerModule, amount : number) -> nil,
 	HasEnoughCoins : (self : PlayerModule, amount : number) -> boolean,
 	UpdateCoinsAmount : (self : PlayerModule, amount : number) -> nil,
+	SetCoinsAmount : (self : PlayerModule, amount : number) -> nil,
 	OnLeave : (self : PlayerModule) -> nil
 }
 
@@ -166,6 +168,17 @@ end
 
 
 --[[
+	Sets the amount of followers to the given amount
+
+	@param amount : number, the amount which to set followers to
+]]--
+function Player:SetFollowersAmount(amount : number)
+	self.followers = amount
+	DataStore2("followers", self.player):Set(self.followers)
+end
+
+
+--[[
 	Returns true if the player has more coins than the given amount
 
 	@param amount : number, the amount of coins to check
@@ -186,6 +199,17 @@ function Player:UpdateCoinsAmount(amount : number)
 
 	self.coins += increment
 	DataStore2("coins", self.player):Increment(increment, self.coins)
+end
+
+
+--[[
+	Sets the amount of coins to the given amount
+
+	@param amount : number, the amount which to set coins to
+]]--
+function Player:SetCoinsAmount(amount : number)
+	self.coins = amount
+	DataStore2("coins", self.player):Set(self.coins)
 end
 
 
