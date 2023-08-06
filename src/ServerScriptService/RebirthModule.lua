@@ -1,8 +1,12 @@
 local ServerScriptService = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 
 DataStore2.Combine("SMS", "rebirth")
+
+local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
+
 
 local followersNeededToRebirth : {number} = {
     100,
@@ -168,6 +172,8 @@ function RebirthModule:Rebirth(plr : Player) : boolean
 
     -- update the number of followers needed to rebirth the next time
     self:UpdateFollowersNeededToRebirth()
+
+    ParticleRE:FireClient(plr)
 
     return true
 end
