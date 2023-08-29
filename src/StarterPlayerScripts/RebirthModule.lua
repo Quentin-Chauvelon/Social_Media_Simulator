@@ -143,7 +143,7 @@ export type RebirthModule = {
     utility : Utility.Utility,
     followersNeededToRebirth : number,
     updateGuiPromise : {},
-    new : () -> RebirthModule,
+    new : (utility : Utility.Utility) -> RebirthModule,
     UpdateFollowersNeededToRebirth : (self : RebirthModule) -> nil,
     OpenGui : (self : RebirthModule) -> nil,
     UpdateGui : (self : RebirthModule) -> nil,
@@ -234,7 +234,7 @@ end
 
 
 --[[
-	Opens the rebirt gui
+	Opens the rebirth gui
 ]]--
 function RebirthModule:OpenGui()
     -- open the gui
