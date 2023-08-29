@@ -31,6 +31,7 @@ local Utility = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Utility
 local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CustomPost"))
 local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("UpgradeModule"))
 local RebirthModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("RebirthModule"))
+local CaseModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CaseModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
@@ -68,6 +69,8 @@ upgradeModule:LoadUpgrades()
 
 local rebirthModule : RebirthModule.RebirthModule = RebirthModule.new(Utility)
 rebirthModule:UpdateFollowersNeededToRebirth()
+
+local caseModule : CaseModule.CaseModule = CaseModule.new(Utility)
 
 
 -- resize the next reward timer (at the top of the screen) when the screen size changes

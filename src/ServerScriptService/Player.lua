@@ -8,6 +8,7 @@ local CustomPost = require(ServerScriptService:WaitForChild("CustomPost"))
 local PlayTimeRewards = require(ServerScriptService:WaitForChild("PlayTimeRewards"))
 local UpgradeModule = require(ServerScriptService:WaitForChild("UpgradeModule"))
 local RebirthModule = require(ServerScriptService:WaitForChild("RebirthModule"))
+local CaseModule = require(ServerScriptService:WaitForChild("CaseModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -27,6 +28,7 @@ export type PlayerModule = {
 	customPosts : CustomPost.CustomPost,
 	playTimeRewards : PlayTimeRewards.PlayTimeRewards,
 	rebirthModule : RebirthModule.RebirthModule,
+	caseModule : CaseModule.CaseModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -38,6 +40,7 @@ export type PlayerModule = {
 	HasEnoughCoins : (self : PlayerModule, amount : number) -> boolean,
 	UpdateCoinsAmount : (self : PlayerModule, amount : number) -> nil,
 	SetCoinsAmount : (self : PlayerModule, amount : number) -> nil,
+	UpdateAutopostInterval : (self : PlayerModule) -> nil,
 	OnLeave : (self : PlayerModule) -> nil
 }
 
@@ -86,6 +89,8 @@ function Player.new(plr : Player)
 
 	p.rebirthModule = RebirthModule.new(plr)
 	p.rebirthModule:UpdateFollowersNeededToRebirth()
+
+	p.caseModule = CaseModule.new(plr)
 
 	p.gamepassModule = GamepassModule.new()
 
@@ -210,6 +215,20 @@ end
 function Player:SetCoinsAmount(amount : number)
 	self.coins = amount
 	DataStore2("coins", self.player):Set(self.coins)
+end
+
+
+--[[
+	
+]]--
+function Player:UpdateAutopostInterval()
+	local upgrade : UpgradeModule.upgrade = self.upgradeModule.upgrades[2]
+
+	self.postModule.autoPostInterval =
+		3_000 -
+		(upgrade.baseValue + upgrade.upgradeValues[upgrade.level]) -
+		(self.caseModule.speedBoost)
+	print("new autopost invertal: ", self.postModule.autoPostInterval, "(", (upgrade.baseValue + upgrade.upgradeValues[upgrade.level]), ", ", self.caseModule.speedBoost, ")")
 end
 
 

@@ -23,6 +23,8 @@ local notificationUIPadding : UIPadding = notification:WaitForChild("UIPadding")
 local uiToResize : {(viewportSize : Vector2) -> nil} = {}
 local debounce = true
 
+local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4,["M"] = 7,["B"] = 10,["T"] = 13,["Qa"] = 16,["Qi"] = 19}
+
 
 export type Utility = {
     guisToClose : {GuiObject},
@@ -38,7 +40,8 @@ export type Utility = {
     OpenGui : (ui : GuiObject, duration : number?) -> boolean,
     SetCloseGuiConnection : (closeConnection : RBXScriptConnection) -> nil,
     CloseGui : (ui : GuiObject, duration : number?) -> nil,
-    CloseAllGuis : () -> boolean
+    CloseAllGuis : () -> boolean,
+    AbbreviateNumber : (number : number) -> string
 }
 
 
@@ -327,6 +330,35 @@ function Utility.CloseAllGuis() : boolean
     end
 
     return wasOneGuiOpened
+end
+
+
+--[[
+    Abbreviates the given number (ex: 1000 -> 1k, 1500000 -> 1.5M...)
+
+    @see https://devforum.roblox.com/t/how-to-make-1-000-000-become-1m-in-text/1969945/3
+    @param number : number, the number to abbreviate
+    @return string, the abbreviated number
+]]--
+function Utility.AbbreviateNumber(number : number) : string
+    local text : string = tostring(string.format("%.f",math.floor(number)))
+        
+    local chosenAbbreviation : string
+        for abbreviation : string, digit : number in pairs(NUMBER_ABBREVIATIONS) do
+            if (#text >= digit and #text < (digit + 3)) then
+                chosenAbbreviation = abbreviation
+                break
+        end
+    end
+    
+    if (chosenAbbreviation and chosenAbbreviation ~= 0) then
+        local digits : number = NUMBER_ABBREVIATIONS[chosenAbbreviation]
+        
+        local rounded : number = math.floor(number / 10 ^  (digits - 2)) * 10 ^  (digits - 2)
+        return string.format("%.1f", rounded / 10 ^ (digits - 1)) .. chosenAbbreviation
+    else
+        return tostring(number)
+    end
 end
 
 

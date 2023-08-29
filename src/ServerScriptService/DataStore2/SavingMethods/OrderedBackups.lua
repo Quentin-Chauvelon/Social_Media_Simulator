@@ -15,7 +15,7 @@
 	times and issues with using the same datastore keys to save data across multiple places in the same game. With
 	this method, data is almost always instantly accessible immediately after a player teleports, making it useful
 	for multi-place games.
---]]
+]]--
 
 local DataStoreService = game:GetService("DataStoreService")
 local Promise = require(script.Parent.Parent.Promise)

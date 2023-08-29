@@ -25,7 +25,7 @@
 	To get the current player's coins:
 
 	coinStore:Get()
---]]
+]]--
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -228,7 +228,7 @@ end
 	The value to return to :Get() in the case of a failure.
 	You can keep this blank and the default value you provided with :Get() will be used instead.
 	</parameter>
-**--]]
+**]]--
 function DataStore:SetBackup(retries, value)
 	self.backupRetries = retries
 	self.backupValue = value
@@ -238,7 +238,7 @@ end
 	<description>
 	Unmark the data store as a backup data store and tell :Get() and reset values to nil.
 	</description>
-**--]]
+**]]--
 function DataStore:ClearBackup()
 	self.backup = nil
 	self.haveValue = false
@@ -249,7 +249,7 @@ end
 	<returns>
 	Whether or not the data store is a backup data store and thus won't save during :Save() or call :AfterSave().
 	</returns>
-**--]]
+**]]--
 function DataStore:IsBackup()
 	return self.backup ~= nil --some people haven't learned if x then yet, and will do if x == false then.
 end
@@ -258,7 +258,7 @@ end
 	<description>
 	Saves the data to the data store. Called when a player leaves.
 	</description>
-**--]]
+**]]--
 function DataStore:Save()
 	local success, result = self:SaveAsync():await()
 
@@ -273,7 +273,7 @@ end
 	<description>
 	Asynchronously saves the data to the data store.
 	</description>
-**--]]
+**]]--
 function DataStore:SaveAsync()
 	return Promise.async(function(resolve, reject)
 		if not self.valueUpdated then
@@ -446,7 +446,7 @@ local combinedDataStoreInfo = {}
 	<parameter name = "...">
 	All the keys to combine under one table.
 	</parameter>
-**--]]
+**]]--
 function DataStore2.Combine(mainKey, ...)
 	for _, name in pairs({...}) do
 		combinedDataStoreInfo[name] = mainKey

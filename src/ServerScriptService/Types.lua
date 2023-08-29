@@ -22,6 +22,7 @@ export type PlayerModule = {
 	HasEnoughCoins : (self : PlayerModule, amount : number) -> boolean,
 	UpdateCoinsAmount : (self : PlayerModule, amount : number) -> nil,
 	SetCoinsAmount : (self : PlayerModule, amount : number) -> nil,
+	UpdateAutopostInterval : (self : PlayerModule) -> nil,
 	OnLeave : (self : PlayerModule) -> nil
 }
 
@@ -138,6 +139,19 @@ export type RebirthModule = {
     TryRebirth : (self : RebirthModule, followers : number, plr : Player) -> boolean,
     Rebirth : (self : RebirthModule, plr : Player) -> boolean,
     UpdateFollowersNeededToRebirth : () -> number
+}
+
+export type CaseModule = {
+    equippedCase : string,
+    speedBoost : number,
+    ownedCases : {[string] : boolean},
+    dataSent : boolean,
+    new : (plr : Player) -> CaseModule,
+    EquipCase : (self : CaseModule, p : Types.PlayerModule, color : string?) -> nil,
+    ApplySpeedBoost : (self : CaseModule, p : Types.PlayerModule) -> nil,
+    UpdatePhoneColor : (self : CaseModule, p : Types.PlayerModule) -> nil,
+    BuyCase : (self : CaseModule, color : string, followers : number) -> boolean,
+    GetOwnedCases : (self : CaseModule) -> savedCases
 }
 
 export type GamepassModule = {

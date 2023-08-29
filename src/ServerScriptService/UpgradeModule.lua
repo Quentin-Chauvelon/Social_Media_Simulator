@@ -23,7 +23,7 @@ local defaultUpgrades : {upgrade} = {
         id = 2,
         level = 1,
         maxLevel = 10,
-        baseValue = 3000,
+        baseValue = 0,
         upgradeValues = {0, 50, 100, 150, 200, 250, 300, 350, 400, 450},
         costs = {3, 8, 15, 25, 35, 45, 55, 70, 100, 150}
     },
@@ -81,6 +81,7 @@ UpgradeModule.__index = UpgradeModule
 function UpgradeModule.new(plr : Player) : UpgradeModule
     local upgradeModule : UpgradeModule = {}
 
+    -- DataStore2("upgrades", plr):Set(nil)
     upgradeModule.upgrades = DataStore2("upgrades", plr):Get(defaultUpgrades)
     upgradeModule.firstFire = true
     upgradeModule.followersMultiplier = 0
@@ -121,7 +122,7 @@ function UpgradeModule:ApplyUpgrade(p : Types.PlayerModule, upgrade : upgrade)
         end
 
     elseif upgrade.id == 2 then
-        p.postModule.autoPostInterval = upgrade.baseValue - upgrade.upgradeValues[upgrade.level]
+        p:UpdateAutopostInterval()
 
     elseif upgrade.id == 3 then
         self.followersMultiplier = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]

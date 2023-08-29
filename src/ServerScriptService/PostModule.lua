@@ -123,7 +123,7 @@ function PostModule.new(plr : Player)
 	
 	postModule.nextAutoPost = 0
 	postModule.nextClickPost = 0
-	postModule.autoPostInterval = postStats.autoPostInterval
+	postModule.autoPostInterval = defaultPostStats.autoPostInterval
 	postModule.clickPostInterval = postStats.clickPostInterval
 
 	postModule.dialog = {}
@@ -208,6 +208,7 @@ end
 	fires to the client to update the phone UI
 ]]--
 function PostModule:Post(p : Types.PlayerModule)
+	print(tick())
 	local plr : Player = p.player
 	local nextState : string = self.currentState
 

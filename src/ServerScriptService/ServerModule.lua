@@ -21,6 +21,7 @@ local ListCustomPostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("ListCust
 local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCustomPost")
 local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
+local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
 
 local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
 
@@ -58,7 +59,7 @@ end
 ]]--
 function ServerModule.onJoin(plr : Player)
 	local p : Player.PlayerModule = Player.new(plr)
-
+	
 	-- save the player module on the server module
 	players[plr.Name] = p
 
@@ -72,6 +73,9 @@ function ServerModule.onJoin(plr : Player)
 
 	-- generate the state machine
 	p.postModule:GenerateStateMachine()
+
+	-- equip the player's case
+	p.caseModule:EquipCase(p)
 
 	-- detect when player touches the upgrade post part
 	p.maid:GiveTask(
@@ -117,9 +121,9 @@ function ServerModule.onJoin(plr : Player)
 		-- fire the client to display the number of followers the player has
 		FollowersRE:FireClient(p.player, p.followers)
 
-		if p.followers >= p.nextFollowerGoal then
-			PlayerReachedFollowerGoal(p)
-		end
+		-- if p.followers >= p.nextFollowerGoal then
+		-- 	PlayerReachedFollowerGoal(p)
+		-- end
 
 		p.plotModule.followerGoal.Size = UDim2.new(0.7,0, ((p.followers / p.nextFollowerGoal) * 0.97), 0) -- multiply by 0.97 because we don't want the frame to be 1 in y scale, we want it to go up to 0.97
 	end)
@@ -278,6 +282,8 @@ end
 
 --[[
 	Fires when the player tries to rebirth
+
+	@param plr : Player, the player who clicked the rebirth button
 ]]--
 RebirthRE.OnServerEvent:Connect(function(plr : Player)
 	local p : Player.PlayerModule = players[plr.Name]
@@ -295,6 +301,32 @@ RebirthRE.OnServerEvent:Connect(function(plr : Player)
 		end
 	end
 end)
+
+
+--[[
+	Fires when the player wants to buy a case
+
+	@param plr : Player, the player who wants to buy a case
+	@param color : string?, the color of the case the player wants to buy, or nil if it's the first time firing the event
+]]--
+CaseRF.OnServerInvoke = function(plr : Player, color : string?)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+
+		-- if it's the first time the player fires the event, return the list of owned cases
+		if not p.caseModule.dataSent and not color then
+			p.caseModule.dataSent = true
+			return p.caseModule:GetOwnedCases()
+		end
+
+		-- the player tries to buy the case (or equip it if he already owns it)
+		if color then
+			return p.caseModule:BuyCase(color, p)
+		end
+
+		return false
+	end
+end
 
 
 --[[
