@@ -82,7 +82,7 @@ local caseDetails : {[string] : caseDetail} = {
         enabled = true,
         speedBoost = 450,
         price = 50_000,
-        color = Color3.fromRGB(255, 255, 255),
+        color = Color3.fromRGB(151, 103, 247),
         gradient = ColorSequence.new{
             ColorSequenceKeypoint.new(0, Color3.fromRGB(232, 28, 255)),
             ColorSequenceKeypoint.new(1, Color3.fromRGB(64, 201, 255))
@@ -93,7 +93,7 @@ local caseDetails : {[string] : caseDetail} = {
         enabled = true,
         speedBoost = 500,
         price = 100_000,
-        color = Color3.fromRGB(255, 255, 255),
+        color = Color3.fromRGB(45, 239, 188),
         gradient = ColorSequence.new{
             ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 135)),
             ColorSequenceKeypoint.new(1, Color3.fromRGB(96, 239, 255))
@@ -104,7 +104,7 @@ local caseDetails : {[string] : caseDetail} = {
         enabled = true,
         speedBoost = 550,
         price = 250_000,
-        color = Color3.fromRGB(255, 255, 255),
+        color = Color3.fromRGB(216, 218, 139),
         gradient = ColorSequence.new{
             ColorSequenceKeypoint.new(0, Color3.fromRGB(178, 249, 162)),
             ColorSequenceKeypoint.new(0.389, Color3.fromRGB(208, 233, 150)),
