@@ -15,7 +15,7 @@ local allRewards : Frame = playTimeRewardsUI:WaitForChild("AllRewards")
 local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
 local collectedReward : Frame = playTimeRewardsUI:WaitForChild("CollectedReward")
 
-local defaultRewards : {number} = {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}
+local defaultRewards : {number} = {60, 120, 300, 600, 900, 1_200, 1_800, 2_700, 3_600, 5_400, 7_200, 10_800}
 
 
 export type PlayTimeRewards = {
@@ -98,16 +98,16 @@ function PlayTimeRewards:NextRewardClick()
             self:StartTimer()
 
             if reward.reward == "followers" then
-                collectedReward.Reward.Image = ""
+                collectedReward.Reward.Image = "http://www.roblox.com/asset/?id=14109181705"
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(209, 44, 255)
 
             elseif reward.reward == "coins" then
-                collectedReward.Reward.Image = ""
+                collectedReward.Reward.Image = "http://www.roblox.com/asset/?id=14109221821"
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(255, 251, 36)
             end
 
             collectedReward.Reward.TextLabel.Text = tostring(reward.value)
-            
+
             -- since self.nextReward is equal to the next reward and we want the previous one, we take it from the table
             local timePlayed : number = 0
             for i,v : number in pairs(defaultRewards) do
@@ -143,7 +143,7 @@ function PlayTimeRewards:NextRewardClick()
             local backgroundTween : Tween = TweenService:Create(
                 collectedReward.Background,
                 TweenInfo.new(
-                    8,
+                    20,
                     Enum.EasingStyle.Linear,
                     Enum.EasingDirection.InOut,
                     math.huge
@@ -231,7 +231,15 @@ end
 ]]--
 function PlayTimeRewards:StartTimer()
     -- if the player already got all the rewards, don't create the promise
-    if self.timePlayedToday > 18_000 then return end
+    if self.timePlayedToday > 10_8000 then return end
+
+    -- make the tick image visible and hide the timer in the all rewards frame, run this before updating self.nextReward
+    for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewards.Background:GetChildren()) do
+        if reward:IsA("Frame") and reward:GetAttribute("TimePlayed") <= self.timePlayedToday then
+            reward.Timer.Visible = false
+            reward.Collected.Visible = true
+        end
+    end
 
     self.promise = Promise.new(function(resolve)
 
@@ -249,7 +257,7 @@ function PlayTimeRewards:StartTimer()
                 end
                 
                 -- if the player got all the rewards, stop the promise
-                if self.timePlayedToday > 18_000 then
+                if self.timePlayedToday > 10_800 then
                     resolve()
                 end
             end
@@ -297,11 +305,16 @@ function PlayTimeRewards:SyncTimer(timePlayedToday : number)
 
                 rightShakeTween:Play()
                 rightShakeTween.Completed:Wait()
-
+                
                 leftShakeTween:Play()
                 leftShakeTween.Completed:Wait()
 
-                task.wait(5)
+                rightShakeTween:Play()
+                rightShakeTween.Completed:Wait()
+
+                nextRewardChest.Rotation = 0
+
+                task.wait(3)
             until not self.isNextRewardReady
 
             resolve()

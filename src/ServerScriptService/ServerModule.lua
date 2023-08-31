@@ -217,7 +217,7 @@ end
 CollectPlayTimeRewardRF.OnServerInvoke = function (plr : Player)
 	local p : Player.PlayerModule = players[plr.Name]
 	if p then
-		return p.playTimeRewards:CollectReward()
+		return p.playTimeRewards:CollectReward(p)
 	end
 end
 

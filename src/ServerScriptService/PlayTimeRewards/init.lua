@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local TableUtilities = require(ReplicatedStorage:WaitForChild("TableUtilities"))
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
+local Types = require(ServerScriptService:WaitForChild("Types"))
 local Rewards = require(script:WaitForChild("Rewards"))
 
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
@@ -15,7 +16,7 @@ local defaultPlayTimeRewardsStats = {
 	timePlayedToday = 0
 }
 
-local defaultRewards : {number} = {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}
+local defaultRewards : {number} = {60, 120, 300, 600, 900, 1_200, 1_800, 2_700, 3_600, 5_400, 7_200, 10_800}
 
 
 export type PlayTimeRewards = {
@@ -29,7 +30,7 @@ export type PlayTimeRewards = {
 	GetDataToSave : (self : PlayTimeRewards) -> PlayTimeRewardsStats,
 	LoadData : (self : PlayTimeRewards) -> nil,
 	StartTimer : (self : PlayTimeRewards) -> nil,
-	CollectReward : (self : PlayTimeRewards) -> PlayTimeReward,
+	CollectReward : (self : PlayTimeRewards, p : Types.PlayerModule) -> PlayTimeReward,
 	OnLeave : (self : PlayTimeRewards) -> nil
 }
 
@@ -51,7 +52,8 @@ PlayTimeRewards.__index = PlayTimeRewards
 function PlayTimeRewards.new(plr : Player)
 	local playTimeRewards = {}
 
-	DataStore2("playTimeRewards", plr):Set({lastDayPlayed = os.time(), timePlayedToday = 105})
+	-- DataStore2("playTimeRewards", plr):Set({lastDayPlayed = os.time(), timePlayedToday = 105})
+	-- DataStore2("playTimeRewards", plr):Set(nil)
 	local playTimeRewardsStats = DataStore2("playTimeRewards", plr):Get(defaultPlayTimeRewardsStats)
 
 	playTimeRewards.lastDayPlayed = playTimeRewardsStats.lastDayPlayed
@@ -136,7 +138,7 @@ function PlayTimeRewards:StartTimer()
 				DataStore2("playTimeRewards", self.plr):Set(self:GetDataToSave())
 			end
 
-			task.wait(15)
+			task.wait(1)
 			self.timePlayedToday += 15
 			
 			DataStore2("playTimeRewards", self.plr):Set(self:GetDataToSave())
@@ -167,11 +169,24 @@ end
 --[[
 	Returns a random reward based on the tier of reward the player is at
 
+	@param p : PlayerModule, the object representing the player
 	@return the reward
 ]]--
-function PlayTimeRewards:CollectReward()
+function PlayTimeRewards:CollectReward(p : Types.PlayerModule)
 	if self.rewardToCollect ~= 0 then
-		local reward = Rewards.GetReward(self.rewardToCollect)
+		-- get the reward based on the time the player has played
+		local reward : Rewards.Reward = Rewards.GetReward(self.rewardToCollect)
+
+		-- apply the reward
+		if reward.reward == "followers" then
+			p:UpdateFollowersAmount(reward.value)
+		elseif reward.reward == "coins" then
+			p:UpdateCoinsAmount(reward.value)
+		elseif reward.reward == "pet" then
+			print("pet")
+		elseif reward.reward == "potion" then
+			print("potion", reward.value)
+		end
 
 		self.rewardToCollect = 0
 

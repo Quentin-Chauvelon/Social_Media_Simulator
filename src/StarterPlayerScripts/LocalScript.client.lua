@@ -72,23 +72,42 @@ rebirthModule:UpdateFollowersNeededToRebirth()
 
 local caseModule : CaseModule.CaseModule = CaseModule.new(Utility)
 
+-- store all playtime rewards UIStroke in a table to change them easily later
+local playtimeRewardsGuiUIStroke : {UIStroke} = {}
+for _,v : Instance in ipairs(playTimeRewardsUI:GetDescendants()) do
+	if v:IsA("UIStroke") then
+		table.insert(playtimeRewardsGuiUIStroke, v)
+	end
+end
 
--- resize the next reward timer (at the top of the screen) when the screen size changes
+-- resize playtime rewards
 Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+	-- resize the next reward timer (at the top of the screen) when the screen size changes
 	nextRewardTimer.TextSize = nextRewardChest.AbsoluteSize.Y / 3
 	nextRewardTimer.Position = UDim2.new(0, 0, 1, nextRewardTimer.AbsoluteSize.Y / 2)
 
-	nextRewardTimer.UIStroke.Thickness = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
-end)
-
-
--- resize the all rewards uigridlayout cell padding (to evenly space out all the rewards)
-Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+	-- resize the all rewards uigridlayout cell padding (to evenly space out all the rewards)
 	allRewardsUiGridLayout.CellPadding = UDim2.new(
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
 	)
+	
+	-- resize all the rewards in the all rewards frame
+	for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewardsBackground:GetChildren()) do
+		if reward:IsA("Frame") then
+			reward.Timer.TextSize = reward.AbsoluteSize.Y / 3
+			reward.Timer.Position = UDim2.new(0, 0, 1, reward.Timer.AbsoluteSize.Y / 2)
+		end
+	end
+
+	-- change the thickness of all the UIStrokes
+	local thickness : number = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 5)
+	for _,uiStroke : UIStroke in pairs(playtimeRewardsGuiUIStroke) do
+		uiStroke.Thickness = thickness
+	end
 end)
+
+
 
 
 -- resize the menu side buttons UI stroke
@@ -102,19 +121,6 @@ Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 		end
 	end
 end)
-
-
--- resize all the rewards in the all rewards frame
-for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewardsBackground:GetChildren()) do
-	if reward:IsA("Frame") then
-		Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
-			reward.Timer.TextSize = reward.Chest.AbsoluteSize.Y / 3
-			reward.Timer.Position = UDim2.new(0, 0, 1, reward.Timer.AbsoluteSize.Y / 2)
-
-			reward.Timer.UIStroke.Thickness = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
-		end)
-	end
-end
 
 
 --[[

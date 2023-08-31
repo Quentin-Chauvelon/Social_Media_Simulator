@@ -30,11 +30,12 @@ end
 local function test1()
     DataStore2("playTimeRewards", plr):Set(nil)
     local playTimeRewards = PlayTimeRewards.new(plr)
+    playTimeRewards:LoadData()
     playTimeRewards:StartTimer()
 
 	assert(playTimeRewards.lastDayPlayed == os.time(), "lastDayPlayed should be equal to " .. os.time() .. " but was equal to " .. playTimeRewards.lastDayPlayed)
 	assert(playTimeRewards.timePlayedToday == 0, "timePlayedToday should be equal to 0 but was equal to " .. playTimeRewards.timePlayedToday)
-    assert(TableEqual(playTimeRewards.nextRewards, {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
+    assert(TableEqual(playTimeRewards.nextRewards, {60, 120, 300, 600, 900, 1_200, 1_800, 2_700, 3_600, 5_400, 7_200, 10_800}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
 end
 
 
@@ -42,11 +43,12 @@ local function test2()
     DataStore2("playTimeRewards", plr):Set(nil)
 	local playTimeRewards = PlayTimeRewards.new(plr)
     playTimeRewards.timePlayedToday = 100
+    playTimeRewards:LoadData()
     playTimeRewards:StartTimer()
 
 	assert(playTimeRewards.lastDayPlayed == os.time(), "lastDayPlayed should be equal to " .. os.time() .. " but was equal to " .. playTimeRewards.lastDayPlayed)
 	assert(playTimeRewards.timePlayedToday == 0, "timePlayedToday should be equal to 0 but was equal to " .. playTimeRewards.timePlayedToday)
-	assert(TableEqual(playTimeRewards.nextRewards, {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
+	assert(TableEqual(playTimeRewards.nextRewards, {60, 120, 300, 600, 900, 1_200, 1_800, 2_700, 3_600, 5_400, 7_200, 10_800}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
 end
 
 
@@ -55,11 +57,14 @@ local function test3()
 	local playTimeRewards = PlayTimeRewards.new(plr)
     playTimeRewards.lastDayPlayed = os.time()
     playTimeRewards.timePlayedToday = 1000
+    playTimeRewards:LoadData()
     playTimeRewards:StartTimer()
 
 	assert(playTimeRewards.lastDayPlayed == os.time(), "lastDayPlayed should be equal to " .. os.time() .. " but was equal to " .. playTimeRewards.lastDayPlayed)
 	assert(playTimeRewards.timePlayedToday == 1000, "timePlayedToday should be equal to 1000 but was equal to " .. playTimeRewards.timePlayedToday)
-	assert(TableEqual(playTimeRewards.nextRewards, {1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
+	
+    print(playTimeRewards.nextRewards)
+    assert(TableEqual(playTimeRewards.nextRewards, {1_200, 1_800, 2_700, 3_600, 5_400, 7_200, 10_800}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
 end
 
 
@@ -68,6 +73,7 @@ local function test4()
 	local playTimeRewards = PlayTimeRewards.new(plr)
     playTimeRewards.lastDayPlayed = os.time()
     playTimeRewards.timePlayedToday = 100_000
+    playTimeRewards:LoadData()
     playTimeRewards:StartTimer()
 
 	assert(playTimeRewards.lastDayPlayed == os.time(), "lastDayPlayed should be equal to " .. os.time() .. " but was equal to " .. playTimeRewards.lastDayPlayed)
@@ -81,13 +87,13 @@ local function test5()
 	local playTimeRewards = PlayTimeRewards.new(plr)
     playTimeRewards.lastDayPlayed = 1
     playTimeRewards.timePlayedToday = 500
-    print(playTimeRewards)
+    playTimeRewards:LoadData()
     playTimeRewards:StartTimer()
 
 	assert(playTimeRewards.lastDayPlayed == os.time(), "lastDayPlayed should be equal to " .. os.time() .. " but was equal to " .. playTimeRewards.lastDayPlayed)
 	assert(playTimeRewards.timePlayedToday == 0, "timePlayedToday should be equal to 0 but was equal to " .. playTimeRewards.timePlayedToday)
     print(playTimeRewards.nextRewards)
-	assert(TableEqual(playTimeRewards.nextRewards, {120, 300, 600, 900, 1_500, 2_400, 3_600, 5_400, 7_200, 10_800, 14_400, 18_000}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
+	assert(TableEqual(playTimeRewards.nextRewards, {60, 120, 300, 600, 900, 1_200, 1_800, 2_700, 3_600, 5_400, 7_200, 10_800}), "nextRewards should be equal to ... but was equal to " .. tostring(playTimeRewards.nextRewards))
 end
 
 

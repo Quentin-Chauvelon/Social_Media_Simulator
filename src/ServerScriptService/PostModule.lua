@@ -208,7 +208,6 @@ end
 	fires to the client to update the phone UI
 ]]--
 function PostModule:Post(p : Types.PlayerModule)
-	print(tick())
 	local plr : Player = p.player
 	local nextState : string = self.currentState
 

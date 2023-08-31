@@ -117,7 +117,7 @@ export type PlayTimeRewards = {
 	GetDataToSave : (self : PlayTimeRewards) -> PlayTimeRewardsStats,
 	LoadData : (self : PlayTimeRewards) -> nil,
 	StartTimer : (self : PlayTimeRewards) -> nil,
-	CollectReward : (self : PlayTimeRewards) -> PlayTimeReward,
+	CollectReward : (self : PlayTimeRewards, p : PlayerModule) -> PlayTimeReward,
 	OnLeave : (self : PlayTimeRewards) -> nil
 }
 
@@ -128,7 +128,7 @@ type PlayTimeRewardsStats = {
 
 type PlayTimeReward = {
 	reward : string,
-	value : number
+	value : number | string | potion
 }
 
 export type RebirthModule = {
@@ -147,11 +147,27 @@ export type CaseModule = {
     ownedCases : {[string] : boolean},
     dataSent : boolean,
     new : (plr : Player) -> CaseModule,
-    EquipCase : (self : CaseModule, p : Types.PlayerModule, color : string?) -> nil,
-    ApplySpeedBoost : (self : CaseModule, p : Types.PlayerModule) -> nil,
-    UpdatePhoneColor : (self : CaseModule, p : Types.PlayerModule) -> nil,
+    EquipCase : (self : CaseModule, p : PlayerModule, color : string?) -> nil,
+    ApplySpeedBoost : (self : CaseModule, p : PlayerModule) -> nil,
+    UpdatePhoneColor : (self : CaseModule, p : PlayerModule) -> nil,
     BuyCase : (self : CaseModule, color : string, followers : number) -> boolean,
     GetOwnedCases : (self : CaseModule) -> savedCases
+}
+
+type savedCases = {
+    equippedCase : string,
+    ownedCases : {
+        [string] : boolean
+    }
+}
+
+type caseDetail = {
+    enabled : boolean, -- false if players aren't suppose to buy it
+    speedBoost : number,
+    price : number,
+    color : Color3,
+    gradient : ColorSequence?,
+    imageUrl : string
 }
 
 export type GamepassModule = {
@@ -212,6 +228,12 @@ export type Promise = {
 	retryWithDelay : (any) -> Promise,
 	fromEvent : (any) -> Promise,
 	onUnhandledRejection : (any) -> (() -> ()),
+}
+
+export type potion = {
+	type : string,
+	value : number,
+	duration : number
 }
 
 return nil
