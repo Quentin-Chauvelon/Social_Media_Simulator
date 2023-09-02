@@ -3,7 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local Types = require(ServerScriptService:WaitForChild("Types"))
 
-DataStore2.Combine("SMS", "rebirth")
+DataStore2.Combine("SMS", "cases")
 
 local caseDetails : {[string] : caseDetail} = {
     Grey = {
