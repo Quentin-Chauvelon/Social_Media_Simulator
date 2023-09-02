@@ -5,6 +5,8 @@ local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local Types = require(ServerScriptService:WaitForChild("Types"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
+local DisplayPotionsRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayPotions")
+
 DataStore2.Combine("SMS", "potions")
 
 
@@ -36,7 +38,7 @@ export type potionTypes = {
     Followers : number,
     Coins : number,
     AutoPostSpeed : number,
-    Both : number
+    FollowersCoins : number
 }
 
 
@@ -52,7 +54,7 @@ function PotionModule.new(plr : Player)
         Followers = 0,
         Coins = 1,
         AutoPostSpeed = 2,
-        Both = 3
+        FollowersCoins = 3
     }
     potionModule.plr = plr
 
@@ -84,12 +86,18 @@ function PotionModule:UsePotion(potion : potion, p : Types.PlayerModule)
     -- apply the effect of the potion
     self:ApplyPotionsBoosts(potion.type, p)
 
+    -- fire the client to update the display of all the potions
+    DisplayPotionsRE:FireClient(self.plr, self.activePotions)
+
     -- if there were no active potions, we start the promise to decrease the time left for all the potions
     if #self.activePotions == 1 and not self.potionsTimeLeft then
         self.potionsTimeLeft = Promise.new(function(resolve)
 
             -- stop the promise when the are no more active potions
             while #self.activePotions ~= 0 do
+                task.wait(60)
+                print("loop")
+
                 -- table of the type of potions that have expired since the last loop iteration
                 local expiredPotions : {number} = {}
 
@@ -118,13 +126,16 @@ function PotionModule:UsePotion(potion : potion, p : Types.PlayerModule)
                 
                 -- save the active potions
                 DataStore2("potions", self.plr):Set(self.activePotions)
-
-                task.wait(2)
-                print("loop")
+                
+                -- fire the client to update the display of all the potions
+                DisplayPotionsRE:FireClient(self.plr, self.activePotions)
             end
-
+            
             resolve()
             self.potionsTimeLeft = nil
+
+            -- fire the client with an empty table to remove all potions
+            DisplayPotionsRE:FireClient(self.plr, {})
         end)
     end
 end
@@ -190,13 +201,13 @@ function PotionModule:ApplyPotionsBoosts(type : number, p : Types.PlayerModule)
         end
     end
 
-    if type == self.potionTypes.Followers or type == self.potionTypes.Both then
+    if type == self.potionTypes.Followers or type == self.potionTypes.FollowersCoins then
         -- remove one to the boost, otherwise it's one too high
         self.followersMultiplier = boost >= 1 and boost - 1 or 0
 
         p:UpdateFollowersMultiplier()
 
-    elseif type == self.potionTypes.Coins or type == self.potionTypes.Both then
+    elseif type == self.potionTypes.Coins or type == self.potionTypes.FollowersCoins then
         -- remove one to the boost, otherwise it's one too high
         self.coinsMultiplier = boost >= 1 and boost - 1 or 0
 

@@ -13,6 +13,7 @@ local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
+local DisplayPotionsRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayPotions")
 
 local lplr = Players.LocalPlayer
 
@@ -32,6 +33,7 @@ local CustomPost = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Cust
 local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("UpgradeModule"))
 local RebirthModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("RebirthModule"))
 local CaseModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CaseModule"))
+local PotionModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PotionModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
@@ -70,7 +72,9 @@ upgradeModule:LoadUpgrades()
 local rebirthModule : RebirthModule.RebirthModule = RebirthModule.new(Utility)
 rebirthModule:UpdateFollowersNeededToRebirth()
 
-local caseModule : CaseModule.CaseModule = CaseModule.new(Utility)
+CaseModule.new(Utility)
+
+local potionModule : PotionModule.PotionModule = PotionModule.new(Utility)
 
 -- store all playtime rewards UIStroke in a table to change them easily later
 local playtimeRewardsGuiUIStroke : {UIStroke} = {}
@@ -418,4 +422,26 @@ RebirthRE.OnClientEvent:Connect(function()
 
 	-- update the gui to update the values of the upgrades and progress
 	rebirthModule:UpdateGui()
+end)
+
+
+--[[
+	Displays all the active potions for the player
+]]
+DisplayPotionsRE.OnClientEvent:Connect(function(activePotions : {PotionModule.potion})
+	-- variable to know if they were potions active last time the event fired
+	-- used to know if we should start the promise that is going to count down and update the time left for all potions
+	local noActivePotionsBefore : boolean = #potionModule.activePotions == 0 and #activePotions ~= 0
+
+	-- multiply the time left by 60 to turn it into seconds so that the timer can be more accurate
+	for i,_ in pairs(activePotions) do
+		activePotions[i].timeLeft *= 60
+	end
+
+	potionModule.activePotions = activePotions
+    potionModule:DisplayActivePotions()
+
+	if noActivePotionsBefore then
+		potionModule:StartPotionsTimer()
+	end
 end)
