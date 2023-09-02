@@ -11,6 +11,8 @@ export type PlayerModule = {
 	customPosts : CustomPost,
 	playTimeRewards : PlayTimeRewards,
 	rebirthModule : RebirthModule,
+	caseModule : CaseModule,
+	potionModule : PotionModule,
 	gamepassModule : GamepassModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -230,10 +232,35 @@ export type Promise = {
 	onUnhandledRejection : (any) -> (() -> ()),
 }
 
+
+export type PotionModule = {
+    potionTypes : potionTypes,
+    plr : Player,
+    activePotions : {potion},
+    potionsTimeLeft : Promise,
+    followersMultiplier : number,
+    coinsMultiplier : number,
+    speedBoost : number,
+    potionTypes : number,
+    new : () -> PotionModule,
+    UsePotion : (self : PotionModule, potion : potion, p : PlayerModule) -> nil,
+    UseAllActivePotions : (self : PotionModule) -> nil,
+    CreatePotion : (self : PotionModule, type : number, value : number, duration : number) -> potion,
+    CreateAndUsePotion : (self : PotionModule, type : number, value : number, duration : number, p : PlayerModule) -> nil,
+    ApplyPotionsBoosts : (self : PotionModule, type : number, p : PlayerModule) -> nil
+}
+
 export type potion = {
-	type : string,
-	value : number,
-	duration : number
+    type : number,
+    value : number,
+    duration : number,
+    timeLeft : number
+}
+
+type potionTypes = {
+    Followers : number,
+    Coins : number,
+    AutoPostSpeed : number
 }
 
 return nil

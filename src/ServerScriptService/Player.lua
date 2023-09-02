@@ -10,6 +10,7 @@ local UpgradeModule = require(ServerScriptService:WaitForChild("UpgradeModule"))
 local RebirthModule = require(ServerScriptService:WaitForChild("RebirthModule"))
 local CaseModule = require(ServerScriptService:WaitForChild("CaseModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
+local PotionModule = require(ServerScriptService:WaitForChild("PotionModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
 DataStore2.Combine("SMS", "followers", "coins")
@@ -29,6 +30,7 @@ export type PlayerModule = {
 	playTimeRewards : PlayTimeRewards.PlayTimeRewards,
 	rebirthModule : RebirthModule.RebirthModule,
 	caseModule : CaseModule.CaseModule,
+	potionModule : PotionModule.PotionModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -91,6 +93,9 @@ function Player.new(plr : Player)
 	p.rebirthModule:UpdateFollowersNeededToRebirth()
 
 	p.caseModule = CaseModule.new(plr)
+	
+	p.potionModule = PotionModule.new(plr)
+	p.potionModule:UseAllActivePotions()
 
 	p.gamepassModule = GamepassModule.new()
 
@@ -130,10 +135,12 @@ function Player:UpdateFollowersMultiplier()
 		1 +
 		self.upgradeModule.followersMultiplier +
 		self.rebirthModule.followersMultiplier +
+		self.potionModule.followersMultiplier +
 		self.gamepassModule:GetFollowersMultiplier()
 
 	-- TODO: DELETE THE FOLLOWING LINE
-	self.followersMultiplier *= 100
+	-- self.followersMultiplier *= 100
+	print("followers multiplier", self.followersMultiplier)
 end
 
 
@@ -144,7 +151,10 @@ function Player:UpdateCoinsMultiplier()
 	self.coinsMultiplier =
 		1 +
 		self.upgradeModule.coinsMultiplier +
+		self.potionModule.coinsMultiplier +
 		self.gamepassModule:GetCoinsMultiplier()
+	
+	print("coins multiplier", self.coinsMultiplier)
 end
 
 
@@ -227,8 +237,9 @@ function Player:UpdateAutopostInterval()
 	self.postModule.autoPostInterval =
 		3_000 -
 		(upgrade.baseValue + upgrade.upgradeValues[upgrade.level]) -
-		(self.caseModule.speedBoost)
-	print("new autopost invertal: ", self.postModule.autoPostInterval, "(", (upgrade.baseValue + upgrade.upgradeValues[upgrade.level]), ", ", self.caseModule.speedBoost, ")")
+		(self.caseModule.speedBoost) -
+		(self.potionModule.speedBoost)
+	print("new autopost invertal: ", self.postModule.autoPostInterval, "(", (upgrade.baseValue + upgrade.upgradeValues[upgrade.level]), ", ", self.caseModule.speedBoost, ", ", self.potionModule.speedBoost, ")")
 end
 
 
