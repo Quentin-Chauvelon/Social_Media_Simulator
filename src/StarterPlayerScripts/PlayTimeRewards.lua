@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+local PotionModule = require(script.Parent:WaitForChild("PotionModule"))
 
 local CollectPlayTimeRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("CollectPlayTimeReward")
 
@@ -34,7 +35,7 @@ export type PlayTimeRewards = {
 
 type PlayTimeReward = {
     reward : string,
-    value : number
+    value : number | string | PotionModule.potion
 }
 
 
@@ -68,17 +69,21 @@ end
     @return string, the formatted time
 ]]--
 local function FormatTimeForTimer(timeUntilNextReward : number) : string
-    local min : number | string = math.floor(timeUntilNextReward / 60)
-    local sec : number | string = timeUntilNextReward % 60
+    if timeUntilNextReward and timeUntilNextReward ~= math.huge then
+        local min : number | string = math.floor(timeUntilNextReward / 60)
+        local sec : number | string = timeUntilNextReward % 60
 
-    if min < 0 or sec < 0 then
-        return "00:00"
+        if min < 0 or sec < 0 then
+            return "00:00"
+        end
+
+        min = min < 10 and "0" .. tostring(min) or tostring(min)
+        sec = sec < 10 and "0" .. tostring(sec) or tostring(sec)
+
+        return min .. ":" .. sec
     end
 
-    min = min < 10 and "0" .. tostring(min) or tostring(min)
-    sec = sec < 10 and "0" .. tostring(sec) or tostring(sec)
-
-    return min .. ":" .. sec
+    return ""
 end
 
 
@@ -104,9 +109,23 @@ function PlayTimeRewards:NextRewardClick()
             elseif reward.reward == "coins" then
                 collectedReward.Reward.Image = "http://www.roblox.com/asset/?id=14109221821"
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(255, 251, 36)
+
+            elseif reward.reward == "potion" then
+                collectedReward.Reward.Image = PotionModule:GetPotionImage(reward.value)
+                collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(92, 198, 255)
             end
 
-            collectedReward.Reward.TextLabel.Text = tostring(reward.value)
+            if reward.reward ~= "potion" then
+                collectedReward.Reward.TextLabel.Text = tostring(reward.value)
+            else
+                if reward.value.type == 0 then
+                    collectedReward.Reward.TextLabel.Text = "Followers x" .. tostring(reward.value.value)
+                elseif reward.value.type == 1 then
+                    collectedReward.Reward.TextLabel.Text = "Coins x" .. tostring(reward.value.value)
+                elseif reward.value.type == 3 then
+                    collectedReward.Reward.TextLabel.Text = "Followers and coins x" .. tostring(reward.value.value)
+                end
+            end
 
             -- since self.nextReward is equal to the next reward and we want the previous one, we take it from the table
             local timePlayed : number = 0
@@ -231,7 +250,10 @@ end
 ]]--
 function PlayTimeRewards:StartTimer()
     -- if the player already got all the rewards, don't create the promise
-    if self.timePlayedToday > 10_8000 then return end
+    if self.timePlayedToday > 10_8000 then
+        self.nextRewardTimer.Visible = false
+        return 
+    end
 
     -- make the tick image visible and hide the timer in the all rewards frame, run this before updating self.nextReward
     for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewards.Background:GetChildren()) do

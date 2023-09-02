@@ -260,7 +260,8 @@ export type potion = {
 type potionTypes = {
     Followers : number,
     Coins : number,
-    AutoPostSpeed : number
+    AutoPostSpeed : number,
+    FollowersCoins : number
 }
 
 return nil

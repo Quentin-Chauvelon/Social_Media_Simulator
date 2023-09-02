@@ -183,7 +183,6 @@ function PotionModule:StartPotionsTimer()
 
             resolve()
             self.timerPromise = nil
-            print("updated timer")
         end)
     end
 end

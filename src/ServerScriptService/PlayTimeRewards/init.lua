@@ -54,8 +54,7 @@ function PlayTimeRewards.new(plr : Player)
 
 	-- DataStore2("playTimeRewards", plr):Set({lastDayPlayed = os.time(), timePlayedToday = 105})
 	-- DataStore2("playTimeRewards", plr):Set(nil)
-	local playTimeRewardsStats = DataStore2("playTimeRewards", plr):Get(defaultPlayTimeRewardsStats)
-
+	local playTimeRewardsStats : PlayTimeRewardsStats = DataStore2("playTimeRewards", plr):Get(defaultPlayTimeRewardsStats)
 	playTimeRewards.lastDayPlayed = playTimeRewardsStats.lastDayPlayed
 	playTimeRewards.timePlayedToday = playTimeRewardsStats.timePlayedToday
 
@@ -97,6 +96,7 @@ function PlayTimeRewards:LoadData()
 	end)
 
 	-- if the player didn't already play today, we reset the time played
+	print(self.lastDayPlayed, os.date("%j/%y", self.lastDayPlayed), os.date("%j/%y"))
 	if os.date("%j/%y", self.lastDayPlayed) ~= os.date("%j/%y") then
 		self.lastDayPlayed = os.time()
 		self.timePlayedToday = 0
@@ -138,7 +138,7 @@ function PlayTimeRewards:StartTimer()
 				DataStore2("playTimeRewards", self.plr):Set(self:GetDataToSave())
 			end
 
-			task.wait(1)
+			task.wait(15)
 			self.timePlayedToday += 15
 			
 			DataStore2("playTimeRewards", self.plr):Set(self:GetDataToSave())
@@ -167,7 +167,7 @@ end
 
 
 --[[
-	Returns a random reward based on the tier of reward the player is at
+	Returns the reward the player should get
 
 	@param p : PlayerModule, the object representing the player
 	@return the reward
@@ -185,7 +185,13 @@ function PlayTimeRewards:CollectReward(p : Types.PlayerModule)
 		elseif reward.reward == "pet" then
 			print("pet")
 		elseif reward.reward == "potion" then
-			p.potionModule:CreateAndUsePotion(reward.value.type, reward.value.value, reward.value.duration, p)
+			-- if the potion is a followers and coins potion, we split into two potions
+			if reward.value.type == p.potionModule.potionTypes.FollowersCoins then
+				p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Followers, reward.value.value, reward.value.duration, p)
+				p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Coins, reward.value.value, reward.value.duration, p)
+			else
+				p.potionModule:CreateAndUsePotion(reward.value.type, reward.value.value, reward.value.duration, p)
+			end
 		end
 
 		self.rewardToCollect = 0
