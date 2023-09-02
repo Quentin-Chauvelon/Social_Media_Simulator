@@ -95,7 +95,6 @@ function Player.new(plr : Player)
 	p.caseModule = CaseModule.new(plr)
 	
 	p.potionModule = PotionModule.new(plr)
-	p.potionModule:UseAllActivePotions()
 
 	p.gamepassModule = GamepassModule.new()
 

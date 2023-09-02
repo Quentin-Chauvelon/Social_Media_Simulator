@@ -21,7 +21,7 @@ export type PotionModule = {
     potionTypes : number,
     new : () -> PotionModule,
     UsePotion : (self : PotionModule, potion : potion, p : Types.PlayerModule) -> nil,
-    UseAllActivePotions : (self : PotionModule) -> nil,
+    UseAllActivePotions : (self : PotionModule, p : Types.PlayerModule) -> nil,
     CreatePotion : (self : PotionModule, type : number, value : number, duration : number) -> potion,
     CreateAndUsePotion : (self : PotionModule, type : number, value : number, duration : number, p : Types.PlayerModule) -> nil,
     ApplyPotionsBoosts : (self : PotionModule, type : number, p : Types.PlayerModule) -> nil
@@ -58,7 +58,7 @@ function PotionModule.new(plr : Player)
     }
     potionModule.plr = plr
 
-    DataStore2("potions", plr):Set(nil)
+    -- DataStore2("potions", plr):Set(nil)
     potionModule.activePotions = DataStore2("potions", plr):Get({})
     potionModule.potionsTimeLeft = nil
     
@@ -96,7 +96,6 @@ function PotionModule:UsePotion(potion : potion, p : Types.PlayerModule)
             -- stop the promise when the are no more active potions
             while #self.activePotions ~= 0 do
                 task.wait(60)
-                print("loop")
 
                 -- table of the type of potions that have expired since the last loop iteration
                 local expiredPotions : {number} = {}
@@ -109,8 +108,6 @@ function PotionModule:UsePotion(potion : potion, p : Types.PlayerModule)
                     if self.activePotions[i].timeLeft <= 0 then
                         table.insert(expiredPotions, i)
                     end
-                    
-                    print("potion: ", potion.type, " x", potion.value, ", time left: ", potion.timeLeft)
                 end
 
                 -- remove the expired potions from the table and re-apply the boosts
@@ -144,9 +141,17 @@ end
 --[[
     Applies the effects for all the active potions
 ]]--
-function PotionModule:UseAllActivePotions()
+function PotionModule:UseAllActivePotions(p : Types.PlayerModule)
+    -- make a copy of the table to empty the self.activePotions table, because self:UsePotion adds the potion to the table.
+    -- So if we don't remove the potions prior to calling UsePotion, we end up in a endless loop
+    local activePotions : {potion} = {}
     for _,potion : potion in pairs(self.activePotions) do
-        self:UsePotion(potion)
+        table.insert(activePotions, potion)
+    end
+    table.clear(self.activePotions)
+    
+    for _,potion : potion in pairs(activePotions) do
+        self:UsePotion(potion, p)
     end
 end
 
@@ -191,7 +196,6 @@ end
     @param type : number, the type of potion to apply the boost for
 ]]--
 function PotionModule:ApplyPotionsBoosts(type : number, p : Types.PlayerModule)
-
     local boost : number = 0
 
     -- sum the boosts of all the potions matching the given type

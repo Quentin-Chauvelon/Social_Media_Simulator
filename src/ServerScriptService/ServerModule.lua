@@ -77,6 +77,9 @@ function ServerModule.onJoin(plr : Player)
 	-- equip the player's case
 	p.caseModule:EquipCase(p)
 
+	-- use all the potions to give the effects to the player
+	p.potionModule:UseAllActivePotions(p)
+
 	-- detect when player touches the upgrade post part
 	p.maid:GiveTask(
 		p.plotModule.phone.UpgradePosts.HitBox.Touched:Connect(function(hit)
