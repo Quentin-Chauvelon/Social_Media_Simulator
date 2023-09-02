@@ -22,7 +22,7 @@ function Rewards.GetReward(rewardToCollect : number) : Reward
     elseif rewardToCollect == 300 then
         return {reward = "followers", value = 10_000}
     elseif rewardToCollect == 600 then
-        return {reward = "potion", value = {type = "followers", value = 2, duration = 10}}
+        return {reward = "potion", value = {type = 0, value = 2, duration = 10}}
     elseif rewardToCollect == 900 then
         return {reward = "coins", value = 100}
     elseif rewardToCollect == 1_200 then
@@ -32,13 +32,13 @@ function Rewards.GetReward(rewardToCollect : number) : Reward
     elseif rewardToCollect == 2_700 then
         return {reward = "coins", value = 475}
     elseif rewardToCollect == 3_600 then
-        return {reward = "potion", value = {type = "coins", value = 3, duration = 10}}
+        return {reward = "potion", value = {type = 1, value = 3, duration = 20}}
     elseif rewardToCollect == 5_400 then
         return {reward = "followers", value = 300_000}
     elseif rewardToCollect == 7_200 then
         return {reward = "coins", value = 2_000}
     elseif rewardToCollect == 10_800 then
-        return {reward = "potion", value = {type = "both", value = 5, duration = 30}}
+        return {reward = "potion", value = {type = 3, value = 5, duration = 30}}
     else
         return {reward = "followers", value = 1_000} -- default reward
     end

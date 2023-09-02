@@ -185,7 +185,7 @@ function PlayTimeRewards:CollectReward(p : Types.PlayerModule)
 		elseif reward.reward == "pet" then
 			print("pet")
 		elseif reward.reward == "potion" then
-			print("potion", reward.value)
+			p.potionModule:CreateAndUsePotion(reward.value.type, reward.value.value, reward.value.duration, p)
 		end
 
 		self.rewardToCollect = 0

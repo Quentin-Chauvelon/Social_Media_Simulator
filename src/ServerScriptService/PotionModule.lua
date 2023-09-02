@@ -35,7 +35,8 @@ export type potion = {
 export type potionTypes = {
     Followers : number,
     Coins : number,
-    AutoPostSpeed : number
+    AutoPostSpeed : number,
+    Both : number
 }
 
 
@@ -50,7 +51,8 @@ function PotionModule.new(plr : Player)
     potionModule.potionTypes = {
         Followers = 0,
         Coins = 1,
-        AutoPostSpeed = 2
+        AutoPostSpeed = 2,
+        Both = 3
     }
     potionModule.plr = plr
 
@@ -188,13 +190,13 @@ function PotionModule:ApplyPotionsBoosts(type : number, p : Types.PlayerModule)
         end
     end
 
-    if type == self.potionTypes.Followers then
+    if type == self.potionTypes.Followers or type == self.potionTypes.Both then
         -- remove one to the boost, otherwise it's one too high
         self.followersMultiplier = boost >= 1 and boost - 1 or 0
 
         p:UpdateFollowersMultiplier()
 
-    elseif type == self.potionTypes.Coins then
+    elseif type == self.potionTypes.Coins or type == self.potionTypes.Both then
         -- remove one to the boost, otherwise it's one too high
         self.coinsMultiplier = boost >= 1 and boost - 1 or 0
 
