@@ -101,12 +101,12 @@ function PotionModule:UsePotion(potion : potion, p : Types.PlayerModule)
                 local expiredPotions : {number} = {}
 
                 -- decrease all potions time left by 1 minute
-                for i : number, potion : potion in pairs(self.activePotions) do
+                for i : number,_ in pairs(self.activePotions) do
                     self.activePotions[i].timeLeft -= 1
 
                     -- if the potion is expired, add the type to the table of the expired potion types
                     if self.activePotions[i].timeLeft <= 0 then
-                        table.insert(expiredPotions, i)
+                        table.insert(expiredPotions, 1, i)
                     end
                 end
 
