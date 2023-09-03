@@ -15,7 +15,7 @@ local defaultUpgrades : {upgrade} = {
         maxLevel = 10,
         baseValue = 16,
         upgradeValues = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18},
-        costs = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+        costs = {10, 25, 50, 200, 1_000, 3_000, 10_000, 25_000, 50_000, 100_000}
     },
     
     -- bot speed
@@ -25,7 +25,7 @@ local defaultUpgrades : {upgrade} = {
         maxLevel = 10,
         baseValue = 0,
         upgradeValues = {0, 50, 100, 150, 200, 250, 300, 350, 400, 450},
-        costs = {3, 8, 15, 25, 35, 45, 55, 70, 100, 150}
+        costs = {100, 500, 2_000, 5_000, 15_000, 50_000, 150_000, 450_000, 1_000_000, 2_500_000}
     },
     
     -- followers multiplier
@@ -35,7 +35,7 @@ local defaultUpgrades : {upgrade} = {
         maxLevel = 10,
         baseValue = 0,
         upgradeValues = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9},
-        costs = {5, 15, 40, 75, 125, 200, 300, 450, 675, 1000}
+        costs = {250, 1_000, 2_500, 7_500, 12_500, 50_000, 200_000, 550_000, 1_500_000, 4_000_000}
     },
     
     -- coins multiplier
@@ -45,7 +45,7 @@ local defaultUpgrades : {upgrade} = {
         maxLevel = 10,
         baseValue = 0,
         upgradeValues = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9},
-        costs = {10, 30, 80, 150, 250, 400, 600, 900, 1350, 2000}
+        costs = {500, 2_000, 8_000, 20_000, 75_000, 250_000, 900_000, 2_000_000, 7_500_000, 20_000_000}
     },
 }
 
