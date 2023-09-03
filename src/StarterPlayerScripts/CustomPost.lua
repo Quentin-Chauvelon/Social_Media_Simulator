@@ -200,6 +200,7 @@ function CustomPost.new(utility : Utility.Utility)
         repliedPostMessage.TextSize = repliedPostMessage.AbsoluteSize.Y / 3 * 2.5
     end)
 
+    table.insert(utility.guisToClose, customPostsBackground)
 
     customPostsButton.MouseButton1Down:Connect(function()
         if not customPostsBackground.Visible then
@@ -336,23 +337,7 @@ end
 
 
 function CustomPost:CloseCustomPostGui()
-    self.utility.BlurBackground(false)
-
-    local customPostsOriginalSize : UDim2 = customPostsBackground.Size
-
-    customPostsBackground:TweenSize(
-        UDim2.new(0,0,0,0),
-        Enum.EasingDirection.InOut,
-        Enum.EasingStyle.Linear,
-        CUSTOM_POSTS_TWEEN_DURATION,
-        false,
-        function()
-            customPostsBackground.Visible = false
-            
-            -- Change the ui size back to its original size, so that if the player resizes the window, it still works (instead of resizing something based on size of 0)
-            customPostsBackground.Size = customPostsOriginalSize
-        end
-    )
+    self.utility.CloseGui(customPostsBackground)
 end
 
 
@@ -360,41 +345,33 @@ end
     Opens the custom post gui
 ]]--
 function CustomPost:OpenCustomPostGui()
-    -- the ui doesn't have a size of 0 because it is kept at a normal size (this allows the ui to be able to be resized even when it's hidden (if the player resizes it's game window))
-    local customPostsOriginalSize : UDim2 = customPostsBackground.Size
-    customPostsBackground.Size = UDim2.new(0,0,0,0)
 
-	self.utility.BlurBackground(true)
-	customPostsBackground.Visible = true
+    -- open the gui
+    if self.utility.OpenGui(customPostsBackground) then
 
-	customPostsBackground:TweenSize(
-		customPostsOriginalSize,
-		Enum.EasingDirection.InOut,
-		Enum.EasingStyle.Linear,
-		CUSTOM_POSTS_TWEEN_DURATION
-	)
+        -- if the player opened the custom post gui for the first time, set the thumbnail, display, guildname... for new post
+        if not AlreadyOpenedOnce then
+            AlreadyOpenedOnce = true
+            LoadPlayerDetailsForPost()
 
-    -- if the player opened the custom post gui for the first time, set the thumbnail, display, guildname... for new post
-    if not AlreadyOpenedOnce then
-        AlreadyOpenedOnce = true
-        LoadPlayerDetailsForPost()
+            -- fire the server to tell it we are ready to receive events
+            ListCustomPostsRE:FireServer()
+        end
+        
+        local createPostConnection : RBXScriptConnection
+        createPostConnection = customPostsCreatePostButton.MouseButton1Down:Connect(function()
+            self.currentPost = nil
+            self:SavePost()
+        end)
 
-        -- fire the server to tell it we are ready to receive events
-        ListCustomPostsRE:FireServer()
+        -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
+        self.utility.SetCloseGuiConnection(
+            customPostsCloseButton.MouseButton1Down:Connect(function()
+                createPostConnection:Disconnect()
+                self:CloseCustomPostGui()
+            end)
+        )
     end
-    
-    local createPostConnection : RBXScriptConnection
-    createPostConnection = customPostsCreatePostButton.MouseButton1Down:Connect(function()
-        self.currentPost = nil
-        self:SavePost()
-    end)
-    
-    local customPostsCloseConnection : RBXScriptConnection
-	customPostsCloseConnection = customPostsCloseButton.MouseButton1Down:Connect(function()
-        createPostConnection:Disconnect()
-        customPostsCloseConnection:Disconnect()
-		self:CloseCustomPostGui()
-	end)
 end
 
 
