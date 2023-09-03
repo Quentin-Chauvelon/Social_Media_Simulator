@@ -21,7 +21,8 @@ local notificationClose : TextButton = notification:WaitForChild("Close")
 local notificationUIPadding : UIPadding = notification:WaitForChild("UIPadding")
 
 local uiToResize : {(viewportSize : Vector2) -> nil} = {}
-local debounce = true
+local debounce : boolean = true
+local openGuiDebounce : boolean = true
 
 local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4,["M"] = 7,["B"] = 10,["T"] = 13,["Qa"] = 16,["Qi"] = 19}
 
@@ -241,29 +242,36 @@ end
 ]]
 function Utility.OpenGui(ui : GuiObject, duration : number?) : boolean
     if not ui.Visible then
+        if openGuiDebounce then
+            openGuiDebounce = false
 
-        -- close all guis before opening one
-        -- if one of them was opened, we wait for it to close before opening another one
-        if Utility.CloseAllGuis() then
-            task.wait(0.2)
+            -- close all guis before opening one
+            -- if one of them was opened, we wait for it to close before opening another one
+            if Utility.CloseAllGuis() then
+                task.wait(0.2)
+            end
+            
+            -- the ui doesn't have a size of 0 because it is kept at a normal size (this allows the ui to be able to be resized even when it's hidden (if the player resizes it's game window))
+            local uiOriginalSize : UDim2 = ui.Size
+            ui.Size = UDim2.new(0,0,0,0)
+            
+            Utility.BlurBackground(true)
+
+            ui.Visible = true
+            
+            ui:TweenSize(
+                uiOriginalSize,
+                Enum.EasingDirection.InOut,
+                Enum.EasingStyle.Linear,
+                duration or 0.2,
+                false,
+                function()
+                    openGuiDebounce = true
+                end
+            )
+
+            return true
         end
-        
-        -- the ui doesn't have a size of 0 because it is kept at a normal size (this allows the ui to be able to be resized even when it's hidden (if the player resizes it's game window))
-        local uiOriginalSize : UDim2 = ui.Size
-        ui.Size = UDim2.new(0,0,0,0)
-        
-        Utility.BlurBackground(true)
-
-        ui.Visible = true
-        
-        ui:TweenSize(
-            uiOriginalSize,
-            Enum.EasingDirection.InOut,
-            Enum.EasingStyle.Linear,
-            duration or 0.2
-        )
-
-        return true
     end
 
     return false
