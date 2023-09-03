@@ -23,7 +23,7 @@ local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
 
-local upgradePostsRequiredFollowers : {number} = {10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000}
+local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
 local playersReady : Folder = ReplicatedStorage:WaitForChild("PlayersReady")
 
@@ -142,8 +142,11 @@ function ServerModule.onJoin(plr : Player)
 	end)
 	
 	-- fire the followers and coins events once at the start to display the numbers
-	FollowersRE:FireClient(p.player, p.followers)
-	CoinsRE:FireClient(p.player, p.coins)
+	FollowersRE:FireClient(plr, p.followers)
+	CoinsRE:FireClient(plr, p.coins)
+
+	-- fire the upgrade posts remote event to load the ui for the types the player already owns
+	UpgradePostsRE:FireClient(plr, p.postModule.level)
 
 	local playerReady : BoolValue = Instance.new("BoolValue")
 	playerReady.Name = plr.Name
@@ -199,6 +202,9 @@ UnlockPostRF.OnServerInvoke = function(plr : Player, post : number)
 		if p then
 
 			if p.postModule.level < post and p:HasEnoughFollowers(upgradePostsRequiredFollowers[post]) then
+				-- increment the saved level
+				DataStore2("level", plr):Set(post)
+
 				p.postModule.level = post
 
 				p.postModule:GenerateStateMachine()

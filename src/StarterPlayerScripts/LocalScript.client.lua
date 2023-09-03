@@ -76,6 +76,24 @@ CaseModule.new(Utility)
 
 local potionModule : PotionModule.PotionModule = PotionModule.new(Utility)
 
+
+-- store all upgrades posts UIStroke in a table to change them easily later
+local upgradePostsGuiUIStroke : {UIStroke} = {}
+for _,v : Instance in ipairs(upgradePostsBackground:GetDescendants()) do
+	if v:IsA("UIStroke") then
+		table.insert(upgradePostsGuiUIStroke, v)
+	end
+end
+
+Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+	-- change the thickness of all the UIStrokes
+	local thickness : number = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 5)
+	for _,uiStroke : UIStroke in pairs(upgradePostsGuiUIStroke) do
+		uiStroke.Thickness = thickness
+	end
+end)
+
+
 -- store all playtime rewards UIStroke in a table to change them easily later
 local playtimeRewardsGuiUIStroke : {UIStroke} = {}
 for _,v : Instance in ipairs(playTimeRewardsUI:GetDescendants()) do
@@ -274,62 +292,82 @@ end
 
 
 --[[
+	Updates all the owned post types ui that are less than or equal to the given level to display them as owned
+
+	@param level : number, the level of post types the player owns
+]]--
+local function UpdateOwnedPostTypes(level : number)
+	for _,v in ipairs(upgradePostsBackground:WaitForChild("Layout"):GetChildren()) do
+		if v:IsA("ImageButton") and v.LayoutOrder <= level then
+			
+			if v:FindFirstChild("Lock") then
+				v.Lock:Destroy()
+			end
+			
+			if v:FindFirstChild("PriceContainer") then
+				v.PriceContainer:Destroy()
+			end
+
+			v.UpgradeName.Visible = true
+
+			-- change the color of the button
+			v.BackgroundColor3 = Color3.fromRGB(67, 231, 58)
+			v.UIStroke.Color = Color3.fromRGB(29, 97, 24)
+
+			v.Active = false
+			v.AutoButtonColor = false
+		end
+	end
+end
+
+
+--[[
 	Display or hide the upgrade posts gui
 	
-	@param visible : boolean, true if the gui should be displayed, false otherwise
+	@param visible : boolean | number, true if the gui should be displayed, false otherwise. It can also be a number (on first fire only) to load the ui for the already owned post types
 ]]--
-UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean)
-	Utility.BlurBackground(visible)
-	
-	if visible and not upgradePosts.Enabled then
-		upgradePosts.Enabled = true
+UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean | number)
 
-		upgradePostsBackground:TweenSize(
-			UDim2.new(0.5,0,0.5,0),
-			Enum.EasingDirection.InOut,
-			Enum.EasingStyle.Linear,
-			UPGRADE_POSTS_TWEEN_DURATION
-		)
+	if typeof(visible) == "boolean" then
+		Utility.BlurBackground(visible)
 		
-		-- listen to all the clicks to upgrade the post
-		for _,upgradePost in ipairs(upgradePostsBackground:WaitForChild("Layout"):GetChildren()) do
-			if upgradePost:IsA("ImageButton") and upgradePost.Active then
-				table.insert(upgradePostsClickConnection, upgradePost.MouseButton1Down:Connect(function()
-					
-					-- when the player clicks, fire the server to check if the player has enough followers
-					-- and then if it's the case, unlock all previous post types on the gui
-					if UnlockPostRF:InvokeServer(upgradePost.LayoutOrder) then
+		if visible and not upgradePosts.Enabled then
+			upgradePosts.Enabled = true
+
+			upgradePostsBackground:TweenSize(
+				UDim2.new(0.5,0,0.5,0),
+				Enum.EasingDirection.InOut,
+				Enum.EasingStyle.Linear,
+				UPGRADE_POSTS_TWEEN_DURATION
+			)
+			
+			-- listen to all the clicks to upgrade the post
+			for _,upgradePost in ipairs(upgradePostsBackground:WaitForChild("Layout"):GetChildren()) do
+				if upgradePost:IsA("ImageButton") and upgradePost.Active then
+					table.insert(upgradePostsClickConnection, upgradePost.MouseButton1Down:Connect(function()
 						
-						for _,v in ipairs(upgradePostsBackground:WaitForChild("Layout"):GetChildren()) do
-							if v:IsA("ImageButton") and v.LayoutOrder <= upgradePost.LayoutOrder then
-								
-								if v:FindFirstChild("Lock") then
-									v.Lock:Destroy()
-								end
-								
-								if v:FindFirstChild("UpgradeName") then
-									v.UpgradeName:Destroy()
-								end
-
-								v.Price.Text = v.Name
-
-								v.Active = false
-								v.AutoButtonColor = false
-							end
+						-- when the player clicks, fire the server to check if the player has enough followers
+						-- and then if it's the case, unlock all previous post types on the gui
+						if UnlockPostRF:InvokeServer(upgradePost.LayoutOrder) then
+							-- update all the owned post types ui to display them as owned
+							UpdateOwnedPostTypes(upgradePost.LayoutOrder)
 						end
-					end
-				end))
+					end))
+				end
 			end
-		end
-		
-		-- listen to the click to close the gui
-		table.insert(upgradePostsClickConnection, upgradePostsCloseButton.MouseButton1Down:Connect(function()
-			Utility.BlurBackground(false)
+			
+			-- listen to the click to close the gui
+			table.insert(upgradePostsClickConnection, upgradePostsCloseButton.MouseButton1Down:Connect(function()
+				Utility.BlurBackground(false)
+				CloseUpgradePostsGui()
+			end))
+			
+		elseif not visible and upgradePosts.Enabled then
 			CloseUpgradePostsGui()
-		end))
-		
-	elseif not visible and upgradePosts.Enabled then
-		CloseUpgradePostsGui()
+		end
+
+	elseif typeof(visible) == "number" then
+		UpdateOwnedPostTypes(visible)		
 	end
 end)
 
