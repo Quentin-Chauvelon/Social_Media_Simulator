@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utility = require(script.Parent:WaitForChild("Utility"))
+local GamePassModule = require(script.Parent:WaitForChild("GamePassModule"))
 
 local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
 
@@ -17,6 +18,7 @@ local casesListContainer : ScrollingFrame = casesBackground:WaitForChild("Conten
 local casesListContainerUIGridLayout : UIGridLayout = casesListContainer:WaitForChild("UIGridLayout")
 local caseButtonDeactivated : Frame = casesBackground.ContentContainer:WaitForChild("PhoneCaseUpgradeContainer"):WaitForChild("CaseButtonDeactivated")
 local caseBuyButton : TextButton = casesBackground.ContentContainer.PhoneCaseUpgradeContainer:WaitForChild("CaseBuyButton")
+local caseRobuxBuyButton : TextButton = casesBackground.ContentContainer.PhoneCaseUpgradeContainer:WaitForChild("CaseRobuxBuyButton")
 local casePrice : TextLabel = caseBuyButton:WaitForChild("CasePrice")
 local caseEquipped : Frame = casesBackground.ContentContainer.PhoneCaseUpgradeContainer:WaitForChild("CaseEquipped")
 local speedBoostText : TextLabel = casesBackground.ContentContainer.PhoneCaseUpgradeContainer:WaitForChild("SpeedBoostText")
@@ -32,12 +34,14 @@ export type CaseModule = {
     equippedCase : string,
     caseItemsClickConnections : {RBXScriptConnection},
     buyCaseButtonConnection : RBXScriptConnection,
+    buyRobuxCaseButtonConnection : RBXScriptConnection,
     utility : Utility.Utility,
     new : (utility : Utility.Utility) -> CaseModule,
     OpenGui : (self : CaseModule) -> nil,
     UpdateAllCasesBackgroundColors : (self : CaseModule) -> nil,
     SelectCase : (self : CaseModule, caseListItem : ImageButton) -> nil,
     BuyCase : (self : CaseModule) -> nil,
+    CaseBoughtSuccessfully : (self : CaseModule, caseColor : string) -> nil,
     CloseGui : (self : CaseModule) -> nil,
 }
 
@@ -133,6 +137,11 @@ function CaseModule:OpenGui()
             self:BuyCase()
         end)
 
+        -- pick up clicks if the player wants to buy a robux case
+        self.buyRobuxCaseButtonConnection = caseRobuxBuyButton.MouseButton1Down:Connect(function()
+            self:BuyCase()
+        end)
+
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
         self.utility.SetCloseGuiConnection(
             casesCloseButton.MouseButton1Down:Connect(function()
@@ -185,6 +194,7 @@ function CaseModule:SelectCase(caseListItem : ImageButton)
         -- show the owned or buy button based on if the player owns the case
         if caseListItem.Owned.Value then
             caseBuyButton.Visible = false
+            caseRobuxBuyButton.Visible = false
             caseEquipped.Visible = true
 
             -- equip the case when the player selects a case he owns
@@ -195,8 +205,18 @@ function CaseModule:SelectCase(caseListItem : ImageButton)
                 self:UpdateAllCasesBackgroundColors()
             end
         else
-            caseEquipped.Visible = false
-            caseBuyButton.Visible = true
+            -- robux case
+            if color == "Space" then
+                caseEquipped.Visible = false
+                caseBuyButton.Visible = false
+                caseRobuxBuyButton.Visible = true
+            
+            -- non robux cases
+            else
+                caseEquipped.Visible = false
+                caseRobuxBuyButton.Visible = false
+                caseBuyButton.Visible = true
+            end
         end
 
         speedBoostText.Text = "-" .. tostring(caseListItem.SpeedBoost.Value) .. "s on auto post"
@@ -211,25 +231,41 @@ end
 function CaseModule:BuyCase()
     local caseColor : string = self.selectedCase
 
-    local success : boolean = CaseRF:InvokeServer(caseColor)
-    if success then
-
-        -- mark the case as equipped
-        self.equippedCase = caseColor
+    -- the space case can only be bought with robux
+    if caseColor == "Space" then
         
-        -- set the owned value to true
-        if casesListContainer:FindFirstChild(caseColor .. "Case") then
-            casesListContainer[caseColor .. "Case"].Owned.Value = true
+        -- if the player doesn't already own the game pass
+        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.SpaceCase) then
+            -- prompt the purhcase to buy the case
+            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.SpaceCase)
         end
 
-        self:UpdateAllCasesBackgroundColors()
-
-        caseBuyButton.Visible = false
-        caseEquipped.Visible = true
-
-        -- 180, 230, 161
-        -- remove background reset color in CaseModule:SelectCase() (already commented out)
+        return
     end
+
+    local success : boolean = CaseRF:InvokeServer(caseColor)
+    if success then
+        self:CaseBoughtSuccessfully(caseColor)
+    end
+end
+
+
+--[[
+    
+]]--
+function CaseModule:CaseBoughtSuccessfully(caseColor : string)
+    -- mark the case as equipped
+    self.equippedCase = caseColor
+    
+    -- set the owned value to true
+    if casesListContainer:FindFirstChild(caseColor .. "Case") then
+        casesListContainer[caseColor .. "Case"].Owned.Value = true
+    end
+
+    self:UpdateAllCasesBackgroundColors()
+
+    caseBuyButton.Visible = false
+    caseEquipped.Visible = true
 end
 
 
@@ -237,6 +273,9 @@ end
 	Closes the cases gui
 ]]--
 function CaseModule:CloseGui()
+    self.buyCaseButtonConnection:Disconnect()
+    self.buyRobuxCaseButtonConnection:Disconnect()
+
     for _,caseItemsClickConnection : RBXScriptConnection in pairs(self.caseItemsClickConnections) do
         caseItemsClickConnection:Disconnect()
     end

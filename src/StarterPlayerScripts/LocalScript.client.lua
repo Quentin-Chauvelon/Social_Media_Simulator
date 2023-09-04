@@ -14,13 +14,15 @@ local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
 local DisplayPotionsRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayPotions")
+local BoughtGamePassRE : RemoteEvent = ReplicatedStorage:WaitForChild("BoughtGamePass")
+local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 
 local lplr = Players.LocalPlayer
 
 -- wait for the server to be ready before loading in the client
 repeat RunService.Heartbeat:Wait()
 until
-	ReplicatedStorage:WaitForChild("IsServerReady") and
+	ReplicatedStorage:FindFirstChild("IsServerReady") and
 	ReplicatedStorage.IsServerReady.Value and
 	ReplicatedStorage.PlayersReady:WaitForChild(lplr.Name)
 
@@ -34,6 +36,7 @@ local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("U
 local RebirthModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("RebirthModule"))
 local CaseModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CaseModule"))
 local PotionModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PotionModule"))
+local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
@@ -483,3 +486,20 @@ DisplayPotionsRE.OnClientEvent:Connect(function(activePotions : {PotionModule.po
 		potionModule:StartPotionsTimer()
 	end
 end)
+
+
+--[[
+	Called whenever the player buys a game pass to make changes locally (mainly to the ui) if needed
+]]--
+BoughtGamePassRE.OnClientEvent:Connect(function(gamePassId : number)
+	if gamePassId == GamePassModule.gamePasses.SpaceCase then
+		CaseModule:CaseBoughtSuccessfully("Space")
+	end
+end)
+
+
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+-- fire the server once the client is loaded
+PlayerLoadedRE:FireServer()

@@ -190,9 +190,9 @@ local caseDetails : {[string] : caseDetail} = {
         enabled = false,
         speedBoost = 2000,
         price = 0,
-        color = Color3.fromRGB(255, 255, 255),
+        color = Color3.fromRGB(13, 6, 52),
         gradient = nil,
-        imageUrl = ""
+        imageUrl = "http://www.roblox.com/asset/?id=14670945265"
     }
 }
 
@@ -235,7 +235,7 @@ export type CaseModule = {
     EquipCase : (self : CaseModule, p : Types.PlayerModule, color : string?) -> nil,
     ApplySpeedBoost : (self : CaseModule, p : Types.PlayerModule) -> nil,
     UpdatePhoneColor : (self : CaseModule, p : Types.PlayerModule) -> nil,
-    BuyCase : (self : CaseModule, color : string, followers : number) -> boolean,
+    BuyCase : (self : CaseModule, color : string, p : Types.PlayerModule) -> boolean,
     GetOwnedCases : (self : CaseModule) -> savedCases
 }
 
@@ -379,12 +379,22 @@ function CaseModule:UpdatePhoneColor(p : Types.PlayerModule, color : string?)
 
     -- if the case has a gradient, display it on the frame
     local gradient : ColorSequence? = caseDetails[color].gradient
-    local phoneUIGradientFrame : Frame = p.plotModule.phone.PhoneModel.CaseGradient.SurfaceGui.Frame
+    local phoneUIGradientFrame : Frame = p.plotModule.phone.PhoneModel.Case.SurfaceGui.CaseGradient
     if gradient then
         phoneUIGradientFrame.UIGradient.Color = gradient
         phoneUIGradientFrame.Visible = true
     else
         phoneUIGradientFrame.Visible = false
+    end
+
+    -- if the case has an image, display it on the frame
+    local imageUrl : string = caseDetails[color].imageUrl
+    local phoneUIImageFrame : Frame = p.plotModule.phone.PhoneModel.Case.SurfaceGui.CaseImage
+    if imageUrl ~= "" then
+        phoneUIImageFrame.Image = imageUrl
+        phoneUIImageFrame.Visible = true
+    else
+        phoneUIImageFrame.Visible = false
     end
 end
 
