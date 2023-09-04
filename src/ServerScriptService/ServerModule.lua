@@ -22,6 +22,7 @@ local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCu
 local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
+local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -50,6 +51,14 @@ local function PlayerReachedFollowerGoal(p : Player.PlayerModule)
 
 	p.plotModule.phone.FollowerGoal.Goal.SurfaceGui.GoalText.Text = tostring(p.nextFollowerGoal .. " followers")
 end
+
+
+PlayerLoadedRE.OnServerEvent:Connect(function(player)
+	local p : Player.PlayerModule = players[player.Name]
+	if p then
+		p.isLoaded = true
+	end
+end)
 
 
 --[[
@@ -140,18 +149,30 @@ function ServerModule.onJoin(plr : Player)
 		-- fire the client to display the number of coins the player has
 		CoinsRE:FireClient(p.player, p.coins)
 	end)
-	
-	-- fire the followers and coins events once at the start to display the numbers
-	FollowersRE:FireClient(plr, p.followers)
-	CoinsRE:FireClient(plr, p.coins)
-
-	-- fire the upgrade posts remote event to load the ui for the types the player already owns
-	UpgradePostsRE:FireClient(plr, p.postModule.level)
 
 	local playerReady : BoolValue = Instance.new("BoolValue")
 	playerReady.Name = plr.Name
 	playerReady.Value = true
 	playerReady.Parent = playersReady
+
+	-- wait for the player to be fully loaded before firing events
+	Promise.new(function(resolve)
+		repeat
+			RunService.Heartbeat:Wait()
+		until p.isLoaded == true
+
+		-- load the effect of the game passes the player owns
+		p.gamepassModule:LoadOwnedGamePasses(p)
+		
+		-- fire the followers and coins events once at the start to display the numbers
+		FollowersRE:FireClient(plr, p.followers)
+		CoinsRE:FireClient(plr, p.coins)
+	
+		-- fire the upgrade posts remote event to load the ui for the types the player already owns
+		UpgradePostsRE:FireClient(plr, p.postModule.level)
+
+		resolve()
+	end)
 end
 
 
@@ -329,7 +350,7 @@ CaseRF.OnServerInvoke = function(plr : Player, color : string?)
 		end
 
 		-- the player tries to buy the case (or equip it if he already owns it)
-		if color then
+		if color and typeof(color) == "string" and (color ~= "Space" or p.caseModule.ownedCases["Space"] == true) then
 			return p.caseModule:BuyCase(color, p)
 		end
 
@@ -354,6 +375,19 @@ MarketplaceService.ProcessReceipt = function(receiptInfo : table) : Enum.Product
 		end
 	end
 end
+
+
+--[[
+	Apply an effect when the player buys a game pass
+]]--
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player : Player, purchasedPassID : number, purchaseSuccess : boolean)
+	if purchaseSuccess then
+		local p : Player.PlayerModule = players[player.Name]
+		if p then
+			p.gamepassModule:PlayerBoughtGamePass(purchasedPassID, p)
+		end
+	end
+end)
 
 
 --[[

@@ -18,6 +18,7 @@ DataStore2.Combine("SMS", "followers", "coins")
 
 export type PlayerModule = {
 	player : Player,
+	isLoaded : boolean,
 	followers : number,
 	nextFollowerGoal : number,
 	coins : number,
@@ -60,6 +61,7 @@ function Player.new(plr : Player)
 	local p = {}
 
 	p.player = plr
+	p.isLoaded = false
 
 	--DataStore2("followers", plr):Set(nil)
 	--DataStore2("coins", plr):Set(nil)
