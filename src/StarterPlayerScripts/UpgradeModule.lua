@@ -52,6 +52,14 @@ function UpgradeModule.new(utility : Utility.Utility) : UpgradeModule
     upgradeModule.upgradeButtonConnections = {}
     upgradeModule.upgradesMachineTouchDetector = workspace:WaitForChild("UpgradesMachine"):WaitForChild("TouchDetector")
 
+    -- store all UIStroke in a table to change them easily later
+    local upgradesGuiUIStroke : {UIStroke} = {}
+    for _,v : Instance in ipairs(upgradesBackground:GetDescendants()) do
+        if v:IsA("UIStroke") then
+            table.insert(upgradesGuiUIStroke, v)
+        end
+    end
+
     utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
         upgradesBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.8, 0.5), 0, 0.7, 0)
 
@@ -68,7 +76,10 @@ function UpgradeModule.new(utility : Utility.Utility) : UpgradeModule
             end
         end
 
-        upgradesBackground.Title.UIStroke.Thickness = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
+        local thickness : number = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 5)
+        for _,uiStroke : UIStroke in pairs(upgradesGuiUIStroke) do
+            uiStroke.Thickness = thickness
+        end
     end)
 
     upgradeModule.upgradesMachineTouchDetector.Touched:Connect(function(hit : BasePart)
@@ -174,7 +185,7 @@ function UpgradeModule:UpdateUpgradeUI(upgradeFrame : Frame, upgrade : upgrade)
     end
 
     if upgrade.level < upgrade.maxLevel then
-        upgradeFrame.UpgradePurchaseContainer.Price.Text = upgrade.costs[upgrade.level + 1]
+        upgradeFrame.UpgradePurchaseContainer.Price.Text = self.utility.AbbreviateNumber(upgrade.costs[upgrade.level + 1])
     else
         upgradeFrame.UpgradePurchaseContainer.Price.Visible = false
         upgradeFrame.UpgradePurchaseContainer.ImageLabel.Visible = false
