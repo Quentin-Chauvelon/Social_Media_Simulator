@@ -31,10 +31,19 @@ GuiTabsModule.__index = GuiTabsModule
 
 
 function GuiTabsModule.new(utility : Utility.Utility)
-    -- utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
-    --     followersContainer.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.2, 0.2), 0, 0.09, 0)
-    --     coinsContainer.Size = UDim2.new(Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.2, 0.2), 0, 0.09, 0)
-    -- end)
+    utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
+		local thickness : number = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 5)
+
+		-- change the thickness of the border
+		followersContainer.UIStroke.Thickness = thickness
+		coinsContainer.UIStroke.Thickness = thickness
+		
+		-- change the size of the right corners filling frames
+		followersContainer.FillUpperBorder.Size = UDim2.new(0.5, 0, 0, thickness)
+		followersContainer.FillLowerBorder.Size = UDim2.new(0.5, 0, 0, thickness)
+		coinsContainer.FillUpperBorder.Size = UDim2.new(0.5, 0, 0, thickness)
+		coinsContainer.FillLowerBorder.Size = UDim2.new(0.5, 0, 0, thickness)
+    end)
 end
 
 
