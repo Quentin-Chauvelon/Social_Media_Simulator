@@ -15,15 +15,14 @@ local currentCamera : Camera = workspace.CurrentCamera
 local customPostTemplate : Frame = ReplicatedStorage:WaitForChild("CustomPostTemplate")
 
 local customPosts : ScreenGui = playerGui:WaitForChild("CustomPosts")
-local customPostsButton : ImageButton = customPosts:WaitForChild("CustomPostsButton")
+local customPostsButton : ImageButton = playerGui:WaitForChild("Menu"):WaitForChild("SideButtons"):WaitForChild("CustomPostsButton")
 
 local customPostsBackground : Frame = customPosts:WaitForChild("Background")
 local customPostsCloseButton : TextButton = customPostsBackground:WaitForChild("Close")
-local customPostsTitleUIStroke : UIStroke = customPostsBackground:WaitForChild("Title"):WaitForChild("UIStroke")
-local customPostsCreatePostButton : TextButton = customPostsBackground:WaitForChild("CreatePostButton")
-local customPostsCreatePostPlusText : TextLabel = customPostsCreatePostButton:WaitForChild("PlusText")
-local customPostsCreatePostPlusTextUIPadding : UIPadding = customPostsCreatePostPlusText:WaitForChild("UIPadding")
-local customPostsCreatePostText : TextLabel = customPostsCreatePostButton:WaitForChild("CreatePostText")
+local customPostsCreatePostButton : TextButton = customPostsBackground:WaitForChild("CreatePostContainer"):WaitForChild("CreatePostButton")
+-- local customPostsCreatePostPlusText : TextLabel = customPostsCreatePostButton:WaitForChild("PlusText")
+-- local customPostsCreatePostPlusTextUIPadding : UIPadding = customPostsCreatePostPlusText:WaitForChild("UIPadding")
+local customPostsCreatePostText : TextLabel = customPostsBackground.CreatePostContainer:WaitForChild("CreatePostText")
 local customPostsScrollingFrame : ScrollingFrame = customPostsBackground:WaitForChild("ScrollingFrame")
 
 local createPost : Frame = customPosts:WaitForChild("CreatePost")
@@ -94,6 +93,10 @@ local function selectPostType(postType : string)
     createPostReplyType.BackgroundColor3 = Color3.fromRGB(186, 186, 186)
     createPostDialogType.BackgroundColor3 = Color3.fromRGB(186, 186, 186)
 
+    createPostPostType.ContextualUIStroke.Color = Color3.fromRGB(52,52,52)
+    createPostReplyType.ContextualUIStroke.Color = Color3.fromRGB(52,52,52)
+    createPostDialogType.ContextualUIStroke.Color = Color3.fromRGB(52,52,52)
+
     createPostPostType.UIScale.Scale = 1
     createPostReplyType.UIScale.Scale = 1
     createPostDialogType.UIScale.Scale = 1
@@ -104,16 +107,19 @@ local function selectPostType(postType : string)
 
     if postType == "post" then
         createPostPostType.BackgroundColor3 = Color3.fromRGB(54, 54, 54)
+        createPostPostType.ContextualUIStroke.Color = Color3.fromRGB(0,0,0)
         createPostPostType.UIScale.Scale = 1.15
         postContainer.Visible = true
 
     elseif postType == "reply" then
         createPostReplyType.BackgroundColor3 = Color3.fromRGB(54, 54, 54)
+        createPostReplyType.ContextualUIStroke.Color = Color3.fromRGB(0,0,0)
         createPostReplyType.UIScale.Scale = 1.15
         replyPostContainer.Visible = true
 
     else
         createPostDialogType.BackgroundColor3 = Color3.fromRGB(54, 54, 54)
+        createPostDialogType.ContextualUIStroke.Color = Color3.fromRGB(0,0,0)
         createPostDialogType.UIScale.Scale = 1.15
         dialogContainer.Visible = true
     end
@@ -176,14 +182,28 @@ function CustomPost.new(utility : Utility.Utility)
         customPost:ListAllPosts(type, id, posts)
     end)
 
+    -- store all UIStroke in a table to change them easily later
+    local customPostGuiUIStroke : {UIStroke} = {}
+    for _,v : Instance in ipairs(customPosts:GetDescendants()) do
+        if v:IsA("UIStroke") then
+            table.insert(customPostGuiUIStroke, v)
+        end
+    end
+    -- add the UIStroke from RepicatedStorage.CustomPostTemplate as well
+    for _,v : Instance in ipairs(customPostTemplate:GetDescendants()) do
+        if v:IsA("UIStroke") then
+            table.insert(customPostGuiUIStroke, v)
+        end
+    end
+
     utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
         customPostsBackground.Size = UDim2.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.8, 0.5), 0, 0.6, 0)
 
         local customPostsCloseButtonUDim = UDim.new(utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 0.12, 0.15), 0)
         customPostsCloseButton.Size = UDim2.new(customPostsCloseButtonUDim, customPostsCloseButtonUDim)
 
-        customPostsCreatePostPlusText.TextSize = customPostsCreatePostButton.AbsoluteSize.Y * 1.5
-        customPostsCreatePostPlusTextUIPadding.PaddingLeft = UDim.new((customPostsCreatePostPlusText.TextSize - 25) * 0.0011, 0)
+        -- customPostsCreatePostPlusText.TextSize = customPostsCreatePostButton.AbsoluteSize.Y * 1.5
+        -- customPostsCreatePostPlusTextUIPadding.PaddingLeft = UDim.new((customPostsCreatePostPlusText.TextSize - 25) * 0.0011, 0)
 
         for _,customPostsScrollingFramePost : Frame | UIListLayout in ipairs(customPostsScrollingFrame:GetChildren()) do
             if customPostsScrollingFramePost:IsA("Frame") then
@@ -191,7 +211,10 @@ function CustomPost.new(utility : Utility.Utility)
             end
         end
 
-        customPostsTitleUIStroke.Thickness = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 4.5)
+        local thickness : number = utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 2, 5)
+        for _,uiStroke : UIStroke in pairs(customPostGuiUIStroke) do
+            uiStroke.Thickness = thickness
+        end
 
         postMessage.TextSize = postMessage.AbsoluteSize.Y / 3
         dialogPost1Message.TextSize = dialogPost1Message.AbsoluteSize.Y / 3 * 2.5
@@ -383,10 +406,10 @@ end
 function CustomPost:ResizePost(post : Frame)
     local viewportSizeX : number = currentCamera.ViewportSize.X
 
-    post.Size = UDim2.new(0.95, 0, 0, self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 20, 40))
-    post.PostText.TextSize = self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 13, 22)
+    post.Size = UDim2.new(0.95, 0, 0, self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 28, 57))
+    post.PostText.TextSize = self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 20, 34)
 
-    local customPostsScrollingFramePostSpacing : number = -self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 5, 12)
+    local customPostsScrollingFramePostSpacing : number = -self.utility.GetNumberInRangeProportionallyDefaultWidth(viewportSizeX, 10, 24)
     post.PostDelete.Position = UDim2.new(1, customPostsScrollingFramePostSpacing, 0.5, 0)
     post.PostEdit.Position = UDim2.new(1, customPostsScrollingFramePostSpacing * 2 - post.PostDelete.AbsoluteSize.X, 0.5, 0)
     post.PostText.Size = UDim2.new(1, customPostsScrollingFramePostSpacing * 3 - post.PostDelete.AbsoluteSize.X * 2 - 10, 1, 0)
@@ -489,7 +512,7 @@ function CustomPost:ListAllPosts(type : string, id : number, posts : {post})
         self.posts = posts
 
         -- destroy all the existing posts
-        for _,post : Frame | UIListLayout in ipairs(customPostsBackground:GetChildren()) do
+        for _,post : Frame | UIListLayout in ipairs(customPostsScrollingFrame:GetChildren()) do
             if post:IsA("Frame") then
                 post:Destroy()
             end
