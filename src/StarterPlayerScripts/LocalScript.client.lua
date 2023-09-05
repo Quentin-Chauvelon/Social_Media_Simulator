@@ -159,7 +159,9 @@ local function characterAdded(character : Model)
 		resolve()
 	end)
 	:andThen(function()
-		currentCamera.CFrame = CFrame.lookAt(currentCamera.CFrame.Position, currentCamera.CFrame.Position + character:WaitForChild("HumanoidRootPart").CFrame.LookVector)
+		currentCamera.CameraType = Enum.CameraType.Scriptable
+		currentCamera.CFrame = character.Head.CFrame
+		currentCamera.CameraType = Enum.CameraType.Custom
 	end)
 end
 
