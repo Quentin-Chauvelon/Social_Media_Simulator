@@ -1,4 +1,5 @@
 local ServerScriptService = game:WaitForChild("ServerScriptService")
+local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BoughtGamePassRE : RemoteEvent = ReplicatedStorage:WaitForChild("BoughtGamePass")
@@ -20,7 +21,9 @@ export type GamepassModule = {
 }
 
 type GamePasses = {
-    SpaceCase : number
+    SpaceCase : number,
+    Open3Eggs : number,
+    Open6Eggs : number
 }
 
 
@@ -32,7 +35,9 @@ function GamepassModule.new()
     local gamepassModule : GamepassModule = {}
 
     gamepassModule.gamePasses = {
-        SpaceCase = 249101309
+        SpaceCase = 249101309,
+        Open3Eggs = 252411712,
+        Open6Eggs = 252412855
     }
 
     gamepassModule.boughtCoinsMultiplier = false
@@ -53,13 +58,16 @@ end
     @param p : PlayerModule, the player object representing the player
 ]]--
 function GamepassModule:PlayerBoughtGamePass(gamePassId : number, p : Types.PlayerModule)
-    local isGamePassPurchaseSuccesfull : boolean = false
+    local isGamePassPurchaseSuccesfull : boolean = true
     
     if gamePassId == self.gamePasses.SpaceCase then
         p.caseModule:BuyCase("Space", p)
-        isGamePassPurchaseSuccesfull = true
-    else
-        isGamePassPurchaseSuccesfull = true
+    
+    elseif gamePassId == self.gamePasses.Open3Eggs then
+        self.boughtOpen3Eggs = true
+    
+    elseif gamePassId == self.gamePasses.Open6Eggs then
+        self.boughtOpen6Eggs = true
     end
 
     -- if the purchase of the game pass was succesful, fire the client to make changes locally if needed
@@ -77,15 +85,19 @@ end
 function GamepassModule:LoadOwnedGamePasses(p : Types.PlayerModule)
     for _,gamePassId : number in pairs(self.gamePasses) do
 
-        if gamePassId == self.gamePasses.SpaceCase then
-            -- if the case is not equipped, do not call the BoughtGamePass function otherwise it is going to equip it (so only fire the event to update the ui)
-            if p.caseModule.equippedCase == "Space" then
+        -- if the player owns the game pass
+        if MarketplaceService:UserOwnsGamePassAsync(p.player.UserId, gamePassId) then
+            
+            if gamePassId == self.gamePasses.SpaceCase then
+                -- if the case is not equipped, do not call the BoughtGamePass function otherwise it is going to equip it (so only fire the event to update the ui)
+                if p.caseModule.equippedCase == "Space" then
+                    self:PlayerBoughtGamePass(gamePassId, p)
+                end
+
+            -- for all other game passes, simply call the BoughtGamePass function
+            else
                 self:PlayerBoughtGamePass(gamePassId, p)
             end
-
-        -- for all other game passes, simply call the BoughtGamePass function
-        else
-            self:PlayerBoughtGamePass(gamePassId, p)
         end
     end
 end
