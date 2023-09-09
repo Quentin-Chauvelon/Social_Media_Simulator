@@ -4,6 +4,8 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utility = require(script.Parent:WaitForChild("Utility"))
+local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+local GamePassModule = require(script.Parent:WaitForChild("GamePassModule"))
 
 local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
 
@@ -15,75 +17,20 @@ local eggsScreenGui : ScreenGui = playerGui:WaitForChild("Eggs")
 
 local petsScreenGui : ScreenGui = playerGui:WaitForChild("Pets")
 local eggOpeningBackground : Frame = petsScreenGui:WaitForChild("EggOpeningBackground")
-local eggImage : ImageLabel = eggOpeningBackground:WaitForChild("Egg")
-local eggViewportFrame : ViewportFrame = eggOpeningBackground:WaitForChild("ViewportFrame")
-local petInformation : CanvasGroup = eggOpeningBackground:WaitForChild("PetInformation")
-local eggPetName : TextLabel = petInformation:WaitForChild("PetName")
-local eggpetRarity : TextLabel = petInformation:WaitForChild("Rarity")
+local oneEggContainer : Frame = eggOpeningBackground:WaitForChild("OneEgg")
+local threeEggContainer : Frame = eggOpeningBackground:WaitForChild("ThreeEggs")
+local sixEggContainer : Frame = eggOpeningBackground:WaitForChild("SixEggs")
 
 local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
-
-
--- tweens
-local scaleEggUp : Tween = TweenService:Create(
-    eggImage,
-    TweenInfo.new(
-        0.2
-    ),
-    {Size = UDim2.new(0.7, 0, 0.7, 0)}
-)
-
-local rotateEggLeft : Tween = TweenService:Create(
-    eggImage,
-    TweenInfo.new(
-        0.15,
-        Enum.EasingStyle.Linear
-    ),
-    {Rotation = -70}
-)
-
-
-local resetEggOrientation : Tween = TweenService:Create(
-    eggImage,
-    TweenInfo.new(
-        0.15,
-        Enum.EasingStyle.Linear
-    ),
-    {Rotation = 0}
-)
-
-
-local shakeEgg : Tween = TweenService:Create(
-    eggImage,
-    TweenInfo.new(
-        0.15,
-        Enum.EasingStyle.Linear,
-        Enum.EasingDirection.InOut,
-        3,
-        true
-    ),
-    {Rotation = 70}
-)
-
-local explodeEgg : Tween = TweenService:Create(
-    eggImage,
-    TweenInfo.new(
-        0.2,
-        Enum.EasingStyle.Quad
-    ),
-    {
-        Size = UDim2.new(3,0,3,0),
-        ImageTransparency = 1
-    }
-)
 
 
 export type PetModule = {
     ownedPets : {pet},
     canOpenEgg : boolean,
+    closeEggSequenceInputConnection : RBXScriptSignal?,
     new : (utility : Utility.Utility) -> PetModule,
-    PlayEggOpeningSequence : (self : PetModule, pets : {pet}) -> nil,
-    CloseEggOpeningSequence : (self : PetModule) -> nil
+    PlayEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame, pets : {pet}) -> nil,
+    CloseEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame) -> nil
 }
 
 export type pet = {
@@ -118,6 +65,9 @@ function PetModule.new(utility : Utility.Utility)
     local petModule : PetModule = {}
 
     petModule.ownedPets = {}
+    petModule.canOpenEgg = true
+
+    petModule.closeEggSequenceInputConnection = nil
 
     -- store all UIStroke in a table to change them easily later
     local eggsGuiUIStroke : {UIStroke} = {}
@@ -164,22 +114,57 @@ function PetModule.new(utility : Utility.Utility)
                 openEggButton.MouseEnter:Connect(function()
                     mouseEnterTween:Play()
                 end)
-                
+
                 -- scale the button down on mouse leave
                 openEggButton.MouseLeave:Connect(function()
                     mouseLeaveTween:Play()
                 end)
-                
+
 
                 -- open an egg when the player clicks the button
                 openEggButton.MouseButton1Down:Connect(function()
-                    local openedPets : {pet} = OpenEggRF:InvokeServer(openEggButton.Parent.EggId.Value, openEggButton.NumberOfEggs.Value)
                     
-                    for _,pet : pet in pairs(openedPets) do
-                        table.insert(petModule.openedPets, pet)
+                    -- if the player doesn't own the 3x or 6x open eggs game passes, prompt them to pruchase it
+                    if openEggButton.NumberOfEggs.Value == 3 then
+                        -- if the player doesn't already own the game pass
+                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenThreeEggs) then
+                            -- prompt the purhcase to buy it
+                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenThreeEggs)
+                            return
+                        end
+
+                    elseif openEggButton.NumberOfEggs.Value == 6 then
+                        -- if the player doesn't already own the game pass
+                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenSixEggs) then
+                            -- prompt the purhcase to buy it
+                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenSixEggs)
+                            return
+                        end
                     end
 
-                    petModule:PlayEggOpeningSequence(openedPets)
+                    if petModule.canOpenEgg then
+                        petModule.canOpenEgg = false
+
+                        -- fire the server to get random pets
+                        local openedPets : {pet} = OpenEggRF:InvokeServer(openEggButton.Parent.EggId.Value, openEggButton.NumberOfEggs.Value)
+
+                        -- add all the pets to the owned pets table
+                        for _,pet : pet in pairs(openedPets) do
+                            table.insert(petModule.ownedPets, pet)
+                        end
+
+                        -- play the right egg opening sequence based on the number of pets the player got
+                        if #openedPets == 1 then
+                            petModule:PlayEggOpeningSequence(oneEggContainer, openedPets)
+                        elseif #openedPets == 3 then
+                            petModule:PlayEggOpeningSequence(threeEggContainer, openedPets)
+                        elseif #openedPets == 6 then
+                            petModule:PlayEggOpeningSequence(sixEggContainer, openedPets)
+                        else
+                            -- if petModule:PlayEggOpeningSequence hasn't been called, set can open egg to true to release the debounce and allow the player to re-open eggs
+                            petModule.canOpenEgg = true
+                        end
+                    end
                 end)
             end
         end
@@ -192,101 +177,193 @@ end
 --[[
     Plays the egg opening sequence
 
+    @param eggSequenceContainer : Frame, the frame containing all the eggs on which to play the opening sequence
     @param pets : {pet}, the pets to show in the sequence
 ]]--
-function PetModule:PlayEggOpeningSequence(pets : {pet})
+function PetModule:PlayEggOpeningSequence(eggSequenceContainer : Frame, pets : {pet})
+
     self.canOpenEgg = false
 
-    local petName = pets[1].name
-    local petClone : Model
-    if displayPets:FindFirstChild(petName) then
-        petClone = displayPets[petName]:Clone()
-        petClone.Parent = eggViewportFrame.WorldModel
-    end
+    for i : number, eggContainer : GuiObject in ipairs(eggSequenceContainer:GetChildren()) do
+        if eggContainer:IsA("Frame") then
+            eggOpeningBackground.Visible = true
+            eggSequenceContainer.Visible = true
 
-    eggOpeningBackground.Visible = true
-    
-    eggImage.Visible = true
-    scaleEggUp:Play()
-    scaleEggUp.Completed:Wait()
+            local pet : pet = pets[i]
 
-    rotateEggLeft:Play()
-    rotateEggLeft.Completed:Wait()
-
-    shakeEgg:Play()
-    shakeEgg.Completed:Wait()
-
-    resetEggOrientation:Play()
-    resetEggOrientation.Completed:Wait()
-
-    explodeEgg:Play()
-    explodeEgg.Completed:Wait()
-
-    eggImage.Visible = false
-
-    eggViewportFrame.Visible = true
-
-    eggPetName.Text = petName
-
-    local rarity : rarity = rarities[pets[1].rarity]
-    eggpetRarity.Text = rarity.name
-    eggpetRarity.TextColor3 = rarity.color
-
-    TweenService:Create(
-        petClone.PrimaryPart,
-        TweenInfo.new(
-            0.5
-        ),
-        {CFrame = CFrame.fromOrientation(0,0,0)}
-    ):Play()
-
-    task.wait(1)
-
-    petInformation.Visible = true
-
-    -- close and reset the egg opening sequence on screen click/touch
-    local inputConnection : RBXScriptSignal
-    inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-        if not gameProcessedEvent then
-            
-            if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-                inputConnection:Disconnect()
-
-                -- close and reset the egg opening sequence
-                self:CloseEggOpeningSequence()
+            -- clone the pet to the viewport frame's world model to display it after the egg explodes
+            local petClone : Model
+            if displayPets:FindFirstChild(pet.name) then
+                petClone = displayPets[pet.name]:Clone()
+                petClone.Parent = eggContainer.ViewportFrame.WorldModel
             end
-        end
-    end)
 
-    TweenService:Create(
-        petInformation,
-        TweenInfo.new(
-            1,
-            Enum.EasingStyle.Linear
-        ),
-        {GroupTransparency = 0}
-    ):Play()
+            local eggImage : ImageLabel = eggContainer.EggImage
+
+            eggImage.Visible = true
+
+            -- scale the egg up from 0 to its normal size
+            local scaleEggUp : Tween = TweenService:Create(
+                eggImage,
+                TweenInfo.new(
+                    0.2
+                ),
+                {Size = UDim2.new(0.7, 0, 0.7, 0)}
+            )
+
+            -- rotate the egg left 70°
+            local rotateEggLeft : Tween = TweenService:Create(
+                eggImage,
+                TweenInfo.new(
+                    0.15,
+                    Enum.EasingStyle.Linear
+                ),
+                {Rotation = -70}
+            )
+
+            -- shake the egg multiple times from left to right
+            local shakeEgg : Tween = TweenService:Create(
+                eggImage,
+                TweenInfo.new(
+                    0.15,
+                    Enum.EasingStyle.Linear,
+                    Enum.EasingDirection.InOut,
+                    4,
+                    true
+                ),
+                {Rotation = 70}
+            )
+
+            -- reset the orientation of the egg back to 0°
+            local resetEggOrientation : Tween = TweenService:Create(
+                eggImage,
+                TweenInfo.new(
+                    0.15,
+                    Enum.EasingStyle.Linear
+                ),
+                {Rotation = 0}
+            )
+
+            -- explode the egg to reveal the pet
+            local explodeEgg : Tween = TweenService:Create(
+                eggImage,
+                TweenInfo.new(
+                    0.2,
+                    Enum.EasingStyle.Quad
+                ),
+                {
+                    Size = UDim2.new(3,0,3,0),
+                    ImageTransparency = 1
+                }
+            )
+
+            -- turn the pet around to face the camera
+            local turnPetAround : Tween = TweenService:Create(
+                petClone.PrimaryPart,
+                TweenInfo.new(
+                    0.5
+                ),
+                {CFrame = CFrame.fromOrientation(0,0,0)}
+            )
+
+            -- wrap the sequence in a promise, so that we can open multiple eggs at once (only useful for x3 and x6 open eggs game passes)
+            Promise.new(function(resolve)
+                scaleEggUp:Play()
+                scaleEggUp.Completed:Wait()
+
+                rotateEggLeft:Play()
+                rotateEggLeft.Completed:Wait()
+
+                shakeEgg:Play()
+                shakeEgg.Completed:Wait()
+
+                resetEggOrientation:Play()
+                resetEggOrientation.Completed:Wait()
+
+                explodeEgg:Play()
+                explodeEgg.Completed:Wait()
+
+                eggImage.Visible = false
+
+                -- reveal the pet
+                eggContainer.ViewportFrame.Visible = true
+
+                -- get the name and color of the rarity based on the id
+                local rarity : rarity = rarities[pet.rarity]
+
+                -- update the pet's information
+                eggContainer.PetInformation.PetName.Text = pet.name
+                eggContainer.PetInformation.Rarity.Text = rarity.name
+                eggContainer.PetInformation.Rarity.TextColor3 = rarity.color
+
+                turnPetAround:Play()
+                turnPetAround.Completed:Wait()
+
+                task.wait(0.5)
+
+                eggContainer.PetInformation.Visible = true
+
+                local canvasGroupTransparencyTween : Tween = TweenService:Create(
+                    eggContainer.PetInformation,
+                    TweenInfo.new(
+                        1,
+                        Enum.EasingStyle.Linear
+                    ),
+                    {GroupTransparency = 0}
+                )
+
+                canvasGroupTransparencyTween:Play()
+                canvasGroupTransparencyTween.Completed:Wait()
+
+                -- close and reset the egg opening sequence on screen click/touch
+                if not self.closeEggSequenceInputConnection then
+                    self.closeEggSequenceInputConnection = UserInputService.InputBegan:Connect(function(input)
+
+                        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            self.closeEggSequenceInputConnection:Disconnect()
+                            self.closeEggSequenceInputConnection = nil
+
+                            -- close and reset the egg opening sequence
+                            self:CloseEggOpeningSequence(eggSequenceContainer)
+                        end
+                    end)
+                end
+
+                resolve()
+            end)
+        end
+    end
 end
 
 
 --[[
     Closes and resets the egg opening sequence
+
+    @param eggSequenceContainer : Frame, the frame containing all the eggs on which to play the opening sequence
 ]]--
-function PetModule:CloseEggOpeningSequence()
+function PetModule:CloseEggOpeningSequence(eggSequenceContainer : Frame)
+
     eggOpeningBackground.Visible = false
+    eggSequenceContainer.Visible = false
 
-    eggImage.Visible = false
-    eggImage.Size = UDim2.new(0,0,0,0)
-    eggImage.ImageTransparency = 0
+    for _,eggContainer : GuiObject in ipairs(eggSequenceContainer:GetChildren()) do
+        if eggContainer:IsA("Frame") then
 
-    eggViewportFrame.Visible = false
-    local petClone : Model = eggViewportFrame.WorldModel:FindFirstChildOfClass("Model")
-    if petClone then
-        petClone:Destroy()
+            eggContainer.EggImage.Visible = false
+            eggContainer.EggImage.Size = UDim2.new(0,0,0,0)
+            eggContainer.EggImage.ImageTransparency = 0
+
+            eggContainer.ViewportFrame.Visible = false
+            local petClone : Model = eggContainer.ViewportFrame.WorldModel:FindFirstChildOfClass("Model")
+            if petClone then
+                petClone:Destroy()
+            end
+
+            eggContainer.PetInformation.Visible = false
+            eggContainer.PetInformation.GroupTransparency = 1
+        end
     end
 
-    petInformation.Visible = false
-    petInformation.GroupTransparency = 1
 
     self.canOpenEgg = true
 end
