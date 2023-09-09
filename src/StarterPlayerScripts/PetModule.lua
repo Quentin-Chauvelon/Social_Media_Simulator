@@ -34,6 +34,7 @@ export type PetModule = {
 }
 
 export type pet = {
+    identifier : string,
     name : string,
     rarity : number,
     size : number,
@@ -52,7 +53,27 @@ type rarity = {
 local rarities : {[number] : rarity} = {
     [0] = {
         name = "Common",
-        color = Color3.fromRGB(122, 171, 235)
+        color = Color3.fromRGB(198, 212, 223)
+    },
+    [1] = {
+        name = "Uncommon",
+        color = Color3.fromRGB(90, 164, 255)
+    },
+    [2] = {
+        name = "Rare",
+        color = Color3.fromRGB(6, 231, 2)
+    },
+    [3] = {
+        name = "Epic",
+        color = Color3.fromRGB(210, 30, 255)
+    },
+    [4] = {
+        name = "Legendary",
+        color = Color3.fromRGB(255, 159, 25)
+    },
+    [5] = {
+        name = "Mystical",
+        color = Color3.fromRGB(80, 8, 125)
     }
 }
 
@@ -65,6 +86,7 @@ function PetModule.new(utility : Utility.Utility)
     local petModule : PetModule = {}
 
     petModule.ownedPets = {}
+
     petModule.canOpenEgg = true
 
     petModule.closeEggSequenceInputConnection = nil
@@ -193,8 +215,8 @@ function PetModule:PlayEggOpeningSequence(eggSequenceContainer : Frame, pets : {
 
             -- clone the pet to the viewport frame's world model to display it after the egg explodes
             local petClone : Model
-            if displayPets:FindFirstChild(pet.name) then
-                petClone = displayPets[pet.name]:Clone()
+            if displayPets:FindFirstChild(pet.identifier) then
+                petClone = displayPets[pet.identifier]:Clone()
                 petClone.Parent = eggContainer.ViewportFrame.WorldModel
             end
 
@@ -363,7 +385,6 @@ function PetModule:CloseEggOpeningSequence(eggSequenceContainer : Frame)
             eggContainer.PetInformation.GroupTransparency = 1
         end
     end
-
 
     self.canOpenEgg = true
 end

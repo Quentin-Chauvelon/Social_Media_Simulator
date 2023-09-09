@@ -21,6 +21,7 @@ export type PetModule = {
 }
 
 type pet = {
+    identifier : string,
     name : string,
     rarity : number,
     size : number,
@@ -36,7 +37,8 @@ local rarities = {
     Uncommon = 1,
     Rare = 2,
     Epic = 3,
-    Legendary = 4
+    Legendary = 4,
+    Mystical = 5
 }
 
 local sizes = {
@@ -55,16 +57,18 @@ local upgrades = {
 
 local pets : {[number] : pet} = {
     [0] = {
-        name = "Smiling",
+        identifier = "TearsOfJoy",
+        name = "Tears of joy",
         rarity = rarities.Common,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 1.1,
-        activeBoost = 1.1,
+        baseBoost = 1.05,
+        activeBoost = 1.05,
         equipped = false
     },
     [1] = {
-        name = "Smiling",
+        identifier = "Grinning",
+        name = "Grinning",
         rarity = rarities.Common,
         size = sizes.Normal,
         upgrade = upgrades.None,
@@ -73,7 +77,8 @@ local pets : {[number] : pet} = {
         equipped = false
     },
     [2] = {
-        name = "Smiling",
+        identifier = "Flushed",
+        name = "Flushed",
         rarity = rarities.Common,
         size = sizes.Normal,
         upgrade = upgrades.None,
@@ -82,41 +87,335 @@ local pets : {[number] : pet} = {
         equipped = false
     },
     [3] = {
-        name = "Smiling",
+        identifier = "ROFL",
+        name = "ROFL",
         rarity = rarities.Common,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 1.1,
-        activeBoost = 1.1,
+        baseBoost = 1.2,
+        activeBoost = 1.2,
         equipped = false
     },
     [4] = {
-        name = "Smiling",
+        identifier = "Crying",
+        name = "Crying",
         rarity = rarities.Common,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 1.1,
-        activeBoost = 1.1,
+        baseBoost = 1.25,
+        activeBoost = 1.25,
         equipped = false
     },
     [5] = {
+        identifier = "Smiling",
         name = "Smiling",
         rarity = rarities.Common,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 1.1,
-        activeBoost = 1.1,
+        baseBoost = 1.5,
+        activeBoost = 1.5,
         equipped = false
     },
     [6] = {
-        name = "Smiling",
-        rarity = rarities.Common,
+        identifier = "Winking",
+        name = "Winking",
+        rarity = rarities.Uncommon,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 1.1,
-        activeBoost = 1.1,
+        baseBoost = 1.65,
+        activeBoost = 1.65,
         equipped = false
-    }
+    },
+    [7] = {
+        identifier = "SmilingEyes",
+        name = "Smiling eyes",
+        rarity = rarities.Uncommon,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 1.8,
+        activeBoost = 1.8,
+        equipped = false
+    },
+    [8] = {
+        identifier = "Sweat",
+        name = "Sweat",
+        rarity = rarities.Uncommon,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 2,
+        activeBoost = 2,
+        equipped = false
+    },
+    [9] = {
+        identifier = "Nerd",
+        name = "Nerd",
+        rarity = rarities.Uncommon,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 2.1,
+        activeBoost = 2.1,
+        equipped = false
+    },
+    [10] = {
+        identifier = "RollingEyes",
+        name = "Rolling eyes",
+        rarity = rarities.Rare,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 2.7,
+        activeBoost = 2.7,
+        equipped = false
+    },
+    [11] = {
+        identifier = "HeartEyes",
+        name = "Heart eyes",
+        rarity = rarities.Rare,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 2.95,
+        activeBoost = 2.95,
+        equipped = false
+    },
+    [12] = {
+        identifier = "Hugging",
+        name = "Hugging",
+        rarity = rarities.Rare,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 3.05,
+        activeBoost = 3.05,
+        equipped = false
+    },
+    [13] = {
+        identifier = "Pensive",
+        name = "Pensive",
+        rarity = rarities.Rare,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 3.2,
+        activeBoost = 3.2,
+        equipped = false
+    },
+    [14] = {
+        identifier = "Thinking",
+        name = "Thinking",
+        rarity = rarities.Rare,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 3.6,
+        activeBoost = 3.6,
+        equipped = false
+    },
+    [15] = {
+        identifier = "Hearts",
+        name = "Hearts",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 3.5,
+        activeBoost = 3.5,
+        equipped = false
+    },
+    [16] = {
+        identifier = "Squinting",
+        name = "Squinting",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 3.75,
+        activeBoost = 3.75,
+        equipped = false
+    },
+    [17] = {
+        identifier = "Fear",
+        name = "Fear",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 4,
+        activeBoost = 4,
+        equipped = false
+    },
+    [18] = {
+        identifier = "ThumbsUp",
+        name = "Thumbs up",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 4.5,
+        activeBoost = 4.5,
+        equipped = false
+    },
+    [19] = {
+        identifier = "Swearing",
+        name = "Swearing",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 5,
+        activeBoost = 5,
+        equipped = false
+    },
+    [20] = {
+        identifier = "UpsideDown",
+        name = "Upside down",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 5.2,
+        activeBoost = 5.2,
+        equipped = false
+    },
+    [21] = {
+        identifier = "FoldedHands",
+        name = "Folded hands",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 6,
+        activeBoost = 6,
+        equipped = false
+    },
+    [22] = {
+        identifier = "OK",
+        name = "OK",
+        rarity = rarities.Epic,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 7,
+        activeBoost = 7,
+        equipped = false
+    },
+    [23] = {
+        identifier = "PurpleHeart",
+        name = "Purple heart",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 9.5,
+        activeBoost = 9.5,
+        equipped = false
+    },
+    [24] = {
+        identifier = "Clapping",
+        name = "Clapping",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 11.2,
+        activeBoost = 11.2,
+        equipped = false
+    },
+    [25] = {
+        identifier = "Sleeping",
+        name = "Sleeping",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 15.3,
+        activeBoost = 15.3,
+        equipped = false
+    },
+    [26] = {
+        identifier = "Sunglasses",
+        name = "Sunglasses",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 20.8,
+        activeBoost = 20.8,
+        equipped = false
+    },
+    [27] = {
+        identifier = "Party",
+        name = "Party",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 35.5,
+        activeBoost = 35.5,
+        equipped = false
+    },
+    [28] = {
+        identifier = "Angel",
+        name = "Angel",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 40.1,
+        activeBoost = 40.1,
+        equipped = false
+    },
+    [29] = {
+        identifier = "Poo",
+        name = "Poo",
+        rarity = rarities.Legendary,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 50.5,
+        activeBoost = 50.5,
+        equipped = false
+    },
+    [100] = {
+        identifier = "RedHeart",
+        name = "Heart",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 75,
+        activeBoost = 75,
+        equipped = false
+    },
+    [101] = {
+        identifier = "Hundred",
+        name = "Hundred",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 100,
+        activeBoost = 100,
+        equipped = false
+    },
+    [102] = {
+        identifier = "Fire",
+        name = "Fire",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 150,
+        activeBoost = 150,
+        equipped = false
+    },
+    [103] = {
+        identifier = "PartyPopper",
+        name = "Party popper",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 250,
+        activeBoost = 250,
+        equipped = false
+    },
+    [104] = {
+        identifier = "Devil",
+        name = "Devil",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 300,
+        activeBoost = 300,
+        equipped = false
+    },
+    [105] = {
+        identifier = "Money",
+        name = "Money",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 500,
+        activeBoost = 500,
+        equipped = false
+    },
 }
 
 
@@ -127,7 +426,9 @@ PetModule.__index = PetModule
 function PetModule.new(plr : Player)
     local petModule : PetModule = {}
 
+    -- DataStore2("pets", plr):Set(nil)
     petModule.ownedPets = DataStore2("pets", plr):Get({})
+    print(petModule.ownedPets)
 
     petModule.maxEquippedPets = 3
     petModule.inventoryCapacity = 50

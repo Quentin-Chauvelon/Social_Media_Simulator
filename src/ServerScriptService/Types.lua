@@ -280,6 +280,7 @@ export type PetModule = {
 }
 
 type pet = {
+	identifier : string,
     name : string,
     rarity : number,
     size : number,
