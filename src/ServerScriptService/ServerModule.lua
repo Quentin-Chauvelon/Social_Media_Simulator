@@ -163,18 +163,18 @@ function ServerModule.onJoin(plr : Player)
 			RunService.Heartbeat:Wait()
 		until p.isLoaded == true
 
-		-- load the effect of the game passes the player owns
-		p.gamepassModule:LoadOwnedGamePasses(p)
-
 		-- fire the client to load the owned pets
 		PetsRE:FireClient(plr, p.petModule.ownedPets)
-		
+
 		-- fire the followers and coins events once at the start to display the numbers
 		FollowersRE:FireClient(plr, p.followers)
 		CoinsRE:FireClient(plr, p.coins)
-	
+
 		-- fire the upgrade posts remote event to load the ui for the types the player already owns
 		UpgradePostsRE:FireClient(plr, p.postModule.level)
+
+		-- load the effect of the game passes the player owns
+		p.gamepassModule:LoadOwnedGamePasses(p)
 
 		resolve()
 	end)

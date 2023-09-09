@@ -9,8 +9,9 @@ local PlayTimeRewards = require(ServerScriptService:WaitForChild("PlayTimeReward
 local UpgradeModule = require(ServerScriptService:WaitForChild("UpgradeModule"))
 local RebirthModule = require(ServerScriptService:WaitForChild("RebirthModule"))
 local CaseModule = require(ServerScriptService:WaitForChild("CaseModule"))
-local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local PotionModule = require(ServerScriptService:WaitForChild("PotionModule"))
+local PetModule = require(ServerScriptService:WaitForChild("PetModule"))
+local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
 DataStore2.Combine("SMS", "followers", "coins")
@@ -32,6 +33,7 @@ export type PlayerModule = {
 	rebirthModule : RebirthModule.RebirthModule,
 	caseModule : CaseModule.CaseModule,
 	potionModule : PotionModule.PotionModule,
+	petModule : PetModule.PetModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -98,7 +100,7 @@ function Player.new(plr : Player)
 	
 	p.potionModule = PotionModule.new(plr)
 
-	p.gamepassModule = GamepassModule.new()
+	p.petModule = PetModule.new(plr)
 
 	--p.coins = DataStore2("coins", plr):Get(0)
 
@@ -123,6 +125,8 @@ function Player.new(plr : Player)
 	rebirthValue.Name = "Rebirth"
 	rebirthValue.Value = p.rebirthModule.rebirthLevel
 	rebirthValue.Parent = statsFolder
+
+	p.gamepassModule = GamepassModule.new()
 
 	return setmetatable(p, Player)
 end
