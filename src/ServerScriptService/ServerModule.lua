@@ -11,6 +11,7 @@ local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
+local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
 local UpgradePostsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpgradePosts")
 local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
 local CoinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Coins")
@@ -22,6 +23,7 @@ local SaveCustomPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("SaveCu
 local UpgradeRF : RemoteFunction = ReplicatedStorage:WaitForChild("Upgrade")
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
+local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
@@ -163,6 +165,9 @@ function ServerModule.onJoin(plr : Player)
 
 		-- load the effect of the game passes the player owns
 		p.gamepassModule:LoadOwnedGamePasses(p)
+
+		-- fire the client to load the owned pets
+		PetsRE:FireClient(plr, p.petModule.ownedPets)
 		
 		-- fire the followers and coins events once at the start to display the numbers
 		FollowersRE:FireClient(plr, p.followers)
@@ -356,6 +361,43 @@ CaseRF.OnServerInvoke = function(plr : Player, color : string?)
 
 		return false
 	end
+end
+
+
+--[[
+	Fires when the player wants to open an egg
+
+	@param plr : Player, the player who wants to open an egg
+	@param eggId : number, the id of the egg the player wants to open
+	@param numberOfEggs : number, the number of eggs the player is trying to open at once (1, 3 or 6 (3 and 6 are gamepasses))
+	@retunr {pet}, the table containing the information about the pets the player got from the egg
+]]--
+OpenEggRF.OnServerInvoke = function(plr : Player, eggId : number, numberOfEggs : number) : {}
+	if eggId and numberOfEggs and typeof(eggId) == "number" and typeof(numberOfEggs) == "number" then
+
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+
+			-- open 1 egg (default opening method)
+			if numberOfEggs == 1 then
+				return p.petModule:OpenEggs(p, eggId, 1)
+
+			-- open 3 eggs (game pass)
+			elseif numberOfEggs == 3 then
+				if p.gamepassModule.boughtOpen3Eggs then
+					return p.petModule:OpenEggs(p, eggId, 3)
+				end
+
+			-- open 6 eggs (game pass)
+			else
+				if p.gamepassModule.boughtOpen6Eggs then
+					return p.petModule:OpenEggs(p, eggId, 6)
+				end
+			end
+		end
+	end
+
+	return {}
 end
 
 

@@ -15,6 +15,7 @@ local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
 local DisplayPotionsRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayPotions")
 local BoughtGamePassRE : RemoteEvent = ReplicatedStorage:WaitForChild("BoughtGamePass")
+local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 
 local lplr = Players.LocalPlayer
@@ -36,6 +37,7 @@ local UpgradeModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("U
 local RebirthModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("RebirthModule"))
 local CaseModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CaseModule"))
 local PotionModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PotionModule"))
+local PetModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PetModule"))
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 
 
@@ -78,6 +80,8 @@ rebirthModule:UpdateFollowersNeededToRebirth()
 CaseModule.new(Utility)
 
 local potionModule : PotionModule.PotionModule = PotionModule.new(Utility)
+
+local petModule : PetModule.PetModule = PetModule.new(Utility)
 
 
 -- store all upgrades posts UIStroke in a table to change them easily later
@@ -487,6 +491,14 @@ DisplayPotionsRE.OnClientEvent:Connect(function(activePotions : {PotionModule.po
 	if noActivePotionsBefore then
 		potionModule:StartPotionsTimer()
 	end
+end)
+
+
+--[[
+	Load the owned pets
+]]--
+PetsRE.OnClientEvent:Connect(function(pets : PetModule.pet)
+    petModule.ownedPets = pets
 end)
 
 

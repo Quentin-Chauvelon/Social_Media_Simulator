@@ -9,6 +9,8 @@ export type GamepassModule = {
     gamePasses : GamePasses,
     boughtCoinsMultiplier : boolean,
     boughtFollowersMultiplier : boolean,
+    boughtOpen3Eggs : boolean,
+    boughtOpen6Eggs : boolean,
     new : () -> GamepassModule,
     PlayerBoughtGamePass : (self : GamepassModule, gamePassId : number, p : Types.PlayerModule) -> nil,
     LoadOwnedGamePasses : (self : GamepassModule) -> nil,
@@ -35,6 +37,8 @@ function GamepassModule.new()
 
     gamepassModule.boughtCoinsMultiplier = false
     gamepassModule.boughtFollowersMultiplier = false
+    gamepassModule.boughtOpen3Eggs = false
+    gamepassModule.boughtOpen6Eggs = false
 
     -- TODO : check if the player owns the game pass to set the variables above
 

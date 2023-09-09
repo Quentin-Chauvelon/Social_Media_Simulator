@@ -13,6 +13,7 @@ export type PlayerModule = {
 	rebirthModule : RebirthModule,
 	caseModule : CaseModule,
 	potionModule : PotionModule,
+	petModule : PetModule,
 	gamepassModule : GamepassModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -262,6 +263,30 @@ type potionTypes = {
     Coins : number,
     AutoPostSpeed : number,
     FollowersCoins : number
+}
+
+
+export type PetModule = {
+    ownedPets : {pet},
+    maxEquippedPets : number,
+    inventoryCapacity : number,
+    plr : Player,
+    new : (plr : Player) -> PetModule,
+    IsPetInventoryFull : (self : PetModule) -> boolean,
+    AddPetToInventory : (self : PetModule, pet : pet) -> nil,
+    GetPetFromPetId : (self : PetModule, petId : number) -> pet?,
+    OpenEgg : (self : PetModule, eggId : number) -> pet,
+    OpenEggs : (self : PetModule, p : PlayerModule, eggId : number, numberOfEggsToOpen : number) -> pet,
+}
+
+type pet = {
+    name : string,
+    rarity : number,
+    size : number,
+    upgrade : number,
+    baseBoost : number,
+    activeBoost : number,
+    equipped : boolean
 }
 
 return nil
