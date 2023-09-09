@@ -37,8 +37,8 @@ function GamepassModule.new()
 
     gamepassModule.boughtCoinsMultiplier = false
     gamepassModule.boughtFollowersMultiplier = false
-    gamepassModule.boughtOpen3Eggs = false
-    gamepassModule.boughtOpen6Eggs = false
+    gamepassModule.boughtOpen3Eggs = true
+    gamepassModule.boughtOpen6Eggs = true
 
     -- TODO : check if the player owns the game pass to set the variables above
 
@@ -57,6 +57,8 @@ function GamepassModule:PlayerBoughtGamePass(gamePassId : number, p : Types.Play
     
     if gamePassId == self.gamePasses.SpaceCase then
         p.caseModule:BuyCase("Space", p)
+        isGamePassPurchaseSuccesfull = true
+    else
         isGamePassPurchaseSuccesfull = true
     end
 

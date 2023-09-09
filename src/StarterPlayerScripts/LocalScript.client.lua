@@ -83,6 +83,8 @@ local potionModule : PotionModule.PotionModule = PotionModule.new(Utility)
 
 local petModule : PetModule.PetModule = PetModule.new(Utility)
 
+GamePassModule.LoadGamePasses()
+
 
 -- store all upgrades posts UIStroke in a table to change them easily later
 local upgradePostsGuiUIStroke : {UIStroke} = {}
@@ -506,6 +508,8 @@ end)
 	Called whenever the player buys a game pass to make changes locally (mainly to the ui) if needed
 ]]--
 BoughtGamePassRE.OnClientEvent:Connect(function(gamePassId : number)
+	GamePassModule.PlayerBoughtGamePass(gamePassId)
+
 	if gamePassId == GamePassModule.gamePasses.SpaceCase then
 		CaseModule:CaseBoughtSuccessfully("Space")
 	end
