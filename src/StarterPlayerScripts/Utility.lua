@@ -16,7 +16,7 @@ local blurEffect : BlurEffect = game:GetService("Lighting"):WaitForChild("Blur")
 local blurWhiteBackground : ScreenGui = playerGui:WaitForChild("BackgroundBlur")
 
 local notification : TextLabel = playerGui:WaitForChild("Menu"):WaitForChild("Notification")
-local notificationImage : ImageLabel = notification:WaitForChild("Image")
+local notificationType : TextLabel = notification:WaitForChild("Type")
 local notificationClose : TextButton = notification:WaitForChild("Close")
 local notificationUIPadding : UIPadding = notification:WaitForChild("UIPadding")
 
@@ -57,12 +57,12 @@ function Utility.new()
         
         local iconSize : number = Utility.GetNumberInRangeProportionallyDefaultWidth(viewportSize.X, 20, 40)
         local iconUDim : UDim = UDim.new(0, iconSize)
-        notificationImage.Size = UDim2.new(iconUDim, iconUDim)
+        notificationType.Size = UDim2.new(iconUDim, iconUDim)
         notificationClose.Size = UDim2.new(iconUDim, iconUDim)
 
         notificationUIPadding.PaddingLeft = UDim.new(0, 20 + iconSize)
         notificationUIPadding.PaddingRight = UDim.new(0, 35 + iconSize)
-        notificationImage.Position = UDim2.new(0, -notificationUIPadding.PaddingLeft.Offset + 10, 0.5, 0)
+        notificationType.Position = UDim2.new(0, -notificationUIPadding.PaddingLeft.Offset + 10, 0.5, 0)
         notificationClose.Position = UDim2.new(1, notificationUIPadding.PaddingRight.Offset - 15, 0.5, 0)
 
         notification.TextSize = iconSize * 0.625
@@ -175,7 +175,7 @@ local function DisplayNotification(text : string, duration : number)
 
     local textSize : Vector2 = TextService:GetTextSize(text, notification.TextSize, Enum.Font.SourceSansBold, Vector2.new(notification.AbsoluteSize.X, 2000))
 
-    notification.Size = UDim2.new(notification.Size.X, UDim.new(0, math.max(textSize.Y + 20, notificationClose.AbsoluteSize.Y + 20)))
+    notification.Size = UDim2.new(notification.Size.X, UDim.new(0, math.max(textSize.Y + 20, notificationClose.AbsoluteSize.Y + 40)))
     notification.Text = text
 
     if not notification.Visible then
@@ -187,6 +187,8 @@ local function DisplayNotification(text : string, duration : number)
             Enum.EasingStyle.Quad,
             0.3
         )
+
+        return
 
         Promise.new(function(resolve)
             local notificationCloseConnection : RBXScriptConnection
@@ -216,18 +218,30 @@ end
 
 
 function Utility.DisplayInformation(text : string, duration : number)
-    notification.BackgroundColor3 = Color3.fromRGB(175, 213, 240)
-    notificationImage.ImageColor3 = Color3.fromRGB(97, 154, 240)
-    notificationClose.BackgroundColor3 = Color3.fromRGB(97, 154, 240)
+    notification.BackgroundColor3 = Color3.fromRGB(107, 158, 240)
+    notification.BorderUIStroke.Color = Color3.fromRGB(56, 84, 125)
+    notification.ContextualUIStroke.Color = Color3.fromRGB(56, 84, 125)
+
+    notificationType.BackgroundColor3 = Color3.fromRGB(56, 84, 125)
+    notificationType.Text = "!"
+
+    notificationClose.TextColor3 = Color3.fromRGB(56, 84, 125)
+    notificationClose.UIStroke.Color = Color3.fromRGB(56, 84, 125)
 
     DisplayNotification(text, duration)
 end
 
 
 function Utility.DisplayError(text : string, duration : number)
-    notification.BackgroundColor3 = Color3.fromRGB(255, 79, 79)
-    notificationImage.ImageColor3 = Color3.new(1,1,1)
-    notificationClose.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    notification.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    notification.BorderUIStroke.Color = Color3.fromRGB(126, 0, 0)
+    notification.ContextualUIStroke.Color = Color3.fromRGB(126, 0, 0)
+
+    notificationType.BackgroundColor3 = Color3.fromRGB(126, 0, 0)
+    notificationType.Text = "X"
+
+    notificationClose.TextColor3 = Color3.fromRGB(126, 0, 0)
+    notificationClose.UIStroke.Color = Color3.fromRGB(126, 0, 0)
 
     DisplayNotification(text, duration)
 end
