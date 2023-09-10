@@ -499,9 +499,9 @@ end)
 --[[
 	Load the owned pets
 ]]--
-PetsRE.OnClientEvent:Connect(function(pets : PetModule.pet)
+PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet})
     petModule.ownedPets = pets
-	petModule:LoadPets()
+	petModule:AddPetsToInventory(pets)
 end)
 
 

@@ -55,18 +55,21 @@ export type PetModule = {
     maxEquippedPets : number,
     maxInventoryCapacity : number,
     utility : Utility.Utility,
+    lastSelectedPet : ImageButton?,
     canOpenEgg : boolean,
     closeEggSequenceInputConnection : RBXScriptSignal?,
     new : (utility : Utility.Utility) -> PetModule,
     PlayEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame, pets : {pet}) -> nil,
     CloseEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame) -> nil,
-    LoadPets : (self : PetModule) -> nil,
     OpenGui : (self : PetModule) -> nil,
     CloseGui : (self : PetModule) -> nil,
+    AddPetToInventory : (self : PetModule, pet : pet) -> nil,
+    AddPetsToInventory : (self : PetModule, pets : {pet}) -> nil,
     SelectPet : (self : PetModule, identifier : string, size : number, upgrade : number) -> nil,
+    UnselectPet : (self : PetModule) -> nil,
     CountNumberOfSamePets : (self : PetModule, identifier : string, size : number, upgrade : number) -> number,
     UpdateNumberOfEquippedPets : (self : PetModule) -> nil,
-    UpdateInventoryCapacity : (self : PetModule) -> nil,
+    UpdateUsedCapacity : (self : PetModule) -> nil,
 }
 
 export type pet = {
@@ -251,6 +254,8 @@ function PetModule.new(utility : Utility.Utility)
 
     petModule.utility = utility
 
+    petModule.lastSelectedPet = nil
+
     petModule.canOpenEgg = true
     petModule.closeEggSequenceInputConnection = nil
 
@@ -385,6 +390,8 @@ function PetModule.new(utility : Utility.Utility)
                             -- if petModule:PlayEggOpeningSequence hasn't been called, set can open egg to true to release the debounce and allow the player to re-open eggs
                             petModule.canOpenEgg = true
                         end
+
+                        petModule:AddPetsToInventory(openedPets)
                     end
                 end)
             end
@@ -620,7 +627,7 @@ end
 --[[
     Updates the inventory capacity
 ]]--
-function PetModule:UpdateInventoryCapacity()
+function PetModule:UpdateUsedCapacity()
     inventoryCapacity.Text = tostring(#self.ownedPets) .. "/" .. tostring(self.maxInventoryCapacity)
 end
 
@@ -740,64 +747,80 @@ end
 
 
 --[[
-    Loads all the pets in the inventory UI
+    Hides the pet details tab
 ]]--
-function PetModule:LoadPets()
-    local lastSelectedPet : ImageButton? = nil
-
-    for _,pet : pet in pairs(self.ownedPets) do
-        local petClone : ImageButton = petTemplate:Clone()
-
-        petClone.PetName.Text = pet.name
-
-        local rarity = rarities[pet.rarity]
-        petClone.BackgroundColor3 = rarity.color
-        petClone.UIStroke.Color = rarity.border
-
-        local displayPet : Model = displayPets:FindFirstChild(pet.identifier)
-        if displayPet then
-            displayPet:Clone().Parent = petClone.PetDisplay
+function PetModule:UnselectPet()
+    -- tween the pets list container size up to remove space for the details tab
+    inventoryPetsListContainer:TweenSize(
+        UDim2.new(0.94, 0, 0.85, 0),
+        Enum.EasingDirection.InOut,
+        Enum.EasingStyle.Linear,
+        0.2,
+        true
+    )
+    
+    -- tween details tab size down to hide it
+    petDetails:TweenSize(
+        UDim2.new(0, 0, 0.85, 0),
+        Enum.EasingDirection.InOut,
+        Enum.EasingStyle.Linear,
+        0.2,
+        true,
+        function()
+            petDetails.Visible = false
         end
+    )
 
-        petClone.MouseButton1Down:Connect(function()
+    petDetails.Visible = false
+end
 
-            -- if the player clicked the same pet twice, hide the details tab
-            if petDetails.Visible and petClone == lastSelectedPet then
-                -- tween the pets list container size up to remove space for the details tab
-                inventoryPetsListContainer:TweenSize(
-                    UDim2.new(0.94, 0, 0.85, 0),
-                    Enum.EasingDirection.InOut,
-                    Enum.EasingStyle.Linear,
-                    0.2,
-                    true
-                )
-                
-                -- tween details tab size down to hide it
-                petDetails:TweenSize(
-                    UDim2.new(0, 0, 0.85, 0),
-                    Enum.EasingDirection.InOut,
-                    Enum.EasingStyle.Linear,
-                    0.2,
-                    true,
-                    function()
-                        petDetails.Visible = false
-                    end
-                )
 
-                petDetails.Visible = false
+--[[
+    Adds the given pet to the inventory UI
 
-                return
-            end
+    @param pet : pet, the pet to add to the inventory
+]]--
+function PetModule:AddPetToInventory(pet : pet)
+    local petClone : ImageButton = petTemplate:Clone()
 
-            lastSelectedPet = petClone
-            self:SelectPet(pet.identifier, pet.size, pet.upgrade)
-        end)
+    petClone.PetName.Text = pet.name
 
-        petClone.Parent = inventoryPetsListContainer
+    local rarity = rarities[pet.rarity]
+    petClone.BackgroundColor3 = rarity.color
+    petClone.UIStroke.Color = rarity.border
+
+    local displayPet : Model = displayPets:FindFirstChild(pet.identifier)
+    if displayPet then
+        displayPet:Clone().Parent = petClone.PetDisplay
     end
 
-    self:UpdateNumberOfEquippedPets()
-    self:UpdateInventoryCapacity()
+    petClone.MouseButton1Down:Connect(function()
+
+        -- if the player clicked the same pet twice, hide the details tab
+        if petDetails.Visible and petClone == self.lastSelectedPet then
+            self:UnselectPet()
+            return
+        end
+
+        self.lastSelectedPet = petClone
+        self:SelectPet(pet.identifier, pet.size, pet.upgrade)
+    end)
+
+    petClone.Parent = inventoryPetsListContainer
+end
+
+
+--[[
+    Adds the given pets to the inventory UI
+
+    @param pets : {pet} the pets to add to the inventory
+]]--
+function PetModule:AddPetsToInventory(pets : {pet})
+    for _,pet : pet in pairs(pets) do
+        self:AddPetToInventory(pet)
+    end
+
+    self:UpdateUsedCapacity()
 end
 
 
