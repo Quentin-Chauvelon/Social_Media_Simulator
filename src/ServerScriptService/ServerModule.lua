@@ -25,6 +25,7 @@ local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
 local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
+local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -91,6 +92,9 @@ function ServerModule.onJoin(plr : Player)
 	-- use all the potions to give the effects to the player
 	p.potionModule:UseAllActivePotions(p)
 
+	-- update the followers multiplier
+	p:UpdateFollowersMultiplier()
+
 	-- detect when player touches the upgrade post part
 	p.maid:GiveTask(
 		p.plotModule.phone.UpgradePosts.HitBox.Touched:Connect(function(hit)
@@ -112,18 +116,43 @@ function ServerModule.onJoin(plr : Player)
 	-- teleport the player once his character is loaded
 	p.maid:GiveTask(
 		plr.CharacterAdded:Connect(function(character)
+			local petsFolder : Folder = Instance.new("Folder")
+			petsFolder.Name = "Pets"
+			petsFolder.Parent = character
+
 			Promise.new(function(resolve)
 				task.wait(0.5)
 				resolve()
 			end)
 			:andThen(function()
+				
 				character.PrimaryPart.CFrame = CFrame.lookAt(p.plotModule.phone.TeleportPart.Position, p.plotModule.phone.PrimaryPart.Position)
+
+				-- if the player resetted his character, recreate all the attachments (check if it doesn't exist first because when the player joins the attachments can be created before this function runs and we don't want to create them twice)
+				if character.HumanoidRootPart and not character.HumanoidRootPart:FindFirstChild("PetAttachment") then
+					-- create the attachments, turn them and loads the pets
+					p.petModule:CreatePetAttachments()
+					p.petModule:RotateAttachmentsTowardsPlayer(p.plotModule.phone.PrimaryPart.Position)
+					p.petModule:LoadEquippedPets()
+				end
 			end)
 		end)
 	)
 
 	if plr.Character then
 		plr.Character.PrimaryPart.CFrame = CFrame.new(p.plotModule.phone.TeleportPart.Position, p.plotModule.phone.PrimaryPart.Position)
+
+		-- if the player resetted his character, recreate all the attachments (check if it doesn't exist first because when the player joins the attachments can be created before this function runs and we don't want to create them twice)
+		if plr.Character.HumanoidRootPart and not plr.Character.HumanoidRootPart:FindFirstChild("PetAttachment") then
+			-- create the attachments, turn them and loads the pets
+			p.petModule:CreatePetAttachments()
+			p.petModule:RotateAttachmentsTowardsPlayer(p.plotModule.phone.PrimaryPart.Position)
+			p.petModule:LoadEquippedPets()
+		end
+
+		local petsFolder : Folder = Instance.new("Folder")
+		petsFolder.Name = "Pets"
+		petsFolder.Parent = plr.Character
 	end
 
 
@@ -398,6 +427,32 @@ OpenEggRF.OnServerInvoke = function(plr : Player, eggId : number, numberOfEggs :
 	end
 
 	return {}
+end
+
+
+--[[
+    Fires when the player wants to equip a pet
+
+	@param plr : Player, the player who wants to equip a pet
+	@param identifier : string, the identifier of the pet
+    @param size : number, the size of the pet
+    @param upgrade : number, the upgrade applied to the pet
+	@return boolean, true if the pet could be equipped, false otherwise
+]]--
+EquipPetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
+	if id and typeof(id) == "number" then
+
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			local equipped : boolean = p.petModule:EquipPet(id, true)
+
+			p:UpdateFollowersMultiplier()
+
+			return equipped
+		end
+	end
+
+	return false
 end
 
 

@@ -268,8 +268,10 @@ type potionTypes = {
 
 export type PetModule = {
     ownedPets : {pet},
+    followersMultiplier : number,
     maxEquippedPets : number,
     inventoryCapacity : number,
+    nextId : number,
     plr : Player,
     new : (plr : Player) -> PetModule,
     IsPetInventoryFull : (self : PetModule) -> boolean,
@@ -277,6 +279,14 @@ export type PetModule = {
     GetPetFromPetId : (self : PetModule, petId : number) -> pet?,
     OpenEgg : (self : PetModule, eggId : number) -> pet,
     OpenEggs : (self : PetModule, p : PlayerModule, eggId : number, numberOfEggsToOpen : number) -> pet,
+    CanEquipPet : (self : PetModule) -> boolean,
+    EquipPet : (self : PetModule, id : number, updateFollowersMultiplier : boolean) -> boolean,
+    AddPetToCharacter : (self : PetModule, pet : pet) -> nil,
+    RemovePetFromCharacter : (self : PetModule, pet : pet) -> nil,
+    LoadEquippedPets : (self : PetModule) -> nil,
+    EquipBest : (self : PetModule) -> nil,
+    UnequipAllPets : (self : PetModule) -> nil,
+    UpdateFollowersMultiplier : (self : PetModule) -> nil,
 }
 
 type pet = {

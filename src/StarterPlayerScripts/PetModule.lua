@@ -8,6 +8,9 @@ local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local GamePassModule = require(script.Parent:WaitForChild("GamePassModule"))
 
 local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
+local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
+
+local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
 
 local lplr = Players.LocalPlayer
 
@@ -36,8 +39,8 @@ local petDetailsPetDisplay : ViewportFrame = petDetails:WaitForChild("PetDisplay
 local petDetailsBoost : TextLabel = petDetails:WaitForChild("Boost")
 local petDetailsRarity : TextLabel = petDetails:WaitForChild("Rarity")
 local petDetailsUpgrade : TextLabel = petDetails:WaitForChild("Upgrade")
-local petDetailsEquipPetButton : TextButton = petDetails:WaitForChild("Equip")
-local petDetailsDeletePetButton : TextButton = petDetails:WaitForChild("Delete")
+local equipPetButton : TextButton = petDetails:WaitForChild("Equip")
+local deletePetButton : TextButton = petDetails:WaitForChild("Delete")
 local petDetailsSizeCraftRequirements : TextLabel = petDetails:WaitForChild("SizeCraftRequirements")
 local petDetailsSizeCraftButton : TextButton = petDetails:WaitForChild("SizeCraft")
 local petDetailsSizeCraftDisabled : TextLabel = petDetails:WaitForChild("SizeCraftDisabled")
@@ -47,32 +50,33 @@ local moreEquippedPetsButton : TextButton = inventoryBackground.InventoryLimits.
 local inventoryCapacity : TextLabel = inventoryBackground.InventoryLimits:WaitForChild("MaxInvetoryCapacity"):WaitForChild("InventoryCapacity")
 local moreInventorySlotsButton : TextButton = inventoryBackground.InventoryLimits.MaxInvetoryCapacity:WaitForChild("MoreInvetorySlots")
 
-local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
-
 
 export type PetModule = {
     ownedPets : {pet},
+    currentlyEquippedPets : number,
     maxEquippedPets : number,
     maxInventoryCapacity : number,
     utility : Utility.Utility,
-    lastSelectedPet : ImageButton?,
+    selectedPet : number?,
     canOpenEgg : boolean,
     closeEggSequenceInputConnection : RBXScriptSignal?,
     new : (utility : Utility.Utility) -> PetModule,
     PlayEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame, pets : {pet}) -> nil,
     CloseEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame) -> nil,
-    OpenGui : (self : PetModule) -> nil,
-    CloseGui : (self : PetModule) -> nil,
-    AddPetToInventory : (self : PetModule, pet : pet) -> nil,
-    AddPetsToInventory : (self : PetModule, pets : {pet}) -> nil,
-    SelectPet : (self : PetModule, identifier : string, size : number, upgrade : number) -> nil,
-    UnselectPet : (self : PetModule) -> nil,
     CountNumberOfSamePets : (self : PetModule, identifier : string, size : number, upgrade : number) -> number,
     UpdateNumberOfEquippedPets : (self : PetModule) -> nil,
     UpdateUsedCapacity : (self : PetModule) -> nil,
+    SelectPet : (self : PetModule, id : number) -> nil,
+    UnselectPet : (self : PetModule) -> nil,
+    AddPetToInventory : (self : PetModule, pet : pet) -> nil,
+    AddPetsToInventory : (self : PetModule, pets : {pet}) -> nil,
+    EquipPet : (self : PetModule) -> boolean,
+    OpenGui : (self : PetModule) -> nil,
+    CloseGui : (self : PetModule) -> nil,
 }
 
 export type pet = {
+    id : number,
     identifier : string,
     name : string,
     rarity : number,
@@ -80,7 +84,8 @@ export type pet = {
     upgrade : number,
     baseBoost : number,
     activeBoost : number,
-    equipped : boolean
+    equipped : boolean,
+    inventorySlot : ImageButton
 }
 
 type Rarities = {
@@ -249,12 +254,14 @@ function PetModule.new(utility : Utility.Utility)
     local petModule : PetModule = {}
 
     petModule.ownedPets = {}
+
+    petModule.currentlyEquippedPets = 0
     petModule.maxEquippedPets = 3
     petModule.maxInventoryCapacity = 50
 
     petModule.utility = utility
 
-    petModule.lastSelectedPet = nil
+    petModule.selectedPet = nil
 
     petModule.canOpenEgg = true
     petModule.closeEggSequenceInputConnection = nil
@@ -349,7 +356,7 @@ function PetModule.new(utility : Utility.Utility)
 
                 -- open an egg when the player clicks the button
                 openEggButton.MouseButton1Down:Connect(function()
-                    
+
                     -- if the player doesn't own the 3x or 6x open eggs game passes, prompt them to pruchase it
                     if openEggButton.NumberOfEggs.Value == 3 then
                         -- if the player doesn't already own the game pass
@@ -397,6 +404,13 @@ function PetModule.new(utility : Utility.Utility)
             end
         end
     end
+
+    -- equip the clicked pet
+    equipPetButton.MouseButton1Down:Connect(function()
+        if petModule.selectedPet then
+            petModule:EquipPet()
+        end
+    end)
 
     return setmetatable(petModule, PetModule)
 end
@@ -620,7 +634,7 @@ end
     Updates the number of equipped pets
 ]]--
 function PetModule:UpdateNumberOfEquippedPets()
-    
+    equippedPets.Text = tostring(self.currentlyEquippedPets) .. "/" .. tostring(self.maxEquippedPets)
 end
 
 
@@ -635,17 +649,15 @@ end
 --[[
     Selects a pet matching the given parameters and display its details
 
-    @param identifier : string, the identifier of the pet
-    @param size : number, the size of the pet
-    @param upgrade : number, the upgrade applied to the pet
+    @param id : number, the id of the pet to select
 ]]--
-function PetModule:SelectPet(identifier : string, size : number, upgrade : number)
+function PetModule:SelectPet(id : number)
     for _,pet : pet in pairs(self.ownedPets) do
-        if pet.identifier == identifier and pet.size == size and pet.upgrade == upgrade then
+        if pet.id == id then
 
             local rarity : rarity = rarities[pet.rarity]
-            local petSize : string = sizes[size]
-            local petUpgrade : upgrade = upgrades[upgrade]
+            local petSize : string = sizes[pet.size]
+            local petUpgrade : upgrade = upgrades[pet.upgrade]
 
             petDetailsName.Text = petUpgrade.name .. " " .. petSize .. " " .. pet.name
 
@@ -695,10 +707,22 @@ function PetModule:SelectPet(identifier : string, size : number, upgrade : numbe
                 petDetailsUpgrade.Visible = false
             end
 
-            local numberOfSamePets : number = self:CountNumberOfSamePets(identifier, size, upgrade)
+            if pet.equipped then
+                equipPetButton.Text = "UNEQUIP"
+                equipPetButton.BackgroundColor3 = Color3.fromRGB(250, 22, 22)
+                equipPetButton.BorderUIStroke.Color = Color3.fromRGB(110, 8, 8)
+                equipPetButton.ContextualUIStroke.Color = Color3.fromRGB(110, 8, 8)
+            else
+                equipPetButton.Text = "EQUIP"
+                equipPetButton.BackgroundColor3 = Color3.fromRGB(109, 241, 99)
+                equipPetButton.BorderUIStroke.Color = Color3.fromRGB(45, 97, 40)
+                equipPetButton.ContextualUIStroke.Color = Color3.fromRGB(45, 97, 40)
+            end
+
+            local numberOfSamePets : number = self:CountNumberOfSamePets(pet.identifier, pet.size, pet.upgrade)
 
             -- enable or disable the button based on if the player has enough pet to craft a better one
-            if numberOfSamePets > 3 then
+            if numberOfSamePets >= 3 then
                 petDetailsSizeCraftDisabled.Visible = false
                 petDetailsSizeCraftButton.Visible = true
             else
@@ -707,10 +731,10 @@ function PetModule:SelectPet(identifier : string, size : number, upgrade : numbe
             end
 
             -- display the right text based on the current size of the pet
-            if size == Sizes.Small then
+            if pet.size == Sizes.Small then
                 petDetailsSizeCraftRequirements.Visible = true
                 petDetailsSizeCraftRequirements.Text = "Craft into big: " .. tostring(numberOfSamePets) .. "/3"
-            elseif size == Sizes.Big then
+            elseif pet.size == Sizes.Big then
                 petDetailsSizeCraftRequirements.Visible = true
                 petDetailsSizeCraftRequirements.Text = "Craft into huge: " .. tostring(numberOfSamePets) .. "/3"
             else
@@ -758,7 +782,7 @@ function PetModule:UnselectPet()
         0.2,
         true
     )
-    
+
     -- tween details tab size down to hide it
     petDetails:TweenSize(
         UDim2.new(0, 0, 0.85, 0),
@@ -783,6 +807,8 @@ end
 function PetModule:AddPetToInventory(pet : pet)
     local petClone : ImageButton = petTemplate:Clone()
 
+    pet.inventorySlot = petClone
+
     petClone.PetName.Text = pet.name
 
     local rarity = rarities[pet.rarity]
@@ -797,14 +823,20 @@ function PetModule:AddPetToInventory(pet : pet)
     petClone.MouseButton1Down:Connect(function()
 
         -- if the player clicked the same pet twice, hide the details tab
-        if petDetails.Visible and petClone == self.lastSelectedPet then
+        if petDetails.Visible and pet.id == self.selectedPet then
             self:UnselectPet()
             return
         end
 
-        self.lastSelectedPet = petClone
-        self:SelectPet(pet.identifier, pet.size, pet.upgrade)
+        self.selectedPet = pet.id
+        self:SelectPet(pet.id)
     end)
+
+    -- if the is already equipped, move it to the front of the list and change its border color to green
+    if pet.equipped then
+        petClone.LayoutOrder = 1
+        petClone.UIStroke.Color = Color3.fromRGB(37, 175, 55)
+    end
 
     petClone.Parent = inventoryPetsListContainer
 end
@@ -821,6 +853,61 @@ function PetModule:AddPetsToInventory(pets : {pet})
     end
 
     self:UpdateUsedCapacity()
+end
+
+
+--[[
+    Equips the given pet
+
+    @param pet : pet, the pet to equip
+    @return boolean, true if the pet could be equipped, false otherwise
+]]--
+function PetModule:EquipPet()
+    local id : number = self.selectedPet
+    local equipped : boolean = EquipPetRF:InvokeServer(id)
+
+    if equipped then
+        for _,pet : pet in pairs(self.ownedPets) do
+            if pet.id == id then
+
+                -- mark the pet as equipped
+                pet.equipped = true
+
+                self.currentlyEquippedPets += 1
+
+                -- move the pet to the start of the list
+                pet.inventorySlot.LayoutOrder = 1
+
+                -- change the border color of the pet frame to green
+                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(37, 175, 55)
+            end
+        end
+
+    else
+        for _,pet : pet in pairs(self.ownedPets) do
+            if pet.id == id then
+
+                -- mark the pet as unequipped
+                pet.equipped = false
+
+                self.currentlyEquippedPets += 1
+
+                -- remove the pet from the start of the list
+                pet.inventorySlot.LayoutOrder = 10
+
+                -- reset the border color of the pet frame
+                local rarity : rarity = rarities[pet.rarity]
+                pet.inventorySlot.UIStroke.Color = rarity.border
+            end
+        end
+    end
+
+    self:UpdateNumberOfEquippedPets()
+
+    -- update the pet details tab (equip/unequip button mainly) (set selectedPet to nil otherwise it would close the details tab since it would be the same pet as the one that was last selected)
+    self.selectedPet = nil
+    self:SelectPet(id)
+    self.selectedPet = id
 end
 
 

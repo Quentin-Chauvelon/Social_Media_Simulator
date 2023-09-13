@@ -501,6 +501,14 @@ end)
 ]]--
 PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet})
     petModule.ownedPets = pets
+
+	-- count the number of pets the player has equipped
+	for _,pet : PetModule.pet in pairs(pets) do
+		if pet.equipped then
+			petModule.currentlyEquippedPets += 1
+		end
+	end
+
 	petModule:AddPetsToInventory(pets)
 end)
 
