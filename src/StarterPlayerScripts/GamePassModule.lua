@@ -19,7 +19,9 @@ type GamePasses = {
     OpenThreeEggs : number,
     OpenSixEggs : number,
     EquipFourMorePets : number,
-    PlusHundredAndFiftyInventoryCapacity : number
+    PlusHundredAndFiftyInventoryCapacity : number,
+    BasicLuck : number,
+    GoldenLuck : number
 }
 
 type ownedGamePass = {
@@ -38,19 +40,15 @@ GamePassModule.gamePasses = {
     OpenThreeEggs = 252411712,
     OpenSixEggs = 252412855,
     EquipFourMorePets = 255196158,
-    PlusHundredAndFiftyInventoryCapacity = 255197366
+    PlusHundredAndFiftyInventoryCapacity = 255197366,
+    BasicLuck = 255242908,
+    GoldenLuck = 255243662
 }
 
 -- list of all the game passes
 -- the first value is a boolean representing if the server could be contacted to load the ownership
 -- the second value is a boolean representing if the player actually owns the game pass
-GamePassModule.ownedGamePasses = {
-    [GamePassModule.gamePasses.SpaceCase] = {loaded = false, owned = false},
-    [GamePassModule.gamePasses.OpenThreeEggs] = {loaded = false, owned = false},
-    [GamePassModule.gamePasses.OpenSixEggs] = {loaded = false, owned = false},
-    [GamePassModule.gamePasses.EquipFourMorePets] = {loaded = false, owned = false},
-    [GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity] = {loaded = false, owned = false},
-}
+GamePassModule.ownedGamePasses = {}
 
 for _,gamePassId : number in pairs(GamePassModule.gamePasses) do
     GamePassModule.ownedGamePasses[gamePassId] = {loaded = false, owned = false}

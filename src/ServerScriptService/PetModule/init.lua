@@ -19,6 +19,7 @@ export type PetModule = {
     maxEquippedPets : number,
     inventoryCapacity : number,
     nextId : number,
+    luck : number,
     plr : Player,
     new : (plr : Player) -> PetModule,
     IsPetInventoryFull : (self : PetModule) -> boolean,
@@ -533,6 +534,8 @@ function PetModule.new(plr : Player)
     end
     petModule.nextId = maxId + 1
 
+    petModule.luck = 0
+
     petModule.currentlyEquippedPets = 0
     petModule.maxEquippedPets = 3
     petModule.inventoryCapacity = 50
@@ -645,7 +648,7 @@ function PetModule:OpenEgg(eggId : number) : pet?
     end
 
     -- get a random pet for the given egg
-    local petId : number? = EggModule.GetRandomPetForEgg(eggId)
+    local petId : number? = EggModule.GetRandomPetForEgg(eggId, self.luck)
     if petId then
 
         -- get the pet information table from the id

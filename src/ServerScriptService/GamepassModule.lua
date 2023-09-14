@@ -27,7 +27,9 @@ type GamePasses = {
     Open3Eggs : number,
     Open6Eggs : number,
     EquipFourMorePets : number,
-    PlusHundredAndFiftyInventoryCapacity : number
+    PlusHundredAndFiftyInventoryCapacity : number,
+    BasicLuck : number,
+    GoldenLuck : number
 }
 
 type ownedGamePass = {
@@ -50,7 +52,9 @@ function GamepassModule.new(plr : Player)
         Open3Eggs = 252411712,
         Open6Eggs = 252412855,
         EquipFourMorePets = 255196158,
-        PlusHundredAndFiftyInventoryCapacity = 255197366
+        PlusHundredAndFiftyInventoryCapacity = 255197366,
+        BasicLuck = 255242908,
+        GoldenLuck = 255243662
     }
 
     gamepassModule.ownedGamePasses = {}
@@ -85,6 +89,17 @@ function GamepassModule:PlayerBoughtGamePass(gamePassId : number, p : Types.Play
 
     elseif gamePassId == self.gamePasses.PlusHundredAndFiftyInventoryCapacity then
         p.petModule.inventoryCapacity = 200
+
+    elseif gamePassId == self.gamePasses.BasicLuck then
+        -- only update the pet luck if it's 0, otherwise we don't want to override a better pass
+        if p.petModule.luck == 0 then
+            p.petModule.luck = 1
+        end
+
+    elseif gamePassId == self.gamePasses.GoldenLuck then
+        print(p.petModule.luck)
+        p.petModule.luck = 2
+        print(p.petModule.luck)
     end
 
     -- if the purchase of the game pass was succesful, fire the client to make changes locally if needed
