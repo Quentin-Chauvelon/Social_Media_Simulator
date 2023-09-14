@@ -29,7 +29,7 @@ export type PetModule = {
     OpenEgg : (self : PetModule, eggId : number) -> pet,
     OpenEggs : (self : PetModule, p : Types.PlayerModule, eggId : number, numberOfEggsToOpen : number) -> pet,
     CanEquipPet : (self : PetModule) -> boolean,
-    EquipPet : (self : PetModule, id : number, updateFollowersMultiplier : boolean) -> boolean,
+    EquipPet : (self : PetModule, id : number, updateFollowersMultiplier : boolean) -> (boolean, boolean),
     AddPetToCharacter : (self : PetModule, pet : pet) -> nil,
     RemovePetFromCharacter : (self : PetModule, pet : pet) -> nil,
     LoadEquippedPets : (self : PetModule) -> nil,
@@ -714,15 +714,17 @@ end
 
     @param id : number, the id of the pet to equip
     @param updateFollowersMultiplier : boolean, true if the followers multiplier should be updated, false otherwise
-    @return boolean, true if the pet could be equipped, false otherwise
+    @return
+        boolean : true if the player could equip a pet, false otherwise (success)
+        boolean : true if the pet is equipped, false otherwise (equipped)
 ]]--
-function PetModule:EquipPet(id : number, updateFollowersMultiplier : boolean) : boolean
+function PetModule:EquipPet(id : number, updateFollowersMultiplier : boolean) : (boolean, boolean)
     for _,pet : pet in pairs(self.ownedPets) do
         if pet.id == id then
 
             -- if the pet is not equipped and the player already the limit for equipped pet, we can't equip the pet
             if not pet.equipped and not self:CanEquipPet() then
-                return false
+                return false, false
             end
 
             pet.equipped = not pet.equipped
@@ -741,11 +743,11 @@ function PetModule:EquipPet(id : number, updateFollowersMultiplier : boolean) : 
                 self:RemovePetFromCharacter(pet)
             end
 
-            return pet.equipped
+            return true, pet.equipped
         end
     end
 
-    return false
+    return false, false
 end
 
 

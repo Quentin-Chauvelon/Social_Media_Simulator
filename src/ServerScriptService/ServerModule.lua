@@ -444,15 +444,15 @@ EquipPetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 
 		local p : Player.PlayerModule = players[plr.Name]
 		if p then
-			local equipped : boolean = p.petModule:EquipPet(id, true)
+			local success : boolean, equipped : boolean = p.petModule:EquipPet(id, true)
 
 			p:UpdateFollowersMultiplier()
 
-			return equipped
+			return success, equipped
 		end
 	end
 
-	return false
+	return false, false
 end
 
 

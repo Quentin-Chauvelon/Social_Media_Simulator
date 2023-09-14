@@ -510,6 +510,7 @@ PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet})
 	end
 
 	petModule:AddPetsToInventory(pets)
+	petModule:UpdateNumberOfEquippedPets()
 end)
 
 

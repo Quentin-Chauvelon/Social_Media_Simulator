@@ -864,40 +864,42 @@ end
 ]]--
 function PetModule:EquipPet()
     local id : number = self.selectedPet
-    local equipped : boolean = EquipPetRF:InvokeServer(id)
+    local success : boolean, equipped : boolean = EquipPetRF:InvokeServer(id)
 
-    if equipped then
-        for _,pet : pet in pairs(self.ownedPets) do
-            if pet.id == id then
+    if success then
+        if equipped then
+            for _,pet : pet in pairs(self.ownedPets) do
+                if pet.id == id then
 
-                -- mark the pet as equipped
-                pet.equipped = true
+                    -- mark the pet as equipped
+                    pet.equipped = true
 
-                self.currentlyEquippedPets += 1
+                    self.currentlyEquippedPets += 1
 
-                -- move the pet to the start of the list
-                pet.inventorySlot.LayoutOrder = 1
+                    -- move the pet to the start of the list
+                    pet.inventorySlot.LayoutOrder = 1
 
-                -- change the border color of the pet frame to green
-                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(37, 175, 55)
+                    -- change the border color of the pet frame to green
+                    pet.inventorySlot.UIStroke.Color = Color3.fromRGB(37, 175, 55)
+                end
             end
-        end
 
-    else
-        for _,pet : pet in pairs(self.ownedPets) do
-            if pet.id == id then
+        else
+            for _,pet : pet in pairs(self.ownedPets) do
+                if pet.id == id then
 
-                -- mark the pet as unequipped
-                pet.equipped = false
+                    -- mark the pet as unequipped
+                    pet.equipped = false
 
-                self.currentlyEquippedPets += 1
+                    self.currentlyEquippedPets -= 1
 
-                -- remove the pet from the start of the list
-                pet.inventorySlot.LayoutOrder = 10
+                    -- remove the pet from the start of the list
+                    pet.inventorySlot.LayoutOrder = 10
 
-                -- reset the border color of the pet frame
-                local rarity : rarity = rarities[pet.rarity]
-                pet.inventorySlot.UIStroke.Color = rarity.border
+                    -- reset the border color of the pet frame
+                    local rarity : rarity = rarities[pet.rarity]
+                    pet.inventorySlot.UIStroke.Color = rarity.border
+                end
             end
         end
     end
