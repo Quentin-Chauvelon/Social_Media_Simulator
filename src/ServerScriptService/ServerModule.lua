@@ -27,6 +27,7 @@ local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
 local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
+local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -438,9 +439,11 @@ end
 	@param identifier : string, the identifier of the pet
     @param size : number, the size of the pet
     @param upgrade : number, the upgrade applied to the pet
-	@return boolean, true if the pet could be equipped, false otherwise
+	@return
+		boolean : true if the player could equip a pet, false otherwise (success)
+        boolean : true if the pet is equipped, false otherwise (equipped)
 ]]--
-EquipPetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
+EquipPetRF.OnServerInvoke = function(plr : Player, id : number) : (boolean, boolean)
 	if id and typeof(id) == "number" then
 
 		local p : Player.PlayerModule = players[plr.Name]
@@ -467,6 +470,19 @@ EquipBestPetsRF.OnServerInvoke = function(plr : Player) : {number}
 	end
 
 	return {}
+end
+
+
+DeletePetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
+	if id and typeof(id) == "number" then
+		
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			return p.petModule:DeletePet(id)
+		end
+	end
+
+	return false
 end
 
 

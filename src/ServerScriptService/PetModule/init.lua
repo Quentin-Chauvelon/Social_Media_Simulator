@@ -35,6 +35,7 @@ export type PetModule = {
     LoadEquippedPets : (self : PetModule) -> nil,
     EquipBest : (self : PetModule) -> {number},
     UnequipAllPets : (self : PetModule) -> nil,
+    DeletePet : (self : PetModule, id : number) -> boolean,
     UpdateFollowersMultiplier : (self : PetModule) -> nil,
 }
 
@@ -928,7 +929,40 @@ end
 
 
 --[[
+    Deletes the pet matching the given id
 
+    @param id : number, the id of the pet to delete
+    @return boolean, true if the pet could be deleted, false otherwise
+]]--
+function PetModule:DeletePet(id : number) : boolean
+    local deleted : boolean = false
+
+    -- remove the pet from the table
+    for i : number, pet : pet in pairs(self.ownedPets) do
+        if pet.id == id then
+            if pet.equipped then
+                self.currentlyEquippedPets -= 1
+
+                self:RemovePetFromCharacter(pet)
+            end
+
+            table.remove(self.ownedPets, i)
+            deleted = true
+
+            DataStore2("pets", self.plr):Set(self.ownedPets)
+
+            break
+        end
+    end
+
+    self:UpdateFollowersMultiplier()
+
+    return deleted
+end
+
+
+--[[
+    Updates the followers multiplier based on the equipped pets
 ]]--
 function PetModule:UpdateFollowersMultiplier()
     local followersMultiplier : number = 0

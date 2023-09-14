@@ -11,6 +11,7 @@ local GamePassModule = require(script.Parent:WaitForChild("GamePassModule"))
 local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
 local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
 local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
+local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
 
 local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
 
@@ -441,7 +442,7 @@ function PetModule.new(utility : Utility.Utility)
                     end
                 end
 
-                if not isInZone then                
+                if not isInZone then
                     -- hide all the pets guis
                     for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
                         eggGui.Enabled = false
@@ -991,7 +992,7 @@ function PetModule:OpenGui()
 
                 -- equip all pets returned from the server
                 for _,petId : number in pairs(equippedPetsIds) do
-                    
+
                     for _,pet : pet in pairs(self.ownedPets) do
                         if pet.id == petId then
                             -- mark the pet as equipped
@@ -1012,6 +1013,38 @@ function PetModule:OpenGui()
 
                 -- hide the pet details tab since we don't know which pet to display
                 self:UnselectPet()
+            end)
+        )
+
+        -- delete the selected pet
+        self.petsUIMaid:GiveTask(
+            deletePetButton.MouseButton1Down:Connect(function()
+                local success : boolean = DeletePetRF:InvokeServer(self.selectedPet)
+
+                if success then
+                    -- remove the pet from the table
+                    print(#self.ownedPets)
+                    for i : number, pet : pet in pairs(self.ownedPets) do
+                        if pet.id == self.selectedPet then
+                            if pet.equipped then
+                                self.currentlyEquippedPets -= 1
+                            end
+
+                            pet.inventorySlot:Destroy()
+
+                            table.remove(self.ownedPets, i)
+
+                            break
+                        end
+                    end
+                    print(#self.ownedPets)
+
+                    self:UpdateNumberOfEquippedPets()
+                    self:UpdateUsedCapacity()
+
+                    self.selectedPet = nil
+                    self:UnselectPet()
+                end
             end)
         )
 
