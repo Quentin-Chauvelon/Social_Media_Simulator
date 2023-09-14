@@ -76,6 +76,7 @@ export type PetModule = {
     AddPetToInventory : (self : PetModule, pet : pet) -> nil,
     AddPetsToInventory : (self : PetModule, pets : {pet}) -> nil,
     EquipPet : (self : PetModule) -> boolean,
+    UpdateEggsOdds : (self : PetModule, luck : number) -> nil,
     OpenGui : (self : PetModule) -> nil,
     CloseGui : (self : PetModule) -> nil,
 }
@@ -251,6 +252,140 @@ local sizes : {[Sizes] : string} = {
 }
 
 
+local eggsOdds : {[number] : {[number] : {number}}} = {
+    [0] = {
+        [0] = {
+            35,
+            24.2,
+            18.1,
+            12.6,
+            7.8,
+            2.3
+        },
+        [1] = {
+            31.5,
+            21.7,
+            16.3,
+            13.6,
+            10.5,
+            6.2
+        },
+        [2] = {
+            31.2,
+            21.6,
+            16.1,
+            12.3,
+            8.3,
+            10.2
+        }
+    },
+    [1] = {
+        [0] = {
+            37.5,
+            32.3,
+            22.6,
+            4.2,
+            2.8,
+            0.6
+        },
+        [1] = {
+            34.3,
+            29.5,
+            24.8,
+            5.7,
+            3.8,
+            1.6
+        },
+        [2] = {
+            35.3,
+            30.4,
+            23.4,
+            4.7,
+            3.1,
+            2.8
+        }
+    },
+    [2] = {
+        [0] = {
+            42.6,
+            26.3,
+            22.2,
+            5.8,
+            2.6,
+            0.5
+        },
+        [1] = {
+            35.3,
+            26.1,
+            22.1,
+            7.2,
+            6.5,
+            2.9
+        },
+        [2] = {
+            33.2,
+            22.5,
+            19,
+            5.4,
+            10.1,
+            9.7
+        }
+    },
+    [3] = {
+        [0] = {
+            42.3,
+            28.3,
+            16.7,
+            11.3,
+            1.1,
+            0.3
+        },
+        [1] = {
+            26.2,
+            35.1,
+            20.7,
+            14,
+            3.2,
+            0.9
+        },
+        [2] = {
+            13.8,
+            38.5,
+            22.7,
+            15.4,
+            7.5,
+            2
+        }
+    },
+    [4] = {
+        [0] = {
+            48.1,
+            43.8,
+            3.9,
+            2.6,
+            1.2,
+            0.4
+        },
+        [1] = {
+            43.4,
+            39.5,
+            8.2,
+            5.5,
+            2.5,
+            0.8
+        },
+        [2] = {
+            36.3,
+            33.1,
+            14.7,
+            9.8,
+            4.5,
+            1.5
+        }
+    }
+}
+
+
 local PetModule : PetModule = {}
 PetModule.__index = PetModule
 
@@ -422,6 +557,24 @@ function PetModule.new(utility : Utility.Utility)
                                     end
                                 end)
                             )
+                        end
+                    end
+
+
+                    -- prompt the luck game passes purchase on luck buttons click
+                    for _,luckButton : GuiObject in ipairs(eggGui.Background.LuckContainer:GetChildren()) do
+                        if luckButton:IsA("ImageButton") then
+                            
+                            if luckButton.Name == "BasicLuck" then
+                                luckButton.MouseButton1Down:Connect(function()
+                                    GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.BasicLuck)
+                                end)
+
+                            elseif luckButton.Name == "GoldenLuck" then
+                                luckButton.MouseButton1Down:Connect(function()
+                                    GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.GoldenLuck)
+                                end)
+                            end
                         end
                     end
                 end
@@ -952,6 +1105,34 @@ function PetModule:EquipPet()
     self.selectedPet = nil
     self:SelectPet(id)
     self.selectedPet = id
+end
+
+
+--[[
+    Updates all the odds text labels in the eggs gui to match the luck parameter (basic luck, golden luck or none
+
+    @param luck : number, 0 = none, 1 = basic luck, 2 = golden luck
+]]--
+function PetModule:UpdateEggsOdds(luck : number)
+    local textColor : Color3
+    if luck == 2 then
+        textColor = Color3.fromRGB(248, 225, 14)
+    elseif luck == 1 then
+        textColor = Color3.fromRGB(47, 197, 10)
+    else
+        textColor = Color3.new(1,1,1)
+    end
+
+    for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
+
+        -- update the odds on hover to allow players to preview the new percentage
+        for _,petFrame : GuiObject in ipairs(eggGui.Background.PetsContainer:GetChildren()) do
+            if petFrame:IsA("Frame") then
+                petFrame.Odds.Text = tostring(eggsOdds[eggGui.Background.OpenEggContainer.EggId.Value][luck][petFrame.LayoutOrder]) .. "%"
+                petFrame.Odds.TextColor3 = textColor
+            end
+        end
+    end
 end
 
 

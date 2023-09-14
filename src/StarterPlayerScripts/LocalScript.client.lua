@@ -89,10 +89,20 @@ GamePassModule.LoadGamePasses()
 if GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.EquipFourMorePets) then
 	petModule.maxEquippedPets = 7
 	petModule:UpdateNumberOfEquippedPets()
+end
 
-elseif GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity) then
+if GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity) then
 	petModule.maxInventoryCapacity = 200
 	petModule:UpdateUsedCapacity()
+end
+
+-- update the odds of the eggs (ui) if the player owns one of the luck game passes
+if GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.BasicLuck) then
+	petModule:UpdateEggsOdds(1)
+end
+
+if GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.GoldenLuck) then
+	petModule:UpdateEggsOdds(2)
 end
 
 
@@ -540,6 +550,12 @@ BoughtGamePassRE.OnClientEvent:Connect(function(gamePassId : number)
 	elseif gamePassId == GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity then
 		petModule.maxInventoryCapacity = 200
 		petModule:UpdateUsedCapacity()
+
+	elseif gamePassId == GamePassModule.gamePasses.BasicLuck then
+		petModule:UpdateEggsOdds(1)
+
+	elseif gamePassId == GamePassModule.gamePasses.GoldenLuck then
+		petModule:UpdateEggsOdds(2)
 	end
 end)
 
