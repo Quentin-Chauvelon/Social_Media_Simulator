@@ -26,6 +26,7 @@ local CaseRF : RemoteFunction = ReplicatedStorage:WaitForChild("Case")
 local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
+local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -453,6 +454,19 @@ EquipPetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 	end
 
 	return false, false
+end
+
+
+--[[
+	Fires when the player clicks on the equip best pets button
+]]--
+EquipBestPetsRF.OnServerInvoke = function(plr : Player) : {number}
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		return p.petModule:EquipBest()
+	end
+
+	return {}
 end
 
 

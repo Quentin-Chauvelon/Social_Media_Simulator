@@ -33,7 +33,7 @@ export type PetModule = {
     AddPetToCharacter : (self : PetModule, pet : pet) -> nil,
     RemovePetFromCharacter : (self : PetModule, pet : pet) -> nil,
     LoadEquippedPets : (self : PetModule) -> nil,
-    EquipBest : (self : PetModule) -> nil,
+    EquipBest : (self : PetModule) -> {number},
     UnequipAllPets : (self : PetModule) -> nil,
     UpdateFollowersMultiplier : (self : PetModule) -> nil,
 }
@@ -878,17 +878,34 @@ end
 
 --[[
     Equips the best pets the player owns
+
+    @return {number}, a table containing the id of all the equiped pets
 ]]--
-function PetModule:EquipBest()
+function PetModule:EquipBest() : {number}
+    local equippedPets : {number} = {}
+
     self:UnequipAllPets()
 
-    -- TODO make sure it works and/or find a better solution?
     table.sort(self.ownedPets, function(pet1 : pet, pet2 : pet)
-        return pet1.activeBoost < pet2.activeBoost
+        return pet1.activeBoost > pet2.activeBoost
     end)
-    print(self.ownedPets)
+
+    for _,pet in pairs(self.ownedPets) do
+        local success : boolean, equipped : boolean = self:EquipPet(pet.id, false)
+
+        if success and equipped then
+            table.insert(equippedPets, pet.id)
+        end
+
+        if not self:CanEquipPet() then
+            break
+        end
+    end
 
     self:UpdateFollowersMultiplier()
+
+    print(equippedPets)
+    return equippedPets
 end
 
 
@@ -898,7 +915,11 @@ end
 function PetModule:UnequipAllPets()
     for _,pet : pet in pairs(self.ownedPets) do
         if pet.equipped then
-            self:AddPetToCharacter(pet)
+            pet.equipped = false
+
+            self.currentlyEquippedPets -= 1
+
+            self:RemovePetFromCharacter(pet)
         end
     end
 

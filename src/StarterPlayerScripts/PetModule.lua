@@ -10,6 +10,7 @@ local GamePassModule = require(script.Parent:WaitForChild("GamePassModule"))
 
 local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
 local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
+local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
 
 local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
 
@@ -972,7 +973,45 @@ function PetModule:OpenGui()
         -- equip the best pets
         self.petsUIMaid:GiveTask(
             equipBestButton.MouseButton1Down:Connect(function()
+                local equippedPetsIds : {number} = EquipBestPetsRF:InvokeServer()
 
+                -- unequip all pets
+                for _,pet : pet in pairs(self.ownedPets) do
+                    if pet.equipped then
+                        pet.equipped = false
+                        pet.inventorySlot.LayoutOrder = 10
+
+                        -- reset the border color of the pet frame
+                        local rarity : rarity = rarities[pet.rarity]
+                        pet.inventorySlot.UIStroke.Color = rarity.border
+
+                        self.currentlyEquippedPets -= 1
+                    end
+                end
+
+                -- equip all pets returned from the server
+                for _,petId : number in pairs(equippedPetsIds) do
+                    
+                    for _,pet : pet in pairs(self.ownedPets) do
+                        if pet.id == petId then
+                            -- mark the pet as equipped
+                            pet.equipped = true
+
+                            self.currentlyEquippedPets += 1
+
+                            -- move the pet to the start of the list
+                            pet.inventorySlot.LayoutOrder = 1
+
+                            -- change the border color of the pet frame to green
+                            pet.inventorySlot.UIStroke.Color = Color3.fromRGB(37, 175, 55)
+                        end
+                    end
+                end
+
+                self:UpdateNumberOfEquippedPets()
+
+                -- hide the pet details tab since we don't know which pet to display
+                self:UnselectPet()
             end)
         )
 
