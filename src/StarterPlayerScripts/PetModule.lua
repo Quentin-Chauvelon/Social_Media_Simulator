@@ -5,6 +5,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utility = require(script.Parent:WaitForChild("Utility"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 local GamePassModule = require(script.Parent:WaitForChild("GamePassModule"))
 
 local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
@@ -30,7 +31,7 @@ local sixEggContainer : Frame = eggOpeningBackground:WaitForChild("SixEggs")
 local inventoryBackground : Frame = petsScreenGui:WaitForChild("InventoryBackground")
 local inventoryCloseButton : ImageButton = inventoryBackground:WaitForChild("Close")
 local inventoryPetsListContainer : ScrollingFrame = inventoryBackground:WaitForChild("PetsListContainer")
-local inventoryEquipBest : TextButton = inventoryBackground:WaitForChild("EquipBest")
+local equipBestButton : TextButton = inventoryBackground:WaitForChild("EquipBest")
 local inventoryCraftAll : TextButton = inventoryBackground:WaitForChild("CraftAll")
 
 local petDetails : Frame = inventoryBackground:WaitForChild("PetDetails")
@@ -59,6 +60,8 @@ export type PetModule = {
     utility : Utility.Utility,
     selectedPet : number?,
     canOpenEgg : boolean,
+    petsUIMaid : Maid.Maid,
+    eggsMaid : Maid.Maid,
     closeEggSequenceInputConnection : RBXScriptSignal?,
     new : (utility : Utility.Utility) -> PetModule,
     PlayEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame, pets : {pet}) -> nil,
@@ -266,6 +269,9 @@ function PetModule.new(utility : Utility.Utility)
     petModule.canOpenEgg = true
     petModule.closeEggSequenceInputConnection = nil
 
+    petModule.petsUIMaid = Maid.new()
+    petModule.eggsMaid = Maid.new()
+
     -- store all UIStroke in a table to change them easily later
     local eggsGuiUIStroke : {UIStroke} = {}
     for _,v : Instance in ipairs(eggsScreenGui:GetDescendants()) do
@@ -317,100 +323,134 @@ function PetModule.new(utility : Utility.Utility)
         petModule:OpenGui()
     end)
 
-    -- for each button of each egg, fire the server to open the egg
-    for _,eggGui : ScreenGui in ipairs(eggsScreenGui:GetChildren()) do
-        for _,openEggButton : GuiObject in ipairs(eggGui.Background.OpenEggContainer:GetChildren()) do
-            if openEggButton:IsA("ImageButton") then
+    -- if the player is in the eggs area, the eggs gui can be shown + add the click connections...
+    for _,part : Part in ipairs(workspace:WaitForChild("EggsAreaDetectionParts"):GetChildren()) do
+        part.Touched:Connect(function(hit : BasePart)
+            if hit.Parent and hit.Name == "HumanoidRootPart" then
 
-                -- tweens to scale the button up and down on mouse enter and mouse leave
-                local mouseEnterTween : Tween = TweenService:Create(
-                    openEggButton.UIScale,
-                    TweenInfo.new(
-                        0.15,
-                        Enum.EasingStyle.Quad,
-                        Enum.EasingDirection.InOut
-                    ),
-                    {Scale = 1.1}
-                )
+                -- for each button of each egg
+                for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
+                    eggGui.Enabled = true
 
-                local mouseLeaveTween : Tween = TweenService:Create(
-                    openEggButton.UIScale,
-                    TweenInfo.new(
-                        0.15,
-                        Enum.EasingStyle.Quad,
-                        Enum.EasingDirection.InOut
-                    ),
-                    {Scale = 1}
-                )
+                    for _,openEggButton : GuiObject in ipairs(eggGui.Background.OpenEggContainer:GetChildren()) do
+                        if openEggButton:IsA("ImageButton") then
 
-                -- scale the button up on mouse enter
-                openEggButton.MouseEnter:Connect(function()
-                    mouseEnterTween:Play()
-                end)
+                            -- tweens to scale the button up and down on mouse enter and mouse leave
+                            local mouseEnterTween : Tween = TweenService:Create(
+                                openEggButton.UIScale,
+                                TweenInfo.new(
+                                    0.15,
+                                    Enum.EasingStyle.Quad,
+                                    Enum.EasingDirection.InOut
+                                ),
+                                {Scale = 1.1}
+                            )
 
-                -- scale the button down on mouse leave
-                openEggButton.MouseLeave:Connect(function()
-                    mouseLeaveTween:Play()
-                end)
+                            local mouseLeaveTween : Tween = TweenService:Create(
+                                openEggButton.UIScale,
+                                TweenInfo.new(
+                                    0.15,
+                                    Enum.EasingStyle.Quad,
+                                    Enum.EasingDirection.InOut
+                                ),
+                                {Scale = 1}
+                            )
+
+                            -- scale the button up on mouse enter
+                            petModule.eggsMaid:GiveTask(
+                                openEggButton.MouseEnter:Connect(function()
+                                    mouseEnterTween:Play()
+                                end)
+                            )
+
+                            -- scale the button down on mouse leave
+                            petModule.eggsMaid:GiveTask(
+                                openEggButton.MouseLeave:Connect(function()
+                                    mouseLeaveTween:Play()
+                                end)
+                            )
 
 
-                -- open an egg when the player clicks the button
-                openEggButton.MouseButton1Down:Connect(function()
+                            -- open an egg when the player clicks the button
+                            petModule.eggsMaid:GiveTask(
+                                openEggButton.MouseButton1Down:Connect(function()
 
-                    -- if the player doesn't own the 3x or 6x open eggs game passes, prompt them to pruchase it
-                    if openEggButton.NumberOfEggs.Value == 3 then
-                        -- if the player doesn't already own the game pass
-                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenThreeEggs) then
-                            -- prompt the purhcase to buy it
-                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenThreeEggs)
-                            return
-                        end
+                                    -- if the player doesn't own the 3x or 6x open eggs game passes, prompt them to pruchase it
+                                    if openEggButton.NumberOfEggs.Value == 3 then
+                                        -- if the player doesn't already own the game pass
+                                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenThreeEggs) then
+                                            -- prompt the purhcase to buy it
+                                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenThreeEggs)
+                                            return
+                                        end
 
-                    elseif openEggButton.NumberOfEggs.Value == 6 then
-                        -- if the player doesn't already own the game pass
-                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenSixEggs) then
-                            -- prompt the purhcase to buy it
-                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenSixEggs)
-                            return
+                                    elseif openEggButton.NumberOfEggs.Value == 6 then
+                                        -- if the player doesn't already own the game pass
+                                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenSixEggs) then
+                                            -- prompt the purhcase to buy it
+                                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenSixEggs)
+                                            return
+                                        end
+                                    end
+
+                                    if petModule.canOpenEgg then
+                                        petModule.canOpenEgg = false
+
+                                        -- fire the server to get random pets
+                                        local openedPets : {pet} = OpenEggRF:InvokeServer(openEggButton.Parent.EggId.Value, openEggButton.NumberOfEggs.Value)
+
+                                        -- add all the pets to the owned pets table
+                                        for _,pet : pet in pairs(openedPets) do
+                                            table.insert(petModule.ownedPets, pet)
+                                        end
+
+                                        -- play the right egg opening sequence based on the number of pets the player got
+                                        if #openedPets == 1 then
+                                            petModule:PlayEggOpeningSequence(oneEggContainer, openedPets)
+                                        elseif #openedPets == 3 then
+                                            petModule:PlayEggOpeningSequence(threeEggContainer, openedPets)
+                                        elseif #openedPets == 6 then
+                                            petModule:PlayEggOpeningSequence(sixEggContainer, openedPets)
+                                        else
+                                            -- if petModule:PlayEggOpeningSequence hasn't been called, set can open egg to true to release the debounce and allow the player to re-open eggs
+                                            petModule.canOpenEgg = true
+                                        end
+
+                                        petModule:AddPetsToInventory(openedPets)
+                                    end
+                                end)
+                            )
                         end
                     end
-
-                    if petModule.canOpenEgg then
-                        petModule.canOpenEgg = false
-
-                        -- fire the server to get random pets
-                        local openedPets : {pet} = OpenEggRF:InvokeServer(openEggButton.Parent.EggId.Value, openEggButton.NumberOfEggs.Value)
-
-                        -- add all the pets to the owned pets table
-                        for _,pet : pet in pairs(openedPets) do
-                            table.insert(petModule.ownedPets, pet)
-                        end
-
-                        -- play the right egg opening sequence based on the number of pets the player got
-                        if #openedPets == 1 then
-                            petModule:PlayEggOpeningSequence(oneEggContainer, openedPets)
-                        elseif #openedPets == 3 then
-                            petModule:PlayEggOpeningSequence(threeEggContainer, openedPets)
-                        elseif #openedPets == 6 then
-                            petModule:PlayEggOpeningSequence(sixEggContainer, openedPets)
-                        else
-                            -- if petModule:PlayEggOpeningSequence hasn't been called, set can open egg to true to release the debounce and allow the player to re-open eggs
-                            petModule.canOpenEgg = true
-                        end
-
-                        petModule:AddPetsToInventory(openedPets)
-                    end
-                end)
+                end
             end
-        end
-    end
+        end)
 
-    -- equip the clicked pet
-    equipPetButton.MouseButton1Down:Connect(function()
-        if petModule.selectedPet then
-            petModule:EquipPet()
-        end
-    end)
+
+        -- when the player leaves the eggs area, disable the pets guis
+        part.TouchEnded:Connect(function(hit : BasePart)
+            if hit.Parent and hit.Name == "HumanoidRootPart" then
+                local isInZone : boolean = false
+
+                -- since touch ended fires somewhat randomly (when the player jumps for example), we want to check if the player is really not in the zone anymore
+                for _,touchingPart : BasePart in ipairs(hit:GetTouchingParts()) do
+                    if touchingPart == part then
+                        isInZone = true
+                        break
+                    end
+                end
+
+                if not isInZone then                
+                    -- hide all the pets guis
+                    for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
+                        eggGui.Enabled = false
+                    end
+
+                    petModule.eggsMaid:DoCleaning()
+                end
+            end
+        end)
+    end
 
     return setmetatable(petModule, PetModule)
 end
@@ -920,6 +960,22 @@ function PetModule:OpenGui()
     -- open the gui
     if self.utility.OpenGui(inventoryBackground) then
 
+        -- equip the clicked pet
+        self.petsUIMaid:GiveTask(
+            equipPetButton.MouseButton1Down:Connect(function()
+                if self.selectedPet then
+                    self:EquipPet()
+                end
+            end)
+        )
+
+        -- equip the best pets
+        self.petsUIMaid:GiveTask(
+            equipBestButton.MouseButton1Down:Connect(function()
+
+            end)
+        )
+
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
         self.utility.SetCloseGuiConnection(
             inventoryCloseButton.MouseButton1Down:Connect(function()
@@ -935,6 +991,8 @@ end
 ]]--
 function PetModule:CloseGui()
     self.utility.CloseGui(inventoryBackground)
+
+    self.petsUIMaid:DoCleaning()
 end
 
 
