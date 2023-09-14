@@ -85,6 +85,16 @@ local petModule : PetModule.PetModule = PetModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
+-- load and apply effects of the game passes if the player owns them
+if GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.EquipFourMorePets) then
+	petModule.maxEquippedPets = 7
+	petModule:UpdateNumberOfEquippedPets()
+
+elseif GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity) then
+	petModule.maxInventoryCapacity = 200
+	petModule:UpdateUsedCapacity()
+end
+
 
 -- store all upgrades posts UIStroke in a table to change them easily later
 local upgradePostsGuiUIStroke : {UIStroke} = {}
@@ -522,6 +532,14 @@ BoughtGamePassRE.OnClientEvent:Connect(function(gamePassId : number)
 
 	if gamePassId == GamePassModule.gamePasses.SpaceCase then
 		CaseModule:CaseBoughtSuccessfully("Space")
+
+	elseif gamePassId == GamePassModule.gamePasses.EquipFourMorePets then
+		petModule.maxEquippedPets = 7
+		petModule:UpdateNumberOfEquippedPets()
+
+	elseif gamePassId == GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity then
+		petModule.maxInventoryCapacity = 200
+		petModule:UpdateUsedCapacity()
 	end
 end)
 

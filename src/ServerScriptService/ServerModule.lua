@@ -415,13 +415,13 @@ OpenEggRF.OnServerInvoke = function(plr : Player, eggId : number, numberOfEggs :
 
 			-- open 3 eggs (game pass)
 			elseif numberOfEggs == 3 then
-				if p.gamepassModule.boughtOpen3Eggs then
+				if p.gamepassModule:PlayerOwnsGamePass(p.gamepassModule.gamePasses.Open3Eggs) then
 					return p.petModule:OpenEggs(p, eggId, 3)
 				end
 
 			-- open 6 eggs (game pass)
 			else
-				if p.gamepassModule.boughtOpen6Eggs then
+				if p.gamepassModule:PlayerOwnsGamePass(p.gamepassModule.gamePasses.Open6Eggs) then
 					return p.petModule:OpenEggs(p, eggId, 6)
 				end
 			end
@@ -466,7 +466,11 @@ end
 EquipBestPetsRF.OnServerInvoke = function(plr : Player) : {number}
 	local p : Player.PlayerModule = players[plr.Name]
 	if p then
-		return p.petModule:EquipBest()
+		local equippedPetsIds : {number} = p.petModule:EquipBest()
+
+		p:UpdateFollowersMultiplier()
+
+		return equippedPetsIds
 	end
 
 	return {}
@@ -478,7 +482,11 @@ DeletePetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 		
 		local p : Player.PlayerModule = players[plr.Name]
 		if p then
-			return p.petModule:DeletePet(id)
+			local success : boolean = p.petModule:DeletePet(id)
+
+			p:UpdateFollowersMultiplier()
+
+			return success
 		end
 	end
 

@@ -173,14 +173,33 @@ type caseDetail = {
     imageUrl : string
 }
 
+
 export type GamepassModule = {
-    boughtCoinsMultiplier : boolean,
-    boughtFollowersMultiplier : boolean,
+    gamePasses : GamePasses,
+    ownedGamePasses : {[GamePasses] : ownedGamePass},
     new : () -> GamepassModule,
-    GetCoinsMultiplier : () -> number,
-    GetFollowersMultiplier : () -> number,
+    PlayerBoughtGamePass : (self : GamepassModule, gamePassId : number, p : PlayerModule) -> nil,
+    UserOwnsGamePass : (self : GamepassModule, gamePassId : number) -> (boolean, boolean),
+    PlayerOwnsGamePass : (self : GamepassModule, gamePassId : number) -> boolean,
+    LoadOwnedGamePasses : (self : GamepassModule) -> nil,
+    GetCoinsMultiplier : (self : GamepassModule) -> number,
+    GetFollowersMultiplier : (self : GamepassModule) -> number,
     OnLeave : (self : GamepassModule) -> nil
 }
+
+type GamePasses = {
+    SpaceCase : number,
+    Open3Eggs : number,
+    Open6Eggs : number,
+    EquipFourMorePets : number,
+    PlusHundredAndFiftyInventoryCapacity : number
+}
+
+type ownedGamePass = {
+    loaded : boolean,
+    owned : boolean
+}
+
 
 export type Maid = {
 	_tasks : {},

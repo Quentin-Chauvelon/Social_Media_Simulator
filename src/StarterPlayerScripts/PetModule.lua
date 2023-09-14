@@ -1048,6 +1048,22 @@ function PetModule:OpenGui()
             end)
         )
 
+
+        -- buy more equipped pets
+        self.petsUIMaid:GiveTask(
+            moreEquippedPetsButton.MouseButton1Down:Connect(function()
+                GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.EquipFourMorePets)
+            end)
+        )
+        
+        
+        -- buy more inventory capacity
+        self.petsUIMaid:GiveTask(
+            moreInventorySlotsButton.MouseButton1Down:Connect(function()
+                GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity)
+            end)
+        )
+        
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
         self.utility.SetCloseGuiConnection(
             inventoryCloseButton.MouseButton1Down:Connect(function()

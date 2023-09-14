@@ -18,6 +18,8 @@ type GamePasses = {
     SpaceCase : number,
     OpenThreeEggs : number,
     OpenSixEggs : number,
+    EquipFourMorePets : number,
+    PlusHundredAndFiftyInventoryCapacity : number
 }
 
 type ownedGamePass = {
@@ -34,7 +36,9 @@ GamePassModule.__index = GamePassModule
 GamePassModule.gamePasses = {
     SpaceCase = 249101309,
     OpenThreeEggs = 252411712,
-    OpenSixEggs = 252412855
+    OpenSixEggs = 252412855,
+    EquipFourMorePets = 255196158,
+    PlusHundredAndFiftyInventoryCapacity = 255197366
 }
 
 -- list of all the game passes
@@ -43,8 +47,14 @@ GamePassModule.gamePasses = {
 GamePassModule.ownedGamePasses = {
     [GamePassModule.gamePasses.SpaceCase] = {loaded = false, owned = false},
     [GamePassModule.gamePasses.OpenThreeEggs] = {loaded = false, owned = false},
-    [GamePassModule.gamePasses.OpenSixEggs] = {loaded = false, owned = false}
+    [GamePassModule.gamePasses.OpenSixEggs] = {loaded = false, owned = false},
+    [GamePassModule.gamePasses.EquipFourMorePets] = {loaded = false, owned = false},
+    [GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity] = {loaded = false, owned = false},
 }
+
+for _,gamePassId : number in pairs(GamePassModule.gamePasses) do
+    GamePassModule.ownedGamePasses[gamePassId] = {loaded = false, owned = false}
+end
 
 
 --[[
@@ -101,15 +111,16 @@ end
     @param gamePassId : number, the id of the game pass the player wants to purchase
 ]]--
 function GamePassModule.PromptGamePassPurchase(gamePassId : number)
-    MarketplaceService:PromptGamePassPurchase(lplr, gamePassId)
+    -- if the player doesn't already own the game pass
+    if not GamePassModule.PlayerOwnsGamePass(gamePassId) then
+        MarketplaceService:PromptGamePassPurchase(lplr, gamePassId)
+    end
 end
 
 
 function GamePassModule.PlayerBoughtGamePass(gamePassId : number)
-    print("here")
     GamePassModule.ownedGamePasses[gamePassId].loaded = true
     GamePassModule.ownedGamePasses[gamePassId].owned = true
-    print(GamePassModule.ownedGamePasses)
 end
 
 

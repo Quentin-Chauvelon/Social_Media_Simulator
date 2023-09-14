@@ -126,7 +126,7 @@ function Player.new(plr : Player)
 	rebirthValue.Value = p.rebirthModule.rebirthLevel
 	rebirthValue.Parent = statsFolder
 
-	p.gamepassModule = GamepassModule.new()
+	p.gamepassModule = GamepassModule.new(plr)
 
 	return setmetatable(p, Player)
 end
@@ -141,11 +141,12 @@ function Player:UpdateFollowersMultiplier()
 		self.upgradeModule.followersMultiplier +
 		self.rebirthModule.followersMultiplier +
 		self.potionModule.followersMultiplier +
+		self.petModule.followersMultiplier +
 		self.gamepassModule:GetFollowersMultiplier()
 
 	-- TODO: DELETE THE FOLLOWING LINE
 	-- self.followersMultiplier *= 100
-	print("followers multiplier", self.followersMultiplier)
+	print("followers multiplier", self.followersMultiplier, self.petModule.followersMultiplier)
 end
 
 
