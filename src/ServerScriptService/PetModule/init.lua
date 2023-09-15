@@ -37,6 +37,7 @@ export type PetModule = {
     EquipBest : (self : PetModule) -> {number},
     UnequipAllPets : (self : PetModule) -> nil,
     DeletePet : (self : PetModule, id : number) -> boolean,
+    DeleteUnequippedPets : (self : PetModule) -> {pet},
     UpdateFollowersMultiplier : (self : PetModule) -> nil,
 }
 
@@ -610,7 +611,6 @@ function PetModule:RotateAttachmentsTowardsPlayer(target : Vector3)
 
     for _,v in ipairs(humanoidRootPart:GetChildren()) do
         if v:IsA("Attachment") and v.Name == "PetAttachment" then
-            print(target.Y)
             v.WorldCFrame = CFrame.lookAt(v.WorldPosition, target)
         end
     end
@@ -961,6 +961,28 @@ function PetModule:DeletePet(id : number) : boolean
     self:UpdateFollowersMultiplier()
 
     return deleted
+end
+
+
+--[[
+    Deletes all the player's unequipped pets (except the mystical ones to prevent any accidental deletion)
+
+    @return the table containing the pets left the player owns (new table of pets after deletion)
+]]--
+function PetModule:DeleteUnequippedPets() : {pet}
+    local newOwnedPets : {pet} = {}
+
+    for _,pet : pet in pairs(self.ownedPets) do
+        if pet.equipped or pet.rarity == rarities.Mystical then
+            table.insert(newOwnedPets, pet)
+        end
+    end
+
+    self.ownedPets = newOwnedPets
+
+    DataStore2("pets", self.plr):Set(self.ownedPets)
+
+    return self.ownedPets
 end
 
 

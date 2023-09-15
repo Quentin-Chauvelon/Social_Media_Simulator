@@ -12,6 +12,8 @@ local OpenEggRF : RemoteFunction = ReplicatedStorage:WaitForChild("OpenEgg")
 local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
 local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
 local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
+local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteUnequippedPets")
+local CraftPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("CraftPet")
 
 local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
 
@@ -34,7 +36,10 @@ local inventoryBackground : Frame = petsScreenGui:WaitForChild("InventoryBackgro
 local inventoryCloseButton : ImageButton = inventoryBackground:WaitForChild("Close")
 local inventoryPetsListContainer : ScrollingFrame = inventoryBackground:WaitForChild("PetsListContainer")
 local equipBestButton : TextButton = inventoryBackground:WaitForChild("EquipBest")
-local inventoryCraftAll : TextButton = inventoryBackground:WaitForChild("CraftAll")
+local deleteUnequippedPetsButton : TextButton = inventoryBackground:WaitForChild("DeleteUnequippedPets")
+local deleteUnequippedPetsconfirmationContainer : Frame = deleteUnequippedPetsButton:WaitForChild("ConfirmationContainer")
+local deleteUnequippedPetsCancelButton : TextButton = deleteUnequippedPetsconfirmationContainer:WaitForChild("DeleteUnequippedCancel")
+local deleteUnequippedPetsConfirmButton : TextButton = deleteUnequippedPetsconfirmationContainer:WaitForChild("DeleteUnequippedConfirm")
 
 local petDetails : Frame = inventoryBackground:WaitForChild("PetDetails")
 local petDetailsName : TextLabel = petDetails:WaitForChild("PetName")
@@ -1244,6 +1249,68 @@ function PetModule:OpenGui()
                 GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.PlusHundredAndFiftyInventoryCapacity)
             end)
         )
+
+
+        -- delete all unequipped pets
+        self.petsUIMaid:GiveTask(
+            deleteUnequippedPetsButton.MouseButton1Down:Connect(function()
+                for _,pet : pet in pairs(self.ownedPets) do
+                    if not pet.equipped then
+                        pet.inventorySlot.UIStroke.Color = Color3.new(1,0,0)
+                    end
+                end
+
+                deleteUnequippedPetsconfirmationContainer.Visible = true
+            end)
+        )
+
+
+        -- cancel the pets unequipped deletion
+        self.petsUIMaid:GiveTask(
+            deleteUnequippedPetsCancelButton.MouseButton1Down:Connect(function()
+                for _,pet : pet in pairs(self.ownedPets) do
+                    if not pet.equipped then
+                        -- reset the border color of the pet frame
+                        local rarity : rarity = rarities[pet.rarity]
+                        
+                        pet.inventorySlot.UIStroke.Color = rarity.border
+                    end
+                end
+
+                deleteUnequippedPetsconfirmationContainer.Visible = false
+            end)
+        )
+        
+
+        -- confirm the pets unequipped deletion
+        self.petsUIMaid:GiveTask(
+            deleteUnequippedPetsConfirmButton.MouseButton1Down:Connect(function()
+                self:UnselectPet()
+
+                self.ownedPets = DeleteUnequippedPetsRF:InvokeServer()
+
+                for _,petFrame : GuiObject in ipairs(inventoryPetsListContainer:GetChildren()) do
+                    if petFrame:IsA("ImageButton") then
+                        petFrame:Destroy()
+                    end
+                end
+                
+                self.currentlyEquippedPets = 0
+
+                -- count the number of pets the player has equipped
+                for _,pet : pet in pairs(self.ownedPets) do
+                    if pet.equipped then
+                        self.currentlyEquippedPets += 1
+                    end
+                end
+
+                self:AddPetsToInventory(self.ownedPets)
+                self:UpdateUsedCapacity()
+
+                deleteUnequippedPetsconfirmationContainer.Visible = false
+            end)
+        )
+        
         
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
         self.utility.SetCloseGuiConnection(

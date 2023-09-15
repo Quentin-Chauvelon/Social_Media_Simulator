@@ -28,6 +28,7 @@ local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoade
 local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
 local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
 local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
+local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteUnequippedPets")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -462,6 +463,9 @@ end
 
 --[[
 	Fires when the player clicks on the equip best pets button
+
+	@param plr : Player, the player who wants to equip the best pets
+	@return {number}, a list of the pets that got equipped
 ]]--
 EquipBestPetsRF.OnServerInvoke = function(plr : Player) : {number}
 	local p : Player.PlayerModule = players[plr.Name]
@@ -477,6 +481,13 @@ EquipBestPetsRF.OnServerInvoke = function(plr : Player) : {number}
 end
 
 
+--[[
+	Fires when the player wants to delete a pet
+
+	@param plr : Player, the player who wants to delete a pet
+	@param id : number, the id of the pet to delete
+	@return boolean, true if the pet could be deleted, false otherwise
+]]
 DeletePetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 	if id and typeof(id) == "number" then
 		
@@ -491,6 +502,22 @@ DeletePetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 	end
 
 	return false
+end
+
+
+--[[
+	Fires when the player wnats to delete all unequipped pets
+
+	@param plr : Player, the player who wants to delete all unequipped pets
+	@return {pet}, a table containing the pets left the player owns (new table of pets after deletion)
+]]
+DeleteUnequippedPetsRF.OnServerInvoke = function(plr : Player) : {}
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		return p.petModule:DeleteUnequippedPets()
+	end
+
+	return {}
 end
 
 
