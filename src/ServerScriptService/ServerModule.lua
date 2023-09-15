@@ -29,6 +29,7 @@ local EquipPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipPet")
 local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBestPets")
 local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
 local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteUnequippedPets")
+local CraftPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("CraftPet")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -515,6 +516,25 @@ DeleteUnequippedPetsRF.OnServerInvoke = function(plr : Player) : {}
 	local p : Player.PlayerModule = players[plr.Name]
 	if p then
 		return p.petModule:DeleteUnequippedPets()
+	end
+
+	return {}
+end
+
+
+--[[
+	Fires when the player wants to craft his pet into a bigger one
+
+	@param plr : Player, the player who wants to craft his pet
+	@param id : number, the id of the pet to craft
+	@return boolean, true if the pet could be crafted, false otherwise
+]]
+CraftPetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
+	if id and typeof(id) == "number" then
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			return p.petModule:CraftPet(id)
+		end
 	end
 
 	return {}

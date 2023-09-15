@@ -38,7 +38,9 @@ export type PetModule = {
     UnequipAllPets : (self : PetModule) -> nil,
     DeletePet : (self : PetModule, id : number) -> boolean,
     DeleteUnequippedPets : (self : PetModule) -> {pet},
-    UpdateFollowersMultiplier : (self : PetModule) -> nil,
+    CraftPet : (self : PetModule, id : number) -> boolean,
+    CalculateActiveBoost : (self : PetModule, pet : pet) -> number,
+    UpdateFollowersMultiplier : (self : PetModule) -> nil
 }
 
 type pet = {
@@ -490,7 +492,7 @@ local function CreatePetAttachment(position : Vector3, humanoidRootPart : Part, 
     local petAttachment : Attachment
     petAttachment = Instance.new("Attachment")
     petAttachment.Name = "PetAttachment"
-    
+
     local used : BoolValue = Instance.new("BoolValue")
     used.Name = "Used"
     used.Value = false
@@ -504,7 +506,7 @@ local function CreatePetAttachment(position : Vector3, humanoidRootPart : Part, 
 
     local petId : NumberValue = Instance.new("NumberValue")
     petId.Name = "PetId"
-    
+
     petId.Value = false
     petId.Parent = petAttachment
 
@@ -782,6 +784,14 @@ function PetModule:AddPetToCharacter(pet : pet)
                     -- if the pet couldn't be found, return
                     if not petClone then return end
 
+                    if pet.size == sizes.Huge then
+                        petClone:ScaleTo(2.5)
+                    elseif pet.size == sizes.Big then
+                        petClone:ScaleTo(1.5)
+                    else
+                        petClone:ScaleTo(1)
+                    end
+
                     -- move the pet to the attachment it will be using
                     petClone:PivotTo(v.WorldCFrame)
 
@@ -795,14 +805,14 @@ function PetModule:AddPetToCharacter(pet : pet)
                     petAttachment.Parent = petClone.PrimaryPart
 
                     local alignPosition : AlignPosition = Instance.new("AlignPosition")
-                    alignPosition.MaxForce = 10_000
+                    alignPosition.MaxForce = 100_000
                     alignPosition.Responsiveness = 25
                     alignPosition.Attachment0 = petAttachment
                     alignPosition.Attachment1 = v
                     alignPosition.Parent = petClone.PrimaryPart
-                    
+
                     local alignOrientation : AlignOrientation = Instance.new("AlignOrientation")
-                    alignOrientation.MaxTorque = 25_000
+                    alignOrientation.MaxTorque = 50_000
                     alignOrientation.Responsiveness = 25
                     alignOrientation.Attachment0 = petAttachment
                     alignOrientation.Attachment1 = v
@@ -908,7 +918,6 @@ function PetModule:EquipBest() : {number}
 
     self:UpdateFollowersMultiplier()
 
-    print(equippedPets)
     return equippedPets
 end
 
@@ -983,6 +992,104 @@ function PetModule:DeleteUnequippedPets() : {pet}
     DataStore2("pets", self.plr):Set(self.ownedPets)
 
     return self.ownedPets
+end
+
+
+--[[
+    Crafts the pet matching the given id into a bigger one
+
+    @param id : number, the id of the pet to craft
+    @return, true if the pet could be craft, false otherwise
+]]--
+function PetModule:CraftPet(id : number) : boolean
+
+    -- find the pet to craft
+    local petToCraft : pet
+    for _,pet : pet in pairs(self.ownedPets) do
+        if pet.id == id then
+            petToCraft = pet
+        end
+    end
+
+    -- if the pet couldn't be found, return
+    if not petToCraft then return false end
+
+    -- if the pet is already a huge one, return
+    if petToCraft.size == 2 then return false end
+
+    -- find 2 pets (other than petToCraft) that have the same identifier, size and upgrade and store their position in a table so that we can then remove them
+    local petsToRemovePositions : {number} = {}
+    for i : number, pet : pet in pairs(self.ownedPets) do
+        if pet.identifier == petToCraft.identifier and pet.size == petToCraft.size and pet.upgrade == petToCraft.upgrade and pet.id ~= petToCraft.id then
+            table.insert(petsToRemovePositions, i)
+
+            -- unequip the pet if it's equipped
+            if pet.equipped then
+                self:EquipPet(pet.id, false)
+            end
+
+            -- if we have found 2 matching pets, stop because we don't want to remove all matching pets
+            if #petsToRemovePositions == 2 then
+                break
+            end
+        end
+    end
+
+    petToCraft.size += 1
+
+    -- if we couldn't find 2 other matching pets, return
+    if #petsToRemovePositions ~= 2 then return false end
+
+    -- sort the table by descending order
+    table.sort(petsToRemovePositions, function(a, b)
+        return a > b
+    end)
+
+    table.remove(self.ownedPets, petsToRemovePositions[1])
+    table.remove(self.ownedPets, petsToRemovePositions[2])
+
+
+    -- if the pet to craft was equipped, update the pet size of the pet in the player's character
+    if petToCraft.equipped then
+        self:RemovePetFromCharacter(petToCraft)
+        self:AddPetToCharacter(petToCraft)
+    end
+
+    petToCraft.activeBoost = self:CalculateActiveBoost(petToCraft)
+
+    DataStore2("pets", self.plr):Set(self.ownedPets)
+
+    self:UpdateFollowersMultiplier()
+
+    return true
+end
+
+
+--[[
+    Calculates the active boost for the given pet (based on its base boost, size and upgrade)
+
+    @param pet : pet, the pet to calculate the active boost for
+    @return number, the calculated active boost
+]]--
+function PetModule:CalculateActiveBoost(pet : pet) : number
+    local sizeBoost : number = 1
+    local upgradeBoost : number = 1
+
+    if pet.size == sizes.Big then
+        sizeBoost = 1.5
+    elseif pet.size == sizes.Huge then
+        sizeBoost = 2
+    end
+
+    if pet.upgrade == upgrades.Shiny then
+        upgradeBoost = 1.5
+    elseif pet.upgrade == upgrades.Rainbow then
+        upgradeBoost = 2.5
+    elseif pet.upgrade == upgrades.Magic then
+        upgradeBoost = 6
+    end
+
+    return math.floor((pet.baseBoost * sizeBoost * upgradeBoost) * 100) / 100
 end
 
 

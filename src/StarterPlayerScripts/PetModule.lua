@@ -82,6 +82,7 @@ export type PetModule = {
     AddPetsToInventory : (self : PetModule, pets : {pet}) -> nil,
     EquipPet : (self : PetModule) -> boolean,
     UpdateEggsOdds : (self : PetModule, luck : number) -> nil,
+    CalculateActiveBoost : (self : PetModule, pet : pet) -> number,
     OpenGui : (self : PetModule) -> nil,
     CloseGui : (self : PetModule) -> nil,
 }
@@ -569,7 +570,7 @@ function PetModule.new(utility : Utility.Utility)
                     -- prompt the luck game passes purchase on luck buttons click
                     for _,luckButton : GuiObject in ipairs(eggGui.Background.LuckContainer:GetChildren()) do
                         if luckButton:IsA("ImageButton") then
-                            
+
                             if luckButton.Name == "BasicLuck" then
                                 luckButton.MouseButton1Down:Connect(function()
                                     GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.BasicLuck)
@@ -1142,6 +1143,34 @@ end
 
 
 --[[
+    Calculates the active boost for the given pet (based on its base boost, size and upgrade)
+
+    @param pet : pet, the pet to calculate the active boost for
+    @return number, the calculated active boost
+]]--
+function PetModule:CalculateActiveBoost(pet : pet) : number
+    local sizeBoost : number = 1
+    local upgradeBoost : number = 1
+
+    if pet.size == Sizes.Big then
+        sizeBoost = 1.5
+    elseif pet.size == Sizes.Huge then
+        sizeBoost = 2
+    end
+
+    if pet.upgrade == Upgrades.Shiny then
+        upgradeBoost = 1.5
+    elseif pet.upgrade == Upgrades.Rainbow then
+        upgradeBoost = 2.5
+    elseif pet.upgrade == Upgrades.Magic then
+        upgradeBoost = 6
+    end
+
+    return math.floor((pet.baseBoost * sizeBoost * upgradeBoost) * 100) / 100
+end
+
+
+--[[
 	Opens the pets gui
 ]]--
 function PetModule:OpenGui()
@@ -1209,7 +1238,6 @@ function PetModule:OpenGui()
 
                 if success then
                     -- remove the pet from the table
-                    print(#self.ownedPets)
                     for i : number, pet : pet in pairs(self.ownedPets) do
                         if pet.id == self.selectedPet then
                             if pet.equipped then
@@ -1223,7 +1251,6 @@ function PetModule:OpenGui()
                             break
                         end
                     end
-                    print(#self.ownedPets)
 
                     self:UpdateNumberOfEquippedPets()
                     self:UpdateUsedCapacity()
@@ -1241,8 +1268,8 @@ function PetModule:OpenGui()
                 GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.EquipFourMorePets)
             end)
         )
-        
-        
+
+
         -- buy more inventory capacity
         self.petsUIMaid:GiveTask(
             moreInventorySlotsButton.MouseButton1Down:Connect(function()
@@ -1272,7 +1299,7 @@ function PetModule:OpenGui()
                     if not pet.equipped then
                         -- reset the border color of the pet frame
                         local rarity : rarity = rarities[pet.rarity]
-                        
+
                         pet.inventorySlot.UIStroke.Color = rarity.border
                     end
                 end
@@ -1280,7 +1307,7 @@ function PetModule:OpenGui()
                 deleteUnequippedPetsconfirmationContainer.Visible = false
             end)
         )
-        
+
 
         -- confirm the pets unequipped deletion
         self.petsUIMaid:GiveTask(
@@ -1294,7 +1321,7 @@ function PetModule:OpenGui()
                         petFrame:Destroy()
                     end
                 end
-                
+
                 self.currentlyEquippedPets = 0
 
                 -- count the number of pets the player has equipped
@@ -1310,8 +1337,62 @@ function PetModule:OpenGui()
                 deleteUnequippedPetsconfirmationContainer.Visible = false
             end)
         )
-        
-        
+
+
+        -- craft the pet into a bigger one
+        self.petsUIMaid:GiveTask(
+            petDetailsSizeCraftButton.MouseButton1Down:Connect(function()
+                local success : boolean = CraftPetRF:InvokeServer(self.selectedPet)
+
+                if success then
+                    local craftedPet : pet
+                    for _,pet : pet in pairs(self.ownedPets) do
+                        if pet.id == self.selectedPet then
+                            craftedPet = pet
+                        end
+                    end
+
+                    if craftedPet then
+                        local petsToRemovePositions : {pet} = {}
+                        for i : number, pet : pet in pairs(self.ownedPets) do
+                            if pet.identifier == craftedPet.identifier and pet.size == craftedPet.size and pet.upgrade == craftedPet.upgrade and pet.id ~= craftedPet.id then
+                                table.insert(petsToRemovePositions, i)
+
+                                pet.inventorySlot:Destroy()
+
+                                -- if we have found 2 matching pets, stop because we don't want to remove all matching pets
+                                if #petsToRemovePositions == 2 then
+                                    break
+                                end
+                            end
+                        end
+
+                        -- increase the pet size
+                        if craftedPet.size < 2 then
+                            craftedPet.size += 1
+                        end
+
+                        -- sort the table by descending order
+                        table.sort(petsToRemovePositions, function(a, b)
+                            return a > b
+                        end)
+
+                        table.remove(self.ownedPets, petsToRemovePositions[1])
+                        table.remove(self.ownedPets, petsToRemovePositions[2])
+
+                        print("active boost", craftedPet.activeBoost)
+                        craftedPet.activeBoost = self:CalculateActiveBoost(craftedPet)
+                        print("active boost", craftedPet.activeBoost)
+
+                        self.selectedPet = nil
+                        self:SelectPet(craftedPet.id)
+                        self.selectedPet = craftedPet.id
+                    end
+                end
+            end)
+        )
+
+
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
         self.utility.SetCloseGuiConnection(
             inventoryCloseButton.MouseButton1Down:Connect(function()
