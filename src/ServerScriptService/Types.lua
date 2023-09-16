@@ -293,6 +293,7 @@ export type PetModule = {
     inventoryCapacity : number,
     nextId : number,
     luck : number,
+    magicUpgradePetId : number,
     plr : Player,
     new : (plr : Player) -> PetModule,
     IsPetInventoryFull : (self : PetModule) -> boolean,
@@ -310,7 +311,12 @@ export type PetModule = {
     EquipBest : (self : PetModule) -> {number},
     UnequipAllPets : (self : PetModule) -> nil,
     DeletePet : (self : PetModule, id : number) -> boolean,
-    UpdateFollowersMultiplier : (self : PetModule) -> nil,
+    DeleteUnequippedPets : (self : PetModule) -> {pet},
+    CraftPet : (self : PetModule, id : number) -> boolean,
+    UpgradePet : (self : PetModule, pet : pet, upgradeType : number, numberOfPetsInMachine : number) -> boolean,
+    MagicUpgradePet : (self : PetModule) -> boolean,
+    CalculateActiveBoost : (self : PetModule, pet : pet) -> number,
+    UpdateFollowersMultiplier : (self : PetModule) -> nil
 }
 
 type pet = {

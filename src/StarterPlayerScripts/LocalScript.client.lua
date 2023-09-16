@@ -145,7 +145,7 @@ Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
 	)
-	
+
 	-- resize all the rewards in the all rewards frame
 	for _,reward : Frame | UIGridLayout | UICorner in ipairs(allRewardsBackground:GetChildren()) do
 		if reward:IsA("Frame") then
@@ -179,7 +179,7 @@ end)
 
 --[[
 	Change the camera orientation when the character resets to face the player's phone
-	
+
 	@param character : Model, the character that got added
 ]]--
 local function characterAdded(character : Model)
@@ -231,7 +231,7 @@ end)
 
 --[[
 	Update the phone UI when the player posts
-	
+
 	@param postType : string, the type of the post
 	@param screen : Frame, the screen on which to post
 	@param plr : Player, the player who posts (not necessarily the localPlayer in case of a dialog for example)
@@ -244,7 +244,7 @@ end)
 
 
 --[[
-	Play the rainbow firework particle effect around the player 
+	Play the rainbow firework particle effect around the player
 ]]--
 ParticleRE.OnClientEvent:Connect(function()
 	local character : Model? = lplr.Character
@@ -263,7 +263,7 @@ ParticleRE.OnClientEvent:Connect(function()
 			Color3.new(0,0,1),
 			Color3.new(1,0,1)
 		}
-		
+
 		-- add the particle emitters to the table to emit and detroy the easily
 		local particleEmitters : {ParticleEmitter} = {}
 
@@ -279,7 +279,7 @@ ParticleRE.OnClientEvent:Connect(function()
 			particleEmitter.Speed = NumberRange.new(35, 45)
 			particleEmitter.SpreadAngle = Vector2.new(180, 180)
 			particleEmitter.Drag = 1
-			
+
 			table.insert(particleEmitters, particleEmitter)
 			particleEmitter.Parent = character.PrimaryPart
 		end
@@ -287,9 +287,9 @@ ParticleRE.OnClientEvent:Connect(function()
 		for _,particleEmitter : ParticleEmitter in pairs(particleEmitters) do
 			particleEmitter:Emit(30)
 		end
-		
+
 		sound:Play()
-		
+
 		Promise.new(function(resolve)
 			task.wait(3)
 			resolve()
@@ -298,7 +298,7 @@ ParticleRE.OnClientEvent:Connect(function()
 			for _,particleEmitter in pairs(particleEmitters) do
 				particleEmitter:Destroy()
 			end
-			
+
 			sound:Destroy()
 		end)
 	end
@@ -309,7 +309,7 @@ local function CloseUpgradePostsGui()
 	-- disconnect all the clicks connection from the upgrade posts gui
 	for _,upgradePostClickConnection : RBXScriptConnection in pairs(upgradePostsClickConnection) do
 		upgradePostClickConnection:Disconnect()
-	end	
+	end
 	table.clear(upgradePostsClickConnection)
 
 	upgradePostsBackground:TweenSize(
@@ -333,11 +333,11 @@ end
 local function UpdateOwnedPostTypes(level : number)
 	for _,v in ipairs(upgradePostsBackground:WaitForChild("Layout"):GetChildren()) do
 		if v:IsA("ImageButton") and v.LayoutOrder <= level then
-			
+
 			if v:FindFirstChild("Lock") then
 				v.Lock:Destroy()
 			end
-			
+
 			if v:FindFirstChild("PriceContainer") then
 				v.PriceContainer:Destroy()
 			end
@@ -357,14 +357,14 @@ end
 
 --[[
 	Display or hide the upgrade posts gui
-	
+
 	@param visible : boolean | number, true if the gui should be displayed, false otherwise. It can also be a number (on first fire only) to load the ui for the already owned post types
 ]]--
 UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean | number)
 
 	if typeof(visible) == "boolean" then
 		Utility.BlurBackground(visible)
-		
+
 		if visible and not upgradePosts.Enabled then
 			upgradePosts.Enabled = true
 
@@ -374,12 +374,12 @@ UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean | number)
 				Enum.EasingStyle.Linear,
 				UPGRADE_POSTS_TWEEN_DURATION
 			)
-			
+
 			-- listen to all the clicks to upgrade the post
 			for _,upgradePost in ipairs(upgradePostsBackground:WaitForChild("Layout"):GetChildren()) do
 				if upgradePost:IsA("ImageButton") and upgradePost.Active then
 					table.insert(upgradePostsClickConnection, upgradePost.MouseButton1Down:Connect(function()
-						
+
 						-- when the player clicks, fire the server to check if the player has enough followers
 						-- and then if it's the case, unlock all previous post types on the gui
 						if UnlockPostRF:InvokeServer(upgradePost.LayoutOrder) then
@@ -389,19 +389,19 @@ UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean | number)
 					end))
 				end
 			end
-			
+
 			-- listen to the click to close the gui
 			table.insert(upgradePostsClickConnection, upgradePostsCloseButton.MouseButton1Down:Connect(function()
 				Utility.BlurBackground(false)
 				CloseUpgradePostsGui()
 			end))
-			
+
 		elseif not visible and upgradePosts.Enabled then
 			CloseUpgradePostsGui()
 		end
 
 	elseif typeof(visible) == "number" then
-		UpdateOwnedPostTypes(visible)		
+		UpdateOwnedPostTypes(visible)
 	end
 end)
 
@@ -409,9 +409,9 @@ end)
 -- remove last posts if there is more than one (might happens at the start while the player is loading)
 -- also load the upgrade post billboard gui
 coroutine.wrap(function()
-	
+
 	task.wait(5)
-	
+
 	-- add the upgrade post billboard gui to the player's plot only
 	for _,plot : Model in ipairs(workspace.Plots:GetChildren()) do
 		if plot.Owner.Value == lplr.Name then
@@ -440,11 +440,11 @@ coroutine.wrap(function()
 			billboardGui.Parent = plot.UpgradePosts.Part
 		end
 	end
-	
+
 	task.wait(5)
-	
+
 	local lastPosts = {}
-	
+
 	for _,phone : Model in ipairs(workspace:WaitForChild("Plots"):GetChildren()) do
 		if phone:FindFirstChild("Owner") and phone.Owner.Value == lplr.Name then
 			for _,post : Frame in ipairs(phone.PhoneModel.Screen.ScreenUI.Background.App:GetChildren()) do
@@ -454,7 +454,7 @@ coroutine.wrap(function()
 			end
 		end
 	end
-	
+
 	if #lastPosts > 1 then
 		lastPosts[1]:Destroy()
 	end
@@ -534,6 +534,8 @@ PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet}, deletePreviousPets
 		end
 	end
 
+	petModule.currentlyEquippedPets = 0
+
 	-- count the number of pets the player has equipped
 	for _,pet : PetModule.pet in pairs(pets) do
 		if pet.equipped then
@@ -541,8 +543,16 @@ PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet}, deletePreviousPets
 		end
 	end
 
-	petModule:AddPetsToInventory(pets)
+	if deletePreviousPets then
+		petModule:RecreatePetsInventory()
+	else
+		petModule:AddPetsToInventory(pets)
+	end
 	petModule:UpdateNumberOfEquippedPets()
+
+	if playerGui:WaitForChild("Pets"):WaitForChild("InventoryBackground"):WaitForChild("UpgradesMachineDetails").Visible then
+		petModule:OpenUpgradesMachineGui()
+	end
 end)
 
 

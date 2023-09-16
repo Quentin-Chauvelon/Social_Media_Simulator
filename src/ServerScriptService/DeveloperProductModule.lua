@@ -24,7 +24,8 @@ type DeveloperProducts = {
     LimitedEditionPetPartyPopper : number,
     LimitedEditionPetRedHeart : number,
     LimitedEditionPetDevil : number,
-    LimitedEditionPetMoney : number
+    LimitedEditionPetMoney : number,
+    MagicUpgrade : number
 }
 
 export type DeveloperProductModule = {
@@ -42,7 +43,8 @@ DeveloperProductModule.developerProducts = {
     LimitedEditionPetPartyPopper = 1644617959,
     LimitedEditionPetRedHeart = 1644618109,
     LimitedEditionPetDevil = 1644618260,
-    LimitedEditionPetMoney = 1644618414
+    LimitedEditionPetMoney = 1644618414,
+    MagicUpgrade = 1645098556
 }
 
 
@@ -67,6 +69,8 @@ local function BoughtLimitedEditionPet(p : Types.PlayerModule, id : number) : bo
 
     -- add the pet to the inventory
     PetsRE:FireClient(p.player, {pet}, false)
+    
+    return true
 end
 
 
@@ -87,34 +91,39 @@ function DeveloperProductModule.BoughtDeveloperProduct(receiptInfo : receiptInfo
             end
 
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.LimitedEditionPetHundred then
-            if not BoughtLimitedEditionPet(p, 100) then
-                return Enum.ProductPurchaseDecision.NotProcessedYet
+            if BoughtLimitedEditionPet(p, 100) then
+                return Enum.ProductPurchaseDecision.PurchaseGranted
             end
 
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.LimitedEditionPetFire then
-            if not BoughtLimitedEditionPet(p, 101) then
-                return Enum.ProductPurchaseDecision.NotProcessedYet
+            if BoughtLimitedEditionPet(p, 101) then
+                return Enum.ProductPurchaseDecision.PurchaseGranted
             end
 
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.LimitedEditionPetPartyPopper then
-            if not BoughtLimitedEditionPet(p, 102) then
-                return Enum.ProductPurchaseDecision.NotProcessedYet
+            if BoughtLimitedEditionPet(p, 102) then
+                return Enum.ProductPurchaseDecision.PurchaseGranted
             end
 
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.LimitedEditionPetRedHeart then
-            if not BoughtLimitedEditionPet(p, 103) then
-                return Enum.ProductPurchaseDecision.NotProcessedYet
+            if BoughtLimitedEditionPet(p, 103) then
+                return Enum.ProductPurchaseDecision.PurchaseGranted
             end
 
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.LimitedEditionPetDevil then
-            if not BoughtLimitedEditionPet(p, 104) then
-                return Enum.ProductPurchaseDecision.NotProcessedYet
+            if BoughtLimitedEditionPet(p, 104) then
+                return Enum.ProductPurchaseDecision.PurchaseGranted
             end
 
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.LimitedEditionPetMoney then
-            if not BoughtLimitedEditionPet(p, 105) then
-                return Enum.ProductPurchaseDecision.NotProcessedYet
+            if BoughtLimitedEditionPet(p, 105) then
+                return Enum.ProductPurchaseDecision.PurchaseGranted
             end
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.MagicUpgrade then
+            p.petModule:MagicUpgradePet()
+
+            PetsRE:FireClient(player, p.petModule.ownedPets, true)
         end
 	end
 

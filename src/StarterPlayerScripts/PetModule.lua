@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,6 +15,8 @@ local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBe
 local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
 local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteUnequippedPets")
 local CraftPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("CraftPet")
+local UpgradePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("UpgradePet")
+local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 
 local displayPets : Folder = ReplicatedStorage:WaitForChild("DisplayPets")
 
@@ -33,7 +36,8 @@ local threeEggContainer : Frame = eggOpeningBackground:WaitForChild("ThreeEggs")
 local sixEggContainer : Frame = eggOpeningBackground:WaitForChild("SixEggs")
 
 local inventoryBackground : Frame = petsScreenGui:WaitForChild("InventoryBackground")
-local inventoryCloseButton : ImageButton = inventoryBackground:WaitForChild("Close")
+local inventoryTitle : TextLabel = inventoryBackground:WaitForChild("Title")
+local inventoryCloseButton : ImageButton = inventoryBackground:WaitForChild("InventoryClose")
 local inventoryPetsListContainer : ScrollingFrame = inventoryBackground:WaitForChild("PetsListContainer")
 local equipBestButton : TextButton = inventoryBackground:WaitForChild("EquipBest")
 local deleteUnequippedPetsButton : TextButton = inventoryBackground:WaitForChild("DeleteUnequippedPets")
@@ -53,10 +57,23 @@ local petDetailsSizeCraftRequirements : TextLabel = petDetails:WaitForChild("Siz
 local petDetailsSizeCraftButton : TextButton = petDetails:WaitForChild("SizeCraft")
 local petDetailsSizeCraftDisabled : TextLabel = petDetails:WaitForChild("SizeCraftDisabled")
 
-local equippedPets : TextLabel = inventoryBackground:WaitForChild("InventoryLimits"):WaitForChild("MaxEquippedPets"):WaitForChild("EquippedPets")
-local moreEquippedPetsButton : TextButton = inventoryBackground.InventoryLimits.MaxEquippedPets:WaitForChild("MoreEquippedPets")
-local inventoryCapacity : TextLabel = inventoryBackground.InventoryLimits:WaitForChild("MaxInvetoryCapacity"):WaitForChild("InventoryCapacity")
-local moreInventorySlotsButton : TextButton = inventoryBackground.InventoryLimits.MaxInvetoryCapacity:WaitForChild("MoreInvetorySlots")
+local inventoryLimitsContainer : Frame = inventoryBackground:WaitForChild("InventoryLimits")
+local equippedPets : TextLabel = inventoryLimitsContainer:WaitForChild("MaxEquippedPets"):WaitForChild("EquippedPets")
+local moreEquippedPetsButton : TextButton = inventoryLimitsContainer.MaxEquippedPets:WaitForChild("MoreEquippedPets")
+local inventoryCapacity : TextLabel = inventoryLimitsContainer:WaitForChild("MaxInvetoryCapacity"):WaitForChild("InventoryCapacity")
+local moreInventorySlotsButton : TextButton = inventoryLimitsContainer.MaxInvetoryCapacity:WaitForChild("MoreInvetorySlots")
+
+local upgradesMachineDetails : Frame = inventoryBackground:WaitForChild("UpgradesMachineDetails")
+local upgradesMachineCloseButton : TextButton = inventoryBackground:WaitForChild("UpgradesMachineClose")
+local upgradesMachineDetailsUpgradeType : TextLabel = upgradesMachineDetails:WaitForChild("UpgradeType")
+local upgradesMachinesDetailsBoost : TextLabel = upgradesMachineDetails:WaitForChild("Boost")
+local upgradesMachinesSlots : Frame = upgradesMachineDetails:WaitForChild("Slots")
+local upgradesMachinesMagicSlot : Frame = upgradesMachineDetails:WaitForChild("MagicSlot")
+local upgradesMachinesUpgradeButton : TextButton = upgradesMachineDetails:WaitForChild("Upgrade")
+local upgradesMachinesMagicUpgradeButton : TextButton = upgradesMachineDetails:WaitForChild("MagicUpgrade")
+local upgradesMachinesGuaranteedSuccess : TextLabel = upgradesMachineDetails:WaitForChild("GuaranteedSuccess")
+local upgradesMachinesChance : TextLabel = upgradesMachineDetails:WaitForChild("Chance")
+local upgradesMachinesUpgradeResult : TextLabel = upgradesMachineDetails:WaitForChild("UpgradeResult")
 
 
 export type PetModule = {
@@ -67,9 +84,14 @@ export type PetModule = {
     utility : Utility.Utility,
     selectedPet : number?,
     canOpenEgg : boolean,
+    selectedUpgradeType : number,
+    upgradeSuccessChance : number,
+    maxNumberOfPetsInMachine : number,
+    petsInMachine : {pet},
     petsUIMaid : Maid.Maid,
     eggsMaid : Maid.Maid,
     closeEggSequenceInputConnection : RBXScriptSignal?,
+    upgradesMachineCloseButtonConnection : RBXScriptConnection,
     new : (utility : Utility.Utility) -> PetModule,
     PlayEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame, pets : {pet}) -> nil,
     CloseEggOpeningSequence : (self : PetModule, eggSequenceContainer : Frame) -> nil,
@@ -80,11 +102,20 @@ export type PetModule = {
     UnselectPet : (self : PetModule) -> nil,
     AddPetToInventory : (self : PetModule, pet : pet) -> nil,
     AddPetsToInventory : (self : PetModule, pets : {pet}) -> nil,
+    RecreatePetsInventory : (self : PetModule) -> nil,
     EquipPet : (self : PetModule) -> boolean,
     UpdateEggsOdds : (self : PetModule, luck : number) -> nil,
     CalculateActiveBoost : (self : PetModule, pet : pet) -> number,
     OpenGui : (self : PetModule) -> nil,
     CloseGui : (self : PetModule) -> nil,
+    SetUpgradesMachineType : (self : PetModule, upgrade : number) -> nil,
+    AddPetToMachine : (self : PetModule, pet : pet) -> nil,
+    RemovePetFromMachine : (self : PetModule) -> nil,
+    FilterPetsList : (self : PetModule, petFilterModel : pet) -> nil,
+    UnfilterPetsList : (self : PetModule) -> nil,
+    UpdateUpgradeSuccessChance : (self : PetModule) -> nil,
+    OpenUpgradesMachineGui : (self : PetModule) -> nil,
+    CloseUpgradesMachineGui : (self : PetModule) -> nil
 }
 
 export type pet = {
@@ -398,6 +429,7 @@ PetModule.__index = PetModule
 
 function PetModule.new(utility : Utility.Utility)
     local petModule : PetModule = {}
+    setmetatable(petModule, PetModule)
 
     petModule.ownedPets = {}
 
@@ -410,7 +442,14 @@ function PetModule.new(utility : Utility.Utility)
     petModule.selectedPet = nil
 
     petModule.canOpenEgg = true
+
+    petModule.maxNumberOfPetsInMachine = 0
+    petModule.petsInMachine = {}
+
+    petModule.selectedUpgradeType = 0
+    petModule.upgradeSuccessChance = 0
     petModule.closeEggSequenceInputConnection = nil
+    petModule.upgradesMachineCloseButtonConnection = nil
 
     petModule.petsUIMaid = Maid.new()
     petModule.eggsMaid = Maid.new()
@@ -432,7 +471,8 @@ function PetModule.new(utility : Utility.Utility)
     end
 
     utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
-        local NUMBER_OF_PETS_PER_ROW : number = 6
+        -- the number of pets per row depends of the size of the list (if the details tab is open and list is half it's normal size, then number of pets per row should 3)
+        local NUMBER_OF_PETS_PER_ROW : number = math.round(6 * inventoryPetsListContainer.Size.X.Scale)
 
         -- resize the pets list frames (based on the size of the scrolling frame) so that they can space properly
         inventoryPetsListContainer.UIGridLayout.CellSize = UDim2.new(
@@ -463,6 +503,11 @@ function PetModule.new(utility : Utility.Utility)
 
     -- open the gui when clicking on the pets button
     petsOpenButton.MouseButton1Down:Connect(function()
+        if upgradesMachineDetails.Visible then
+            petModule:CloseUpgradesMachineGui()
+            task.wait(0.5)
+        end
+
         petModule:OpenGui()
     end)
 
@@ -470,116 +515,118 @@ function PetModule.new(utility : Utility.Utility)
     for _,part : Part in ipairs(workspace:WaitForChild("EggsAreaDetectionParts"):GetChildren()) do
         part.Touched:Connect(function(hit : BasePart)
             if hit.Parent and hit.Name == "HumanoidRootPart" then
+                if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
 
-                -- for each button of each egg
-                for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
-                    eggGui.Enabled = true
+                    -- for each button of each egg
+                    for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
+                        eggGui.Enabled = true
 
-                    for _,openEggButton : GuiObject in ipairs(eggGui.Background.OpenEggContainer:GetChildren()) do
-                        if openEggButton:IsA("ImageButton") then
+                        for _,openEggButton : GuiObject in ipairs(eggGui.Background.OpenEggContainer:GetChildren()) do
+                            if openEggButton:IsA("ImageButton") then
 
-                            -- tweens to scale the button up and down on mouse enter and mouse leave
-                            local mouseEnterTween : Tween = TweenService:Create(
-                                openEggButton.UIScale,
-                                TweenInfo.new(
-                                    0.15,
-                                    Enum.EasingStyle.Quad,
-                                    Enum.EasingDirection.InOut
-                                ),
-                                {Scale = 1.1}
-                            )
+                                -- tweens to scale the button up and down on mouse enter and mouse leave
+                                local mouseEnterTween : Tween = TweenService:Create(
+                                    openEggButton.UIScale,
+                                    TweenInfo.new(
+                                        0.15,
+                                        Enum.EasingStyle.Quad,
+                                        Enum.EasingDirection.InOut
+                                    ),
+                                    {Scale = 1.1}
+                                )
 
-                            local mouseLeaveTween : Tween = TweenService:Create(
-                                openEggButton.UIScale,
-                                TweenInfo.new(
-                                    0.15,
-                                    Enum.EasingStyle.Quad,
-                                    Enum.EasingDirection.InOut
-                                ),
-                                {Scale = 1}
-                            )
+                                local mouseLeaveTween : Tween = TweenService:Create(
+                                    openEggButton.UIScale,
+                                    TweenInfo.new(
+                                        0.15,
+                                        Enum.EasingStyle.Quad,
+                                        Enum.EasingDirection.InOut
+                                    ),
+                                    {Scale = 1}
+                                )
 
-                            -- scale the button up on mouse enter
-                            petModule.eggsMaid:GiveTask(
-                                openEggButton.MouseEnter:Connect(function()
-                                    mouseEnterTween:Play()
-                                end)
-                            )
+                                -- scale the button up on mouse enter
+                                petModule.eggsMaid:GiveTask(
+                                    openEggButton.MouseEnter:Connect(function()
+                                        mouseEnterTween:Play()
+                                    end)
+                                )
 
-                            -- scale the button down on mouse leave
-                            petModule.eggsMaid:GiveTask(
-                                openEggButton.MouseLeave:Connect(function()
-                                    mouseLeaveTween:Play()
-                                end)
-                            )
+                                -- scale the button down on mouse leave
+                                petModule.eggsMaid:GiveTask(
+                                    openEggButton.MouseLeave:Connect(function()
+                                        mouseLeaveTween:Play()
+                                    end)
+                                )
 
 
-                            -- open an egg when the player clicks the button
-                            petModule.eggsMaid:GiveTask(
-                                openEggButton.MouseButton1Down:Connect(function()
+                                -- open an egg when the player clicks the button
+                                petModule.eggsMaid:GiveTask(
+                                    openEggButton.MouseButton1Down:Connect(function()
 
-                                    -- if the player doesn't own the 3x or 6x open eggs game passes, prompt them to pruchase it
-                                    if openEggButton.NumberOfEggs.Value == 3 then
-                                        -- if the player doesn't already own the game pass
-                                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenThreeEggs) then
-                                            -- prompt the purhcase to buy it
-                                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenThreeEggs)
-                                            return
+                                        -- if the player doesn't own the 3x or 6x open eggs game passes, prompt them to pruchase it
+                                        if openEggButton.NumberOfEggs.Value == 3 then
+                                            -- if the player doesn't already own the game pass
+                                            if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenThreeEggs) then
+                                                -- prompt the purhcase to buy it
+                                                GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenThreeEggs)
+                                                return
+                                            end
+
+                                        elseif openEggButton.NumberOfEggs.Value == 6 then
+                                            -- if the player doesn't already own the game pass
+                                            if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenSixEggs) then
+                                                -- prompt the purhcase to buy it
+                                                GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenSixEggs)
+                                                return
+                                            end
                                         end
 
-                                    elseif openEggButton.NumberOfEggs.Value == 6 then
-                                        -- if the player doesn't already own the game pass
-                                        if not GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.OpenSixEggs) then
-                                            -- prompt the purhcase to buy it
-                                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.OpenSixEggs)
-                                            return
+                                        if petModule.canOpenEgg then
+                                            petModule.canOpenEgg = false
+
+                                            -- fire the server to get random pets
+                                            local openedPets : {pet} = OpenEggRF:InvokeServer(openEggButton.Parent.EggId.Value, openEggButton.NumberOfEggs.Value)
+
+                                            -- add all the pets to the owned pets table
+                                            for _,pet : pet in pairs(openedPets) do
+                                                table.insert(petModule.ownedPets, pet)
+                                            end
+
+                                            -- play the right egg opening sequence based on the number of pets the player got
+                                            if #openedPets == 1 then
+                                                petModule:PlayEggOpeningSequence(oneEggContainer, openedPets)
+                                            elseif #openedPets == 3 then
+                                                petModule:PlayEggOpeningSequence(threeEggContainer, openedPets)
+                                            elseif #openedPets == 6 then
+                                                petModule:PlayEggOpeningSequence(sixEggContainer, openedPets)
+                                            else
+                                                -- if petModule:PlayEggOpeningSequence hasn't been called, set can open egg to true to release the debounce and allow the player to re-open eggs
+                                                petModule.canOpenEgg = true
+                                            end
+
+                                            petModule:AddPetsToInventory(openedPets)
                                         end
-                                    end
-
-                                    if petModule.canOpenEgg then
-                                        petModule.canOpenEgg = false
-
-                                        -- fire the server to get random pets
-                                        local openedPets : {pet} = OpenEggRF:InvokeServer(openEggButton.Parent.EggId.Value, openEggButton.NumberOfEggs.Value)
-
-                                        -- add all the pets to the owned pets table
-                                        for _,pet : pet in pairs(openedPets) do
-                                            table.insert(petModule.ownedPets, pet)
-                                        end
-
-                                        -- play the right egg opening sequence based on the number of pets the player got
-                                        if #openedPets == 1 then
-                                            petModule:PlayEggOpeningSequence(oneEggContainer, openedPets)
-                                        elseif #openedPets == 3 then
-                                            petModule:PlayEggOpeningSequence(threeEggContainer, openedPets)
-                                        elseif #openedPets == 6 then
-                                            petModule:PlayEggOpeningSequence(sixEggContainer, openedPets)
-                                        else
-                                            -- if petModule:PlayEggOpeningSequence hasn't been called, set can open egg to true to release the debounce and allow the player to re-open eggs
-                                            petModule.canOpenEgg = true
-                                        end
-
-                                        petModule:AddPetsToInventory(openedPets)
-                                    end
-                                end)
-                            )
+                                    end)
+                                )
+                            end
                         end
-                    end
 
 
-                    -- prompt the luck game passes purchase on luck buttons click
-                    for _,luckButton : GuiObject in ipairs(eggGui.Background.LuckContainer:GetChildren()) do
-                        if luckButton:IsA("ImageButton") then
+                        -- prompt the luck game passes purchase on luck buttons click
+                        for _,luckButton : GuiObject in ipairs(eggGui.Background.LuckContainer:GetChildren()) do
+                            if luckButton:IsA("ImageButton") then
 
-                            if luckButton.Name == "BasicLuck" then
-                                luckButton.MouseButton1Down:Connect(function()
-                                    GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.BasicLuck)
-                                end)
+                                if luckButton.Name == "BasicLuck" then
+                                    luckButton.MouseButton1Down:Connect(function()
+                                        GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.BasicLuck)
+                                    end)
 
-                            elseif luckButton.Name == "GoldenLuck" then
-                                luckButton.MouseButton1Down:Connect(function()
-                                    GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.GoldenLuck)
-                                end)
+                                elseif luckButton.Name == "GoldenLuck" then
+                                    luckButton.MouseButton1Down:Connect(function()
+                                        GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.GoldenLuck)
+                                    end)
+                                end
                             end
                         end
                     end
@@ -591,30 +638,65 @@ function PetModule.new(utility : Utility.Utility)
         -- when the player leaves the eggs area, disable the pets guis
         part.TouchEnded:Connect(function(hit : BasePart)
             if hit.Parent and hit.Name == "HumanoidRootPart" then
-                local isInZone : boolean = false
+                if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                    local isInZone : boolean = false
 
-                -- since touch ended fires somewhat randomly (when the player jumps for example), we want to check if the player is really not in the zone anymore
-                for _,touchingPart : BasePart in ipairs(hit:GetTouchingParts()) do
-                    if touchingPart == part then
-                        isInZone = true
-                        break
-                    end
-                end
-
-                if not isInZone then
-                    -- hide all the pets guis
-                    for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
-                        eggGui.Enabled = false
+                    -- since touch ended fires somewhat randomly (when the player jumps for example), we want to check if the player is really not in the zone anymore
+                    for _,touchingPart : BasePart in ipairs(hit:GetTouchingParts()) do
+                        if touchingPart == part then
+                            isInZone = true
+                            break
+                        end
                     end
 
-                    petModule.eggsMaid:DoCleaning()
+                    if not isInZone then
+                        -- hide all the pets guis
+                        for _,eggGui : BillboardGui in ipairs(eggsScreenGui:GetChildren()) do
+                            eggGui.Enabled = false
+                        end
+
+                        petModule.eggsMaid:DoCleaning()
+                    end
                 end
             end
         end)
     end
 
+    
+    -- upgrades machine
+    for _,upgradeMachine : Folder in ipairs(workspace:WaitForChild("PetsUpgradesMachine"):GetChildren()) do
+        upgradeMachine.TouchDetector.Touched:Connect(function(hit : BasePart)
+            if hit.Parent and hit.Name == "HumanoidRootPart" then
+                if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                    petModule:SetUpgradesMachineType(upgradeMachine.UpgradeType.Value)
 
-    return setmetatable(petModule, PetModule)
+                    petModule:OpenUpgradesMachineGui()
+                end
+            end
+        end)
+
+        upgradeMachine.TouchDetector.TouchEnded:Connect(function(hit : BasePart)
+            if hit.Parent and hit.Name == "HumanoidRootPart" then
+                if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                    local isInZone : boolean = false
+
+                    -- since touch ended fires somewhat randomly (when the player jumps for example), we want to check if the player is really not in the zone anymore
+                    for _,touchingPart : BasePart in ipairs(hit:GetTouchingParts()) do
+                        if touchingPart == upgradeMachine.TouchDetector then
+                            isInZone = true
+                            break
+                        end
+                    end
+
+                    if not isInZone then
+                        petModule:CloseUpgradesMachineGui()
+                    end
+                end
+            end
+        end)
+    end
+
+    return petModule
 end
 
 
@@ -1024,6 +1106,12 @@ function PetModule:AddPetToInventory(pet : pet)
 
     petClone.MouseButton1Down:Connect(function()
 
+        -- if the upgrade machine ui is visible, add the pet to the machine to upgrade it
+        if upgradesMachineDetails.Visible then
+            self:AddPetToMachine(pet)
+            return
+        end
+
         -- if the player clicked the same pet twice, hide the details tab
         if petDetails.Visible and pet.id == self.selectedPet then
             self:UnselectPet()
@@ -1055,6 +1143,46 @@ function PetModule:AddPetsToInventory(pets : {pet})
     end
 
     self:UpdateUsedCapacity()
+end
+
+
+--[[
+    Recreates the pet inventory (deletes all pets and adds them back (used when deleting unequipped pets or when upgrading))
+]]--
+function PetModule:RecreatePetsInventory()
+    for _,petFrame : GuiObject in ipairs(inventoryPetsListContainer:GetChildren()) do
+        if petFrame:IsA("ImageButton") then
+            petFrame:Destroy()
+        end
+    end
+
+    self.currentlyEquippedPets = 0
+
+    -- count the number of pets the player has equipped
+    for _,pet : pet in pairs(self.ownedPets) do
+        if pet.equipped then
+            self.currentlyEquippedPets += 1
+        end
+    end
+
+    self:AddPetsToInventory(self.ownedPets)
+
+    self:UpdateNumberOfEquippedPets()
+    self:UpdateUsedCapacity()
+
+    -- change all the colors to display the upgrade of the pet rather than the rarity if the upgrades machine ui is displayed
+    if upgradesMachineDetails.Visible then
+        for _,pet : pet in pairs(self.ownedPets) do
+            if pet.upgrade == 1 then
+                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(255, 220, 80)
+            elseif pet.upgrade == 2 then
+                pet.inventorySlot.UIStroke.Color = Color3.new(1,1,1)
+                pet.inventorySlot.UIStroke.UIGradient.Enabled = true
+            elseif pet.upgrade == 3 then
+                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(127, 246, 255)
+            end
+        end
+    end
 end
 
 
@@ -1175,6 +1303,7 @@ end
 	Opens the pets gui
 ]]--
 function PetModule:OpenGui()
+
     -- open the gui
     if self.utility.OpenGui(inventoryBackground) then
 
@@ -1317,22 +1446,7 @@ function PetModule:OpenGui()
 
                 self.ownedPets = DeleteUnequippedPetsRF:InvokeServer()
 
-                for _,petFrame : GuiObject in ipairs(inventoryPetsListContainer:GetChildren()) do
-                    if petFrame:IsA("ImageButton") then
-                        petFrame:Destroy()
-                    end
-                end
-
-                self.currentlyEquippedPets = 0
-
-                -- count the number of pets the player has equipped
-                for _,pet : pet in pairs(self.ownedPets) do
-                    if pet.equipped then
-                        self.currentlyEquippedPets += 1
-                    end
-                end
-
-                self:AddPetsToInventory(self.ownedPets)
+                self:RecreatePetsInventory()
 
                 deleteUnequippedPetsconfirmationContainer.Visible = false
             end)
@@ -1380,9 +1494,7 @@ function PetModule:OpenGui()
                         table.remove(self.ownedPets, petsToRemovePositions[1])
                         table.remove(self.ownedPets, petsToRemovePositions[2])
 
-                        print("active boost", craftedPet.activeBoost)
                         craftedPet.activeBoost = self:CalculateActiveBoost(craftedPet)
-                        print("active boost", craftedPet.activeBoost)
 
                         self.selectedPet = nil
                         self:SelectPet(craftedPet.id)
@@ -1410,6 +1522,374 @@ function PetModule:CloseGui()
     self.utility.CloseGui(inventoryBackground)
 
     self.petsUIMaid:DoCleaning()
+end
+
+
+--[[
+    Sets the upgrade type for the machine (shiny, rainbow or magic)
+
+    @param upgrade : number, the upgrade to set the machine to
+]]--
+function PetModule:SetUpgradesMachineType(upgrade : number)
+    
+    local upgradeType : upgrade = upgrades[upgrade]
+
+    self.selectedUpgradeType = upgrade
+
+    -- update the upgrade type ui (shiny, rainbow or magic)
+    upgradesMachineDetailsUpgradeType.UpgradeName.Text = upgradeType.name:upper()
+    upgradesMachineDetailsUpgradeType.BackgroundColor3 = upgradeType.color
+    upgradesMachineDetailsUpgradeType.BorderUIStroke.Color = upgradeType.border
+    upgradesMachineDetailsUpgradeType.UpgradeName.ContextualUIStroke.Color = upgradeType.border
+
+    -- display the gradient if the upgrade should have a gradient
+    if upgradeType.gradient then
+        upgradesMachineDetailsUpgradeType.UIGradient.Enabled = true
+        upgradesMachineDetailsUpgradeType.UIGradient.Color = upgradeType.gradientColor
+    else
+        upgradesMachineDetailsUpgradeType.UIGradient.Enabled = false
+    end
+
+    -- display the image if the upgrade should have an image
+    if upgradeType.image then
+        upgradesMachineDetailsUpgradeType.ImageLabel.Visible = true
+        upgradesMachineDetailsUpgradeType.ImageLabel.Image = upgradeType.imageUrl
+    else
+        upgradesMachineDetailsUpgradeType.ImageLabel.Visible = false
+    end
+
+    -- update the boost
+    if upgrade == Upgrades.Shiny then
+        self.maxNumberOfPetsInMachine = 5
+        upgradesMachinesDetailsBoost.Text = "+50% boost"
+    elseif upgrade == Upgrades.Rainbow then
+        self.maxNumberOfPetsInMachine = 5
+        upgradesMachinesDetailsBoost.Text = "+150% boost"
+    elseif upgrade == Upgrades.Magic then
+        self.maxNumberOfPetsInMachine = 1
+        upgradesMachinesDetailsBoost.Text = "+600% boost"
+    end
+end
+
+
+--[[
+    Opens the upgrades machine gui
+]]--
+function PetModule:OpenUpgradesMachineGui()
+    if inventoryBackground.Visible then
+        self:CloseUpgradesMachineGui()
+        self:CloseGui()
+        task.wait(0.5)
+    end
+
+    -- wait before opening the ui otherwise it would sometimes break (opening before closing and thus changing the originalSize of the ui in utility to 0,0,0,0)
+    task.wait(0.2)
+
+    if not upgradesMachineDetails.Visible then
+
+        -- listen to clicks on slots to remove the pets from the machine
+        for _,slot : ImageButton in ipairs(upgradesMachinesSlots:GetChildren()) do
+            self.petsUIMaid:GiveTask(
+                slot.MouseButton1Down:Connect(function()
+                    self:RemovePetFromMachine()
+                end)
+            )
+        end
+
+        -- listen to click on the magic slot to remove the pet from the machine
+        self.petsUIMaid:GiveTask(
+            upgradesMachinesMagicSlot.Slot1.MouseButton1Down:Connect(function()
+                self:RemovePetFromMachine()
+            end)
+        )
+
+
+        -- magic upgrade button click
+        self.petsUIMaid:GiveTask(
+            upgradesMachinesMagicUpgradeButton.MouseButton1Down:Connect(function()
+                if #self.petsInMachine > 0 and self.petsInMachine[1].upgrade < Upgrades.Magic then
+
+                    -- fire the server before to save the pet we want to upgrade to magic (because after the purchase succeeds, we have no way of knowing which pet to upgrade)
+                    PetsRE:FireServer(self.petsInMachine[1].id)
+
+                    self:RemovePetFromMachine()
+
+                    MarketplaceService:PromptProductPurchase(lplr, 1645098556)
+                end
+            end)
+        )
+
+        -- upgrade button click
+        self.petsUIMaid:GiveTask(
+            upgradesMachinesUpgradeButton.MouseButton1Down:Connect(function()
+                if #self.petsInMachine > 0 then
+                    local success : boolean, pets : {pet} = UpgradePetRF:InvokeServer(self.petsInMachine[1].id, self.selectedUpgradeType, #self.petsInMachine)
+
+                    if success then
+                        upgradesMachinesUpgradeResult.Text = "Success!"
+                        upgradesMachinesUpgradeResult.TextColor3 = Color3.fromRGB(135, 255, 139)
+                        upgradesMachinesUpgradeResult.UIStroke.Color = Color3.fromRGB(0, 115, 4)
+                        upgradesMachinesUpgradeResult.Visible = true
+
+                    else
+                        upgradesMachinesUpgradeResult.Text = "Failed!"
+                        upgradesMachinesUpgradeResult.TextColor3 = Color3.fromRGB(255, 146, 146)
+                        upgradesMachinesUpgradeResult.UIStroke.Color = Color3.fromRGB(126, 0, 0)
+                        upgradesMachinesUpgradeResult.Visible = true
+                    end
+
+                    if #pets > 0 then
+                        -- remove all the pets from the machine
+                        while #self.petsInMachine > 0 do
+                            self:RemovePetFromMachine()
+                        end
+
+                        self.ownedPets = pets
+
+                        self:RecreatePetsInventory()
+                    end
+                end
+            end)
+        )
+
+        equipBestButton.Visible = false
+        deleteUnequippedPetsButton.Visible = false
+        deleteUnequippedPetsCancelButton.Visible = false
+        deleteUnequippedPetsConfirmButton.Visible = false
+        inventoryLimitsContainer.Visible = false
+
+        inventoryCloseButton.Visible = false
+        upgradesMachineCloseButton.Visible = true
+
+        if self.selectedUpgradeType == Upgrades.Shiny then
+            inventoryTitle.Text = "Shiny Machine"
+        elseif self.selectedUpgradeType == Upgrades.Rainbow then
+            inventoryTitle.Text = "Rainbow Machine"
+        elseif self.selectedUpgradeType == Upgrades.Magic then
+            inventoryTitle.Text = "Magic"
+        end
+
+        if self.selectedUpgradeType == Upgrades.Magic then
+            upgradesMachinesSlots.Visible = false
+            upgradesMachinesMagicSlot.Visible = true
+            upgradesMachinesUpgradeButton.Visible = false
+            upgradesMachinesMagicUpgradeButton.Visible = true
+            upgradesMachinesGuaranteedSuccess.Visible = true
+
+        else
+            upgradesMachinesGuaranteedSuccess.Visible = false
+            upgradesMachinesMagicSlot.Visible = false
+            upgradesMachinesSlots.Visible = true
+            upgradesMachinesMagicUpgradeButton.Visible = false
+            upgradesMachinesUpgradeButton.Visible = true
+        end
+
+        -- change all the colors to display the upgrade of the pet rather than the rarity
+        for _,pet : pet in pairs(self.ownedPets) do
+            if pet.upgrade == 1 then
+                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(255, 220, 80)
+            elseif pet.upgrade == 2 then
+                pet.inventorySlot.UIStroke.Color = Color3.new(1,1,1)
+                pet.inventorySlot.UIStroke.UIGradient.Enabled = true
+            elseif pet.upgrade == 3 then
+                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(127, 246, 255)
+            end
+        end
+
+        petDetails.Visible = false
+        petDetails.Size = UDim2.new(0, 0, 0.85, 0)
+        inventoryPetsListContainer.Size = UDim2.new(0.5, 0, 0.85, 0)
+        upgradesMachineDetails.Size = UDim2.new(0.42, 0, 0.85, 0)
+
+        upgradesMachineDetails.Visible = true
+
+        -- open the pets gui
+        self:OpenGui()
+
+        self.upgradesMachineCloseButtonConnection = upgradesMachineCloseButton.MouseButton1Down:Connect(function()
+            self:CloseUpgradesMachineGui()
+        end)
+    end
+end
+
+
+--[[
+    Closes the upgrades machine gui
+]]--
+function PetModule:CloseUpgradesMachineGui()
+    if self.upgradesMachineCloseButtonConnection then
+        self.upgradesMachineCloseButtonConnection:Disconnect()
+    end
+
+    if upgradesMachineDetails.Visible then
+        -- remove all the pets from the machine
+        while #self.petsInMachine > 0 do
+            self:RemovePetFromMachine()
+        end
+
+        -- reset the border colors (based on the rarity)
+        for _,pet : pet in pairs(self.ownedPets) do
+            if pet.equipped then
+                pet.inventorySlot.UIStroke.Color = Color3.fromRGB(37, 175, 55)
+            else
+                pet.inventorySlot.UIStroke.Color = rarities[pet.rarity].border
+            end
+            pet.inventorySlot.UIStroke.UIGradient.Enabled = false
+        end
+
+        equipBestButton.Visible = true
+        deleteUnequippedPetsButton.Visible = true
+        deleteUnequippedPetsCancelButton.Visible = true
+        deleteUnequippedPetsConfirmButton.Visible = true
+        inventoryLimitsContainer.Visible = true
+
+        upgradesMachineCloseButton.Visible = false
+        inventoryCloseButton.Visible = true
+
+        inventoryTitle.Text = "Pets"
+        
+        inventoryPetsListContainer.Size = UDim2.new(0.94, 0, 0.85, 0)
+        upgradesMachineDetails.Size = UDim2.new(0, 0, 0.85, 0)
+        
+        upgradesMachineDetails.Visible = false
+        upgradesMachinesUpgradeResult.Visible = false
+
+        self:CloseGui()
+    end
+end
+
+
+--[[
+    Adds the given pet to the machine and updates the chance of success
+
+    @param pet : pet, the pet to add to the machine
+]]--
+function PetModule:AddPetToMachine(pet : pet)
+    if #self.petsInMachine == 0 then
+        self:FilterPetsList(pet)
+    end
+
+    -- if the player has already filled the machine, return
+    if #self.petsInMachine == self.maxNumberOfPetsInMachine then return end
+
+    table.insert(self.petsInMachine, pet)
+
+    pet.inventorySlot.Visible = false
+
+    -- find the right slot to use based on the number of pets already in the machine and the upgrade type
+    local slot : ImageButton
+    if self.selectedUpgradeType == Upgrades.Magic then
+        slot = upgradesMachinesMagicSlot:FindFirstChild("Slot" .. tostring(#self.petsInMachine))
+    else
+        slot = upgradesMachinesSlots:FindFirstChild("Slot" .. tostring(#self.petsInMachine))
+    end
+
+    -- add the pet to the slot's viewport frame
+    if slot then
+        if displayPets:FindFirstChild(pet.identifier) then
+            local petClone : Model = displayPets[pet.identifier]:Clone()
+            petClone.Parent = slot.PetDisplay
+        end
+
+        slot.BackgroundColor3 = pet.inventorySlot.BackgroundColor3
+        slot.UIStroke.Color = pet.inventorySlot.UIStroke.Color
+    end
+
+    -- updates the chance of having a succes after the upgrade
+    self:UpdateUpgradeSuccessChance()
+end
+
+
+--[[
+    Removes a pet from the machine
+]]--
+function PetModule:RemovePetFromMachine()
+
+    -- only remove pets if there is at least one in the machine
+    if #self.petsInMachine == 0 then return end
+
+    -- find the right slot to use based on the number of pets already in the machine and the upgrade type
+    local slot : ImageButton
+    if self.selectedUpgradeType == Upgrades.Magic then
+        slot = upgradesMachinesMagicSlot:FindFirstChild("Slot" .. tostring(#self.petsInMachine))
+    else
+        slot = upgradesMachinesSlots:FindFirstChild("Slot" .. tostring(#self.petsInMachine))
+    end
+
+    -- make the pet visible in the list
+    self.petsInMachine[#self.petsInMachine].inventorySlot.Visible = true
+
+    -- remove the last entry of the petsInMachine table
+    table.remove(self.petsInMachine, #self.petsInMachine)
+
+
+    -- if there are no pets in the machine anymore, unfilter the pet list so that the player can add other pets to the machine
+    if #self.petsInMachine == 0 then
+        self:UnfilterPetsList()
+    end
+
+    -- destroy the pet in the viewport frame
+    if slot.PetDisplay:FindFirstChildWhichIsA("Model") then
+        slot.PetDisplay:FindFirstChildWhichIsA("Model"):Destroy()
+    end
+
+    slot.BackgroundColor3 = Color3.fromRGB(223, 223, 223)
+    slot.UIStroke.Color = Color3.fromRGB(75, 75, 75)
+
+    -- updates the chance of having a succes after the upgrade
+    self:UpdateUpgradeSuccessChance()
+end
+
+
+--[[
+    
+]]--
+function PetModule:FilterPetsList(petFilterModel : pet)
+    for _,pet : pet in pairs(self.ownedPets) do
+        if pet.identifier ~= petFilterModel.identifier or pet.size ~= petFilterModel.size or pet.upgrade ~= petFilterModel.upgrade then
+            pet.inventorySlot.Visible = false
+        end
+    end
+end
+
+
+--[[
+    
+]]--
+function PetModule:UnfilterPetsList()
+    for _,pet : pet in pairs(self.ownedPets) do
+        pet.inventorySlot.Visible = true
+    end
+end
+
+
+--[[
+    
+]]--
+function PetModule:UpdateUpgradeSuccessChance()
+    if self.selectedUpgradeType == Upgrades.Shiny then
+        self.upgradeSuccessChance = 0.2 * #self.petsInMachine
+    elseif self.selectedUpgradeType == Upgrades.Rainbow then
+        self.upgradeSuccessChance = 0.1 * #self.petsInMachine
+    else
+        self.upgradeSuccessChance = 1
+    end
+
+    -- update the chance text
+    upgradesMachinesChance.Text = string.format("Chance: %d%%", self.upgradeSuccessChance * 100)
+
+    -- update the chance text color
+    if self.upgradeSuccessChance <= 0.25 then
+        upgradesMachinesChance.UIStroke.Color = Color3.fromRGB(218, 72, 72)
+    elseif self.upgradeSuccessChance <= 0.45 then
+        upgradesMachinesChance.UIStroke.Color = Color3.fromRGB(214, 151, 24)
+    elseif self.upgradeSuccessChance <= 0.7 then
+        upgradesMachinesChance.UIStroke.Color = Color3.fromRGB(207, 196, 35)
+    elseif self.upgradeSuccessChance <= 0.9 then
+        upgradesMachinesChance.UIStroke.Color = Color3.fromRGB(111, 193, 114)
+    else
+        upgradesMachinesChance.UIStroke.Color = Color3.fromRGB(19, 172, 29)
+    end
 end
 
 

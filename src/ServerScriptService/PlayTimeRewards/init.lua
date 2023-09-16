@@ -96,7 +96,6 @@ function PlayTimeRewards:LoadData()
 	end)
 
 	-- if the player didn't already play today, we reset the time played
-	print(self.lastDayPlayed, os.date("%j/%y", self.lastDayPlayed), os.date("%j/%y"))
 	if os.date("%j/%y", self.lastDayPlayed) ~= os.date("%j/%y") then
 		self.lastDayPlayed = os.time()
 		self.timePlayedToday = 0

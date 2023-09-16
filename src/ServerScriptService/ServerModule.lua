@@ -30,6 +30,7 @@ local EquipBestPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("EquipBe
 local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
 local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteUnequippedPets")
 local CraftPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("CraftPet")
+local UpgradePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("UpgradePet")
 
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
@@ -533,12 +534,63 @@ CraftPetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 	if id and typeof(id) == "number" then
 		local p : Player.PlayerModule = players[plr.Name]
 		if p then
-			return p.petModule:CraftPet(id)
+			local success : boolean = p.petModule:CraftPet(id)
+
+			p:UpdateFollowersMultiplier()
+
+			return success
 		end
 	end
 
-	return {}
+	return false
 end
+
+
+--[[
+	Tries to upgrade the given pet with the given upgrade type
+
+	@param plr : Player, the player who wants to upgrade his pet
+	@param id : number, the id of the pet to upgrade
+	@param upgradeType : number, the upgrade type the player wants to upgrade his pet to (shiny, rainbow)
+	@param numberOfPetsInMachine : number, the number of pets the player put in the machine, used to know the odds of the upgrade succeeding
+	@return
+		boolean, true if the upgrade succeeded, false otherwise
+		{pets}, a table containing the pets the player owns (new table of pets after upgrade)
+]]
+UpgradePetRF.OnServerInvoke = function(plr : Player, id : number, upgradeType : number, numberOfPetsInMachine : number) : (boolean, {})
+	if id and upgradeType and numberOfPetsInMachine and typeof(id) == "number" and typeof(upgradeType) == "number" and typeof(numberOfPetsInMachine) == "number" then
+		
+		-- upgrade type can only be shiny (1) or rainbow (2), (pets can't be upgraded to magic via the remote function since it's a developer product)
+		if upgradeType < 1 or upgradeType > 2 then return false, {} end
+
+		-- the player can only put up to 5 pets in the machine
+		if numberOfPetsInMachine < 0 or numberOfPetsInMachine > 5 then return false, {} end
+
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			local success : boolean = p.petModule:UpgradePet(id, upgradeType, numberOfPetsInMachine)
+
+			p:UpdateFollowersMultiplier()
+
+			return success, p.petModule.ownedPets
+		end
+	end
+
+	return false, {}
+end
+
+
+--[[
+	This event is fired everytime before purchasing a magic upgrade, otherwise when the purchase succeeds, we have no way of knowing which pet to upgrade, hence why we save the pet id
+]]--
+PetsRE.OnServerEvent:Connect(function(plr : Player, petId : number)
+	if petId and typeof(petId) == "number" then
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			p.petModule.magicUpgradePetId = petId
+		end
+	end
+end)
 
 
 --[[

@@ -20,6 +20,7 @@ export type PetModule = {
     inventoryCapacity : number,
     nextId : number,
     luck : number,
+    magicUpgradePetId : number,
     plr : Player,
     new : (plr : Player) -> PetModule,
     IsPetInventoryFull : (self : PetModule) -> boolean,
@@ -39,6 +40,8 @@ export type PetModule = {
     DeletePet : (self : PetModule, id : number) -> boolean,
     DeleteUnequippedPets : (self : PetModule) -> {pet},
     CraftPet : (self : PetModule, id : number) -> boolean,
+    UpgradePet : (self : PetModule, id : number, upgradeType : number, numberOfPetsInMachine : number) -> (boolean, {pet}),
+    MagicUpgradePet : (self : PetModule) -> nil,
     CalculateActiveBoost : (self : PetModule, pet : pet) -> number,
     UpdateFollowersMultiplier : (self : PetModule) -> nil
 }
@@ -539,6 +542,9 @@ function PetModule.new(plr : Player)
 
     petModule.luck = 0
 
+    -- used to know which pet to upgrade when the magic upgrade developer product purchase succeeds
+    petModule.magicUpgradePetId = nil
+
     petModule.currentlyEquippedPets = 0
     petModule.maxEquippedPets = 3
     petModule.inventoryCapacity = 50
@@ -1035,6 +1041,7 @@ function PetModule:CraftPet(id : number) : boolean
         end
     end
 
+
     petToCraft.size += 1
 
     -- if we couldn't find 2 other matching pets, return
@@ -1086,7 +1093,7 @@ function PetModule:CalculateActiveBoost(pet : pet) : number
     elseif pet.upgrade == upgrades.Rainbow then
         upgradeBoost = 2.5
     elseif pet.upgrade == upgrades.Magic then
-        upgradeBoost = 6
+        upgradeBoost = 7
     end
 
     return math.floor((pet.baseBoost * sizeBoost * upgradeBoost) * 100) / 100
@@ -1107,6 +1114,129 @@ function PetModule:UpdateFollowersMultiplier()
 
     -- remove 1 because the multiplier is already at 1 by default
     self.followersMultiplier = math.max(followersMultiplier - 1, 0)
+end
+
+
+--[[
+    Upgrades the given pet with the given upgrade type
+
+    @param id : number, the id of the pet to upgrade
+	@param upgradeType : number, the upgrade type the player wants to upgrade his pet to (shiny, rainbow)
+	@param numberOfPetsInMachine : number, the number of pets the player put in the machine, used to know the odds of the upgrade succeeding
+	@return
+		boolean, true if the upgrade succeeded, false otherwise
+		{pets}, a table containing the pets the player owns (new table of pets after upgrade)
+]]--
+function PetModule:UpgradePet(id : number, upgradeType : number, numberOfPetsInMachine : number) : (boolean, {pet})
+
+    -- find the pet to upgrade
+    local petToUpgrade : pet
+    for _,pet : pet in pairs(self.ownedPets) do
+        if pet.id == id then
+            petToUpgrade = pet
+        end
+    end
+
+    -- if the pet couldn't be found, return
+    if not petToUpgrade then return false, self.ownedPets end
+
+    -- decrease numberOfPetsInMachine because we don't want to delete the pet matching the given id
+    numberOfPetsInMachine -= 1
+
+    -- find numberOfPetsInMachine pets (other than petToUpgrade) that have the same identifier, size and upgrade and store their position in a table so that we can then remove them
+    local petsToRemovePositions : {number} = {}
+    for i : number, pet : pet in pairs(self.ownedPets) do
+        if pet.identifier == petToUpgrade.identifier and pet.size == petToUpgrade.size and pet.upgrade == petToUpgrade.upgrade and pet.id ~= petToUpgrade.id then
+            table.insert(petsToRemovePositions, i)
+
+            -- unequip the pet if it's equipped
+            if pet.equipped then
+                self:EquipPet(pet.id, false)
+            end
+
+            -- if we have found numberOfPetsInMachine matching pets, stop because we don't want to remove all matching pets
+            if #petsToRemovePositions == numberOfPetsInMachine then
+                break
+            end
+        end
+    end
+
+    if #petsToRemovePositions < numberOfPetsInMachine then return false, self.ownedPets end
+
+    -- sort the table by descending order
+    table.sort(petsToRemovePositions, function(a, b)
+        return a > b
+    end)
+
+    -- remove all the pets used for the upgrade (except the one with the id matching the given id) whether or not the upgrade succeeds
+    for _,position : number in pairs(petsToRemovePositions) do
+        table.remove(self.ownedPets, position)
+    end
+
+    -- calculate the chance of success of the upgrade
+    -- (divide 0.2 by upgradeType because if it's a shiny (1) upgrade, there is a 0.2 * numberOfPets chance while if it's a rainbow (2) upgrade, there is a 0.1 * numberOfPets chance)
+    local successChance : number = (0.2 / upgradeType) * (numberOfPetsInMachine + 1)
+
+    if math.random() <= successChance then
+
+        -- set the new upgrade for the pet
+        petToUpgrade.upgrade = upgradeType
+
+        -- if the pet to craft was equipped, update the pet size of the pet in the player's character
+        if petToUpgrade.equipped then
+            self:RemovePetFromCharacter(petToUpgrade)
+            self:AddPetToCharacter(petToUpgrade)
+        end
+
+        petToUpgrade.activeBoost = self:CalculateActiveBoost(petToUpgrade)
+
+        DataStore2("pets", self.plr):Set(self.ownedPets)
+
+        self:UpdateFollowersMultiplier()
+
+        return true, self.ownedPets
+
+    else
+        -- if the upgrade failed, also remove the pet with the id matching the given id
+        for i : number, pet : pet in pairs(self.ownedPets) do
+            if pet.id == id then
+                table.remove(self.ownedPets, i)
+                break
+            end
+        end
+
+        return false, self.ownedPets
+    end
+
+    return false, self.ownedPets
+end
+
+
+--[[
+    Upgrades a pet to magic
+]]--
+function PetModule:MagicUpgradePet()
+    if self.magicUpgradePetId then
+        local id : number = self.magicUpgradePetId
+
+        for _,pet : pet in pairs(self.ownedPets) do
+            if pet.id == id then
+                pet.upgrade = upgrades.Magic
+
+                -- if the pet to craft was equipped, update the pet size of the pet in the player's character
+                if pet.equipped then
+                    self:RemovePetFromCharacter(pet)
+                    self:AddPetToCharacter(pet)
+                end
+
+                pet.activeBoost = self:CalculateActiveBoost(pet)
+
+                DataStore2("pets", self.plr):Set(self.ownedPets)
+
+                self:UpdateFollowersMultiplier()
+            end
+        end
+    end
 end
 
 
