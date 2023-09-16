@@ -197,7 +197,7 @@ function ServerModule.onJoin(plr : Player)
 		until p.isLoaded == true
 
 		-- fire the client to load the owned pets
-		PetsRE:FireClient(plr, p.petModule.ownedPets)
+		PetsRE:FireClient(plr, p.petModule.ownedPets, true)
 
 		-- fire the followers and coins events once at the start to display the numbers
 		FollowersRE:FireClient(plr, p.followers)

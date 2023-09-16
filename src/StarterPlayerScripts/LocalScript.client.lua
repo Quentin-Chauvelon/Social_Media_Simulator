@@ -38,6 +38,7 @@ local RebirthModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("R
 local CaseModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("CaseModule"))
 local PotionModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PotionModule"))
 local PetModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PetModule"))
+local LimitedEditionPetsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("LimitedEditionPetsModule"))
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 
 
@@ -82,6 +83,8 @@ CaseModule.new(Utility)
 local potionModule : PotionModule.PotionModule = PotionModule.new(Utility)
 
 local petModule : PetModule.PetModule = PetModule.new(Utility)
+
+LimitedEditionPetsModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
@@ -518,9 +521,18 @@ end)
 
 --[[
 	Load the owned pets
+
+	@param pets : {pet}, a table of pets to add to the player's inventory
+	@param deletePreviousPets : boolean, indicates whether or not we should override the ownedPets table (on join or delete unequipped) or simply add them to the table (on limited edition pet purchase)
 ]]--
-PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet})
-    petModule.ownedPets = pets
+PetsRE.OnClientEvent:Connect(function(pets : {PetModule.pet}, deletePreviousPets : boolean)
+	if deletePreviousPets then
+    	petModule.ownedPets = pets
+	else
+		for _,pet : PetModule.pet in pairs(pets) do
+			table.insert(petModule.ownedPets, pet)
+		end
+	end
 
 	-- count the number of pets the player has equipped
 	for _,pet : PetModule.pet in pairs(pets) do

@@ -412,17 +412,6 @@ local pets : {[number] : pet} = {
     },
     [100] = {
         id = 0,
-        identifier = "RedHeart",
-        name = "Heart",
-        rarity = rarities.Mystical,
-        size = sizes.Normal,
-        upgrade = upgrades.None,
-        baseBoost = 75,
-        activeBoost = 75,
-        equipped = false
-    },
-    [101] = {
-        id = 0,
         identifier = "Hundred",
         name = "Hundred",
         rarity = rarities.Mystical,
@@ -432,7 +421,7 @@ local pets : {[number] : pet} = {
         activeBoost = 100,
         equipped = false
     },
-    [102] = {
+    [101] = {
         id = 0,
         identifier = "Fire",
         name = "Fire",
@@ -443,15 +432,26 @@ local pets : {[number] : pet} = {
         activeBoost = 150,
         equipped = false
     },
-    [103] = {
+    [102] = {
         id = 0,
         identifier = "PartyPopper",
-        name = "Party popper",
+        name = "Party Popper",
         rarity = rarities.Mystical,
         size = sizes.Normal,
         upgrade = upgrades.None,
         baseBoost = 250,
         activeBoost = 250,
+        equipped = false
+    },
+    [103] = {
+        id = 0,
+        identifier = "RedHeart",
+        name = "Red Heart",
+        rarity = rarities.Mystical,
+        size = sizes.Normal,
+        upgrade = upgrades.None,
+        baseBoost = 400,
+        activeBoost = 400,
         equipped = false
     },
     [104] = {
@@ -461,8 +461,8 @@ local pets : {[number] : pet} = {
         rarity = rarities.Mystical,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 300,
-        activeBoost = 300,
+        baseBoost = 650,
+        activeBoost = 650,
         equipped = false
     },
     [105] = {
@@ -472,8 +472,8 @@ local pets : {[number] : pet} = {
         rarity = rarities.Mystical,
         size = sizes.Normal,
         upgrade = upgrades.None,
-        baseBoost = 500,
-        activeBoost = 500,
+        baseBoost = 1000,
+        activeBoost = 1000,
         equipped = false
     },
 }

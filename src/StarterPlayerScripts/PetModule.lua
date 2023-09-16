@@ -613,6 +613,7 @@ function PetModule.new(utility : Utility.Utility)
         end)
     end
 
+
     return setmetatable(petModule, PetModule)
 end
 
@@ -1332,7 +1333,6 @@ function PetModule:OpenGui()
                 end
 
                 self:AddPetsToInventory(self.ownedPets)
-                self:UpdateUsedCapacity()
 
                 deleteUnequippedPetsconfirmationContainer.Visible = false
             end)
