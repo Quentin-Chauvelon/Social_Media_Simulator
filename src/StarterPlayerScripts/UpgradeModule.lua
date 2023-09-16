@@ -21,6 +21,7 @@ export type UpgradeModule = {
     upgrades : {upgrade},
     upgradesMachineTouchDetector : Part,
     upgradeButtonConnections : {RBXScriptConnection},
+    closeButtonConnection : RBXScriptSignal,
     utility : Utility.Utility,
     new : (utility : Utility.Utility) -> UpgradeModule,
     LoadUpgrades : (self : UpgradeModule) -> nil,
@@ -50,6 +51,7 @@ function UpgradeModule.new(utility : Utility.Utility) : UpgradeModule
     upgradeModule.upgrades = {}
     upgradeModule.utility = utility
     upgradeModule.upgradeButtonConnections = {}
+    upgradeModule.closeButtonConnection = nil
     upgradeModule.upgradesMachineTouchDetector = workspace:WaitForChild("UpgradesMachine"):WaitForChild("TouchDetector")
 
     -- store all UIStroke in a table to change them easily later
@@ -232,9 +234,7 @@ function UpgradeModule:OpenUpgradesGui()
             end
         end
         
-        local upgradesCloseConnection : RBXScriptConnection
-        upgradesCloseConnection = upgradesCloseButton.MouseButton1Down:Connect(function()
-            upgradesCloseConnection:Disconnect()
+        self.closeButtonConnection = upgradesCloseButton.MouseButton1Down:Connect(function()
             self:CloseUpgradesGui()
         end)
     end
@@ -245,6 +245,8 @@ end
     Closes the upgrades gui
 ]]--
 function UpgradeModule:CloseUpgradesGui()
+    self.closeButtonConnection:Disconnect()
+
     for _,upgradeButtonConnection : RBXScriptConnection in pairs(self.upgradeButtonConnections) do
         upgradeButtonConnection:Disconnect()
     end
