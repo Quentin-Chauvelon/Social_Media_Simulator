@@ -43,7 +43,8 @@ export type PetModule = {
     UpgradePet : (self : PetModule, id : number, upgradeType : number, numberOfPetsInMachine : number) -> (boolean, {pet}),
     MagicUpgradePet : (self : PetModule) -> nil,
     CalculateActiveBoost : (self : PetModule, pet : pet) -> number,
-    UpdateFollowersMultiplier : (self : PetModule) -> nil
+    UpdateFollowersMultiplier : (self : PetModule) -> nil,
+    OnLeave : (self : PetModule) -> nil
 }
 
 type pet = {
@@ -808,7 +809,7 @@ function PetModule:AddPetToCharacter(pet : pet)
                     petAttachment.Parent = petClone.PrimaryPart
 
                     local alignPosition : AlignPosition = Instance.new("AlignPosition")
-                    alignPosition.MaxForce = 100_000
+                    alignPosition.MaxForce = 200_000
                     alignPosition.Responsiveness = 25
                     alignPosition.Attachment0 = petAttachment
                     alignPosition.Attachment1 = v
@@ -1547,6 +1548,12 @@ function PetModule:MagicUpgradePet()
             end
         end
     end
+end
+
+
+function PetModule:OnLeave()
+    setmetatable(self, nil)
+	self = nil
 end
 
 

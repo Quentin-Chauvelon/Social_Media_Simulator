@@ -119,7 +119,8 @@ export type RebirthModule = {
     new : (plr : Player) -> RebirthModule,
     TryRebirth : (self : RebirthModule, followers : number, plr : Player) -> boolean,
     Rebirth : (self : RebirthModule, plr : Player) -> boolean,
-    UpdateFollowersNeededToRebirth : (self : RebirthModule) -> number
+    UpdateFollowersNeededToRebirth : (self : RebirthModule) -> number,
+    OnLeave : (self : RebirthModule) -> nil
 }
 
 
@@ -190,6 +191,12 @@ function RebirthModule:UpdateFollowersNeededToRebirth()
     else
         self.followersNeededToRebirth = 1000 * math.round((2.35085 * (math.pow(nextRebirthLevel, 3.34297)) + 359.514) * (1 + math.floor(nextRebirthLevel / 10) / 10) / 1000)
     end
+end
+
+
+function RebirthModule:OnLeave()
+    setmetatable(self, nil)
+	self = nil
 end
 
 

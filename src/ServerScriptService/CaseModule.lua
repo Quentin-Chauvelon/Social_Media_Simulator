@@ -236,7 +236,8 @@ export type CaseModule = {
     ApplySpeedBoost : (self : CaseModule, p : Types.PlayerModule) -> nil,
     UpdatePhoneColor : (self : CaseModule, p : Types.PlayerModule) -> nil,
     BuyCase : (self : CaseModule, color : string, p : Types.PlayerModule) -> boolean,
-    GetOwnedCases : (self : CaseModule) -> savedCases
+    GetOwnedCases : (self : CaseModule) -> savedCases,
+    OnLeave : (self : CaseModule) -> nil
 }
 
 type savedCases = {
@@ -396,6 +397,12 @@ function CaseModule:UpdatePhoneColor(p : Types.PlayerModule, color : string?)
     else
         phoneUIImageFrame.Visible = false
     end
+end
+
+
+function CaseModule:OnLeave()
+    setmetatable(self, nil)
+	self = nil
 end
 
 

@@ -24,7 +24,8 @@ export type PotionModule = {
     UseAllActivePotions : (self : PotionModule, p : Types.PlayerModule) -> nil,
     CreatePotion : (self : PotionModule, type : number, value : number, duration : number) -> potion,
     CreateAndUsePotion : (self : PotionModule, type : number, value : number, duration : number, p : Types.PlayerModule) -> nil,
-    ApplyPotionsBoosts : (self : PotionModule, type : number, p : Types.PlayerModule) -> nil
+    ApplyPotionsBoosts : (self : PotionModule, type : number, p : Types.PlayerModule) -> nil,
+    OnLeave : (self : PotionModule) -> nil
 }
 
 export type potion = {
@@ -222,6 +223,14 @@ function PotionModule:ApplyPotionsBoosts(type : number, p : Types.PlayerModule)
 
         p:UpdateAutopostInterval()
     end
+end
+
+
+function PotionModule:OnLeave()
+    self.potionsTimeLeft:cancel()
+
+    setmetatable(self, nil)
+	self = nil
 end
 
 

@@ -267,6 +267,14 @@ function Player:OnLeave()
 
 	self.gamepassModule:OnLeave()
 
+	self.potionModule:OnLeave()
+
+	self.caseModule:OnLeave()
+	
+	self.rebirthModule:OnLeave()
+
+	self.petModule:OnLeave()
+
 	-- clean all the connections
 	self.maid:DoCleaning()
 
