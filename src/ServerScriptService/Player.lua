@@ -26,6 +26,7 @@ export type PlayerModule = {
 	coins : number,
 	followersMultiplier : number,
 	coinsMultiplier : number,
+	totalTimePlayed : number,
 	plotModule : PlotModule.PlotModule,
 	postModule : PostModule.PostModule,
 	upgradeModule : UpgradeModule.UpgradeModule,
@@ -82,6 +83,8 @@ function Player.new(plr : Player)
 
 	p.followersMultiplier = 1
 	p.coinsMultiplier = 1
+
+	p.totalTimePlayed = DataStore2("totalTimePlayed", p.player):Get(0)
 
 	p.plotModule = PlotModule.new()
 

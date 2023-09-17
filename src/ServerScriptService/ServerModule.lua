@@ -8,6 +8,7 @@ local Player = require(ServerScriptService:WaitForChild("Player"))
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local DeveloperProductModule = require(ServerScriptService:WaitForChild("DeveloperProductModule"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
+local LeaderboardModule = require(ServerScriptService:WaitForChild("LeaderboardModule"))
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
@@ -32,6 +33,12 @@ local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("
 local CraftPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("CraftPet")
 local UpgradePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("UpgradePet")
 
+local LeaderboardsDataBF : BindableFunction = game:GetService("ServerStorage"):WaitForChild("LeaderboardsData")
+
+
+DataStore2.Combine("SMS", "totalTimePlayed")
+
+
 local upgradePostsRequiredFollowers : {number} = {100, 100, 1_000, 5_000, 25_000, math.huge, math.huge} -- last 2 types have a math.huge price because they can't be bought for now (their price should be 200k and 2M)
 
 local playersReady : Folder = ReplicatedStorage:WaitForChild("PlayersReady")
@@ -46,6 +53,30 @@ export type ServerModule = {
 
 
 local ServerModule : ServerModule = {}
+
+
+LeaderboardModule.new()
+
+LeaderboardsDataBF.OnInvoke = function(playerName : string, leaderboardType : string)
+	local p : Player.PlayerModule = players[playerName]
+	if p then
+		
+		if leaderboardType == "followers" then
+			return p.followers
+		elseif leaderboardType == "rebirths" then
+			return p.rebirthModule.rebirthLevel
+		elseif leaderboardType == "timePlayed" then
+
+			-- every time the event is called, increase the time played by 2 minutes and save it
+			p.totalTimePlayed += 2
+			DataStore2("totalTimePlayed", p.player):Increment(2, p.totalTimePlayed)
+
+			return p.totalTimePlayed
+		end
+	end
+
+	return 0
+end
 
 
 local function PlayerReachedFollowerGoal(p : Player.PlayerModule)
