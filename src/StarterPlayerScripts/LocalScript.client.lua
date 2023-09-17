@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local SocialService = game:GetService("SocialService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
@@ -17,6 +18,7 @@ local DisplayPotionsRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayPo
 local BoughtGamePassRE : RemoteEvent = ReplicatedStorage:WaitForChild("BoughtGamePass")
 local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
+local UpdateFriendsBoostRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFriendsBoost")
 
 local lplr = Players.LocalPlayer
 
@@ -48,6 +50,7 @@ local playerGui : PlayerGui = lplr.PlayerGui
 
 local menu : ScreenGui = playerGui:WaitForChild("Menu")
 local menuSideButtons : Frame = menu:WaitForChild("SideButtons")
+local friendsBoostButton : TextButton = menu:WaitForChild("FriendsBoost")
 
 local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
 local upgradePostsBackground : Frame = upgradePosts:WaitForChild("Background")
@@ -406,6 +409,20 @@ UpgradePostsRE.OnClientEvent:Connect(function(visible : boolean | number)
 end)
 
 
+local experienceInviteOptions : ExperienceInviteOptions = Instance.new("ExperienceInviteOptions")
+experienceInviteOptions.PromptMessage = "Get +20% followers and coins for each friend on your server"
+experienceInviteOptions.InviteMessageId = "745b4e11-1f31-7d4d-874c-9d9fbe28f1db"
+
+-- invite friends
+friendsBoostButton.MouseButton1Down:Connect(function()
+	pcall(function()
+		if SocialService:CanSendGameInviteAsync(lplr) then
+			SocialService:PromptGameInvite(lplr, experienceInviteOptions)
+		end
+	end)
+end)
+
+
 -- remove last posts if there is more than one (might happens at the start while the player is loading)
 -- also load the upgrade post billboard gui
 coroutine.wrap(function()
@@ -579,6 +596,16 @@ BoughtGamePassRE.OnClientEvent:Connect(function(gamePassId : number)
 	elseif gamePassId == GamePassModule.gamePasses.GoldenLuck then
 		petModule:UpdateEggsOdds(2)
 	end
+end)
+
+
+--[[
+	Updates the friend's boost based on the number of friends online
+
+	@param numberOfFriendsOnline : number, the number of the player's friends that are online
+]]--
+UpdateFriendsBoostRE.OnClientEvent:Connect(function(numberOfFriendsOnline : number)
+	friendsBoostButton.Text = string.format("Friends boost: %.f%%", (0.2 * numberOfFriendsOnline * 100))
 end)
 
 

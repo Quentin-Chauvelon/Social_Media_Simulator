@@ -210,6 +210,29 @@ function ServerModule.onJoin(plr : Player)
 		-- load the effect of the game passes the player owns
 		p.gamepassModule:LoadOwnedGamePasses(p)
 
+		-- update the friends boost of all the player's friends that are online
+		local onlineFriends : {string} = p.friendsModule:GetOnlineFriends()
+		for _,friendName : string in pairs(onlineFriends) do
+
+			
+			-- add a friend for each friend already connected
+			local friendP : Player.PlayerModule = players[friendName]
+			if friendP then
+				-- add all the friends for the player that joined
+				p.friendsModule:FriendJoined()
+
+				friendP.friendsModule:FriendJoined()
+
+				-- update the multipliers
+				friendP:UpdateFollowersMultiplier()
+				friendP:UpdateCoinsMultiplier()
+			end
+		end
+
+		-- update the followers and coins multiplier of the player in case he had friends online
+		p:UpdateFollowersMultiplier()
+		p:UpdateCoinsMultiplier()
+
 		resolve()
 	end)
 end
@@ -225,6 +248,18 @@ function ServerModule.onLeave(playerName)
 
 	-- remove the player module from the server module
 	if p then
+		local onlineFriends : {string} = p.friendsModule:GetOnlineFriends()
+		for _,friendName : string in pairs(onlineFriends) do
+			local p : Player.PlayerModule = players[friendName]
+			if p then
+				p.friendsModule:FriendLeft()
+
+				-- update the multipliers
+				p:UpdateFollowersMultiplier()
+				p:UpdateCoinsMultiplier()
+			end
+		end
+
 		p:OnLeave()
 
 		players[playerName] = nil

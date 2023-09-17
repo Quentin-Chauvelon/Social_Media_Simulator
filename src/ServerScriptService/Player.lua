@@ -11,6 +11,7 @@ local RebirthModule = require(ServerScriptService:WaitForChild("RebirthModule"))
 local CaseModule = require(ServerScriptService:WaitForChild("CaseModule"))
 local PotionModule = require(ServerScriptService:WaitForChild("PotionModule"))
 local PetModule = require(ServerScriptService:WaitForChild("PetModule"))
+local FriendsModule = require(ServerScriptService:WaitForChild("FriendsModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -34,6 +35,7 @@ export type PlayerModule = {
 	caseModule : CaseModule.CaseModule,
 	potionModule : PotionModule.PotionModule,
 	petModule : PetModule.PetModule,
+	friendsModule : FriendsModule.FriendsModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -102,6 +104,8 @@ function Player.new(plr : Player)
 
 	p.petModule = PetModule.new(plr)
 
+	p.friendsModule = FriendsModule.new(plr)
+
 	--p.coins = DataStore2("coins", plr):Get(0)
 
 	p.maid = Maid.new()
@@ -142,6 +146,7 @@ function Player:UpdateFollowersMultiplier()
 		self.rebirthModule.followersMultiplier +
 		self.potionModule.followersMultiplier +
 		self.petModule.followersMultiplier +
+		self.friendsModule.followersMultiplier +
 		self.gamepassModule:GetFollowersMultiplier()
 
 	-- TODO: DELETE THE FOLLOWING LINE
@@ -158,6 +163,7 @@ function Player:UpdateCoinsMultiplier()
 		1 +
 		self.upgradeModule.coinsMultiplier +
 		self.potionModule.coinsMultiplier +
+		self.friendsModule.coinsMultiplier +
 		self.gamepassModule:GetCoinsMultiplier()
 	
 	print("coins multiplier", self.coinsMultiplier)
@@ -274,6 +280,8 @@ function Player:OnLeave()
 	self.rebirthModule:OnLeave()
 
 	self.petModule:OnLeave()
+
+	self.friendsModule:OnLeave()
 
 	-- clean all the connections
 	self.maid:DoCleaning()
