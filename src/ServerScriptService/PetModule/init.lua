@@ -798,9 +798,6 @@ function PetModule:AddPetToCharacter(pet : pet)
                         petClone:ScaleTo(1)
                     end
 
-                    -- move the pet to the attachment it will be using
-                    petClone:PivotTo(v.WorldCFrame)
-
                     local petId : NumberValue = Instance.new("NumberValue")
                     petId.Name = "PetId"
                     petId.Value = pet.id
@@ -823,6 +820,319 @@ function PetModule:AddPetToCharacter(pet : pet)
                     alignOrientation.Attachment0 = petAttachment
                     alignOrientation.Attachment1 = v
                     alignOrientation.Parent = petClone.PrimaryPart
+
+                    if pet.upgrade == upgrades.Shiny then
+                        local curveSize : number = 0.8
+                        if pet.size == sizes.Big then
+                            curveSize = 1
+                        elseif pet.size == sizes.Huge then
+                            curveSize = 1.5
+                        end
+
+                        local beamPart : Part = Instance.new("Part")
+                        beamPart.Transparency = 1
+                        beamPart.Name = "BeamPart"
+                        beamPart.Size = petClone.PrimaryPart.Size
+                        beamPart.CFrame = petClone.PrimaryPart.CFrame
+                        beamPart.Rotation = Vector3.new(0,-90,180)
+                        beamPart.CanCollide = false
+                        beamPart.CanQuery = false
+                        beamPart.CanTouch = false
+                        beamPart.Anchored = false
+                        beamPart.Massless = true
+                        beamPart.Shape = Enum.PartType.Ball
+
+                        local beamPartCenterAttachment : Attachment = Instance.new("Attachment")
+                        beamPartCenterAttachment.Name = "Center"
+                        beamPartCenterAttachment.Parent = beamPart
+
+                        local beamPartAttachment0 : Attachment = Instance.new("Attachment")
+                        beamPartAttachment0.Name = "Attachment"
+                        beamPartAttachment0.CFrame = CFrame.new(Vector3.new(math.ceil(beamPart.Size.X) / 2, 0, 0)) -- round size to upper 0.5
+                        beamPartAttachment0.Orientation = Vector3.new(0,0,90)
+                        beamPartAttachment0.Parent = beamPart
+
+                        local beamPartAttachment1 : Attachment = Instance.new("Attachment")
+                        beamPartAttachment1.Name = "Attachment"
+                        beamPartAttachment1.CFrame = CFrame.new(Vector3.new(0, math.ceil(beamPart.Size.Y) / 2, 0)) -- round size to upper 0.5
+                        beamPartAttachment1.Orientation = Vector3.new(0,0,180)
+                        beamPartAttachment1.Parent = beamPart
+
+                        local beamPartAlignPosition : AlignPosition = Instance.new("AlignPosition")
+                        beamPartAlignPosition.ReactionForceEnabled = true
+                        beamPartAlignPosition.Attachment0 = petClone.PrimaryPart.Center
+                        beamPartAlignPosition.Attachment1 = beamPartCenterAttachment
+                        beamPartAlignPosition.MaxForce = 1_000_000
+                        beamPartAlignPosition.Parent = beamPart
+
+                        local beamPartAngularVelocity : AngularVelocity = Instance.new("AngularVelocity")
+                        beamPartAngularVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+                        beamPartAngularVelocity.Attachment0 = beamPartCenterAttachment
+                        beamPartAngularVelocity.AngularVelocity = Vector3.new(0,0,15)
+                        beamPartAngularVelocity.MaxTorque = 1000
+                        beamPartAngularVelocity.Parent = beamPart
+
+                        local beam : Beam = Instance.new("Beam")
+                        beam.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 241, 43)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 251, 125))
+                        }
+                        beam.Transparency = NumberSequence.new(0)
+                        beam.Attachment0 = beamPartAttachment0
+                        beam.Attachment1 = beamPartAttachment1
+                        beam.CurveSize0 = curveSize
+                        beam.CurveSize1 = curveSize
+                        beam.Segments = 20
+                        beam.Width0 = 0.1
+                        beam.Width1 = 0.1
+                        beam.Parent = beamPart
+
+                        beamPart.Parent = petClone
+
+                        local beamPart2 : Part = Instance.new("Part")
+                        beamPart2.Transparency = 1
+                        beamPart2.Name = "BeamPart"
+                        beamPart2.Size = petClone.PrimaryPart.Size
+                        beamPart2.CFrame = petClone.PrimaryPart.CFrame
+                        beamPart2.Rotation = Vector3.new(0,180,0)
+                        beamPart2.CanCollide = false
+                        beamPart2.CanQuery = false
+                        beamPart2.CanTouch = false
+                        beamPart2.Anchored = false
+                        beamPart2.Massless = true
+                        beamPart2.Shape = Enum.PartType.Ball
+
+                        local beamPart2CenterAttachment : Attachment = Instance.new("Attachment")
+                        beamPart2CenterAttachment.Name = "Center"
+                        beamPart2CenterAttachment.Parent = beamPart2
+
+                        local beamPart2Attachment0 : Attachment = Instance.new("Attachment")
+                        beamPart2Attachment0.Name = "Attachment"
+                        beamPart2Attachment0.CFrame = CFrame.new(Vector3.new(math.ceil(beamPart2.Size.X) / 2, 0, 0)) -- round size to upper 0.5
+                        beamPart2Attachment0.Orientation = Vector3.new(0,0,90)
+                        beamPart2Attachment0.Parent = beamPart2
+
+                        local beamPart2Attachment1 : Attachment = Instance.new("Attachment")
+                        beamPart2Attachment1.Name = "Attachment"
+                        beamPart2Attachment1.CFrame = CFrame.new(Vector3.new(0, math.ceil(beamPart2.Size.Y) / 2, 0)) -- round size to upper 0.5
+                        beamPart2Attachment1.Orientation = Vector3.new(0,0,180)
+                        beamPart2Attachment1.Parent = beamPart2
+
+                        local beamPart2AlignPosition : AlignPosition = Instance.new("AlignPosition")
+                        beamPart2AlignPosition.ReactionForceEnabled = true
+                        beamPart2AlignPosition.Attachment0 = petClone.PrimaryPart.Center
+                        beamPart2AlignPosition.Attachment1 = beamPart2CenterAttachment
+                        beamPart2AlignPosition.MaxForce = 1_000_000
+                        beamPart2AlignPosition.Parent = beamPart2
+
+                        local beamPart2AngularVelocity : AngularVelocity = Instance.new("AngularVelocity")
+                        beamPart2AngularVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+                        beamPart2AngularVelocity.Attachment0 = beamPart2Attachment0
+                        beamPart2AngularVelocity.AngularVelocity = Vector3.new(0,0,15)
+                        beamPart2AngularVelocity.MaxTorque = 1000
+                        beamPart2AngularVelocity.Parent = beamPart2
+
+                        local beam2 : Beam = Instance.new("Beam")
+                        beam2.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 241, 43)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 251, 125))
+                        }
+                        beam2.Transparency = NumberSequence.new(0)
+                        beam2.Attachment0 = beamPart2Attachment0
+                        beam2.Attachment1 = beamPart2Attachment1
+                        beam2.CurveSize0 = curveSize
+                        beam2.CurveSize1 = curveSize
+                        beam2.Segments = 10
+                        beam2.Width0 = 0.1
+                        beam2.Width1 = 0.1
+                        beam2.Parent = beamPart2
+
+                        beamPart2.Parent = petClone
+
+                    elseif pet.upgrade == upgrades.Rainbow then
+                        local particleEmitter1 : ParticleEmitter = Instance.new("ParticleEmitter")
+                        particleEmitter1.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.new(1,0,0)),
+                            ColorSequenceKeypoint.new(1, Color3.new(1,1,0))
+                        }
+                        particleEmitter1.Brightness = 10
+                        particleEmitter1.Size = NumberSequence.new(0.4)
+                        particleEmitter1.Squash = NumberSequence.new(1.5)
+                        particleEmitter1.Lifetime = NumberRange.new(0.3)
+                        particleEmitter1.Rate = 12
+                        particleEmitter1.Speed = NumberRange.new(5)
+                        particleEmitter1.Parent = petClone.PrimaryPart
+
+                        local particleEmitter2 : ParticleEmitter = Instance.new("ParticleEmitter")
+                        particleEmitter2.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.new(0,1,0)),
+                            ColorSequenceKeypoint.new(1, Color3.new(0,1,1))
+                        }
+                        particleEmitter1.Brightness = 10
+                        particleEmitter2.Size = NumberSequence.new(0.4)
+                        particleEmitter2.Squash = NumberSequence.new(1.5)
+                        particleEmitter2.Lifetime = NumberRange.new(0.3)
+                        particleEmitter2.Rate = 12
+                        particleEmitter2.Speed = NumberRange.new(5)
+                        particleEmitter2.Parent = petClone.PrimaryPart
+
+                        local particleEmitter3 : ParticleEmitter = Instance.new("ParticleEmitter")
+                        particleEmitter3.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.new(0,0,1)),
+                            ColorSequenceKeypoint.new(1, Color3.new(1,0,1))
+                        }
+                        particleEmitter1.Brightness = 10
+                        particleEmitter3.Size = NumberSequence.new(0.4)
+                        particleEmitter3.Squash = NumberSequence.new(1.5)
+                        particleEmitter3.Lifetime = NumberRange.new(0.3)
+                        particleEmitter3.Rate = 12
+                        particleEmitter3.Speed = NumberRange.new(5)
+                        particleEmitter3.Parent = petClone.PrimaryPart
+
+                    elseif pet.upgrade == upgrades.Magic then
+                        local curveSize : number = 0.8
+                        if pet.size == sizes.Big then
+                            curveSize = 1
+                        elseif pet.size == sizes.Huge then
+                            curveSize = 1.5
+                        end
+
+                        local beamPart : Part = Instance.new("Part")
+                        beamPart.Transparency = 1
+                        beamPart.Name = "BeamPart"
+                        beamPart.Size = petClone.PrimaryPart.Size
+                        beamPart.CFrame = petClone.PrimaryPart.CFrame
+                        beamPart.Rotation = Vector3.new(0,-90,180)
+                        beamPart.CanCollide = false
+                        beamPart.CanQuery = false
+                        beamPart.CanTouch = false
+                        beamPart.Anchored = false
+                        beamPart.Massless = true
+                        beamPart.Shape = Enum.PartType.Ball
+
+                        local beamPartCenterAttachment : Attachment = Instance.new("Attachment")
+                        beamPartCenterAttachment.Name = "Center"
+                        beamPartCenterAttachment.Parent = beamPart
+
+                        local beamPartAttachment0 : Attachment = Instance.new("Attachment")
+                        beamPartAttachment0.Name = "Attachment"
+                        beamPartAttachment0.CFrame = CFrame.new(Vector3.new(math.ceil(beamPart.Size.X) / 2, 0, 0)) -- round size to upper 0.5
+                        beamPartAttachment0.Orientation = Vector3.new(0,0,90)
+                        beamPartAttachment0.Parent = beamPart
+
+                        local beamPartAttachment1 : Attachment = Instance.new("Attachment")
+                        beamPartAttachment1.Name = "Attachment"
+                        beamPartAttachment1.CFrame = CFrame.new(Vector3.new(0, math.ceil(beamPart.Size.Y) / 2, 0)) -- round size to upper 0.5
+                        beamPartAttachment1.Orientation = Vector3.new(0,0,180)
+                        beamPartAttachment1.Parent = beamPart
+
+                        local beamPartAlignPosition : AlignPosition = Instance.new("AlignPosition")
+                        beamPartAlignPosition.ReactionForceEnabled = true
+                        beamPartAlignPosition.Attachment0 = petClone.PrimaryPart.Center
+                        beamPartAlignPosition.Attachment1 = beamPartCenterAttachment
+                        beamPartAlignPosition.MaxForce = 1_000_000
+                        beamPartAlignPosition.Parent = beamPart
+
+                        local beamPartAngularVelocity : AngularVelocity = Instance.new("AngularVelocity")
+                        beamPartAngularVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+                        beamPartAngularVelocity.Attachment0 = beamPartCenterAttachment
+                        beamPartAngularVelocity.AngularVelocity = Vector3.new(0,0,15)
+                        beamPartAngularVelocity.MaxTorque = 1000
+                        beamPartAngularVelocity.Parent = beamPart
+
+                        local beam : Beam = Instance.new("Beam")
+                        beam.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(67, 205, 255)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(29, 44, 132))
+                        }
+                        beam.Transparency = NumberSequence.new(0)
+                        beam.Attachment0 = beamPartAttachment0
+                        beam.Attachment1 = beamPartAttachment1
+                        beam.CurveSize0 = curveSize
+                        beam.CurveSize1 = curveSize
+                        beam.Segments = 20
+                        beam.Width0 = 0.1
+                        beam.Width1 = 0.1
+                        beam.Parent = beamPart
+
+                        beamPart.Parent = petClone
+
+                        local beamPart2 : Part = Instance.new("Part")
+                        beamPart2.Transparency = 1
+                        beamPart2.Name = "BeamPart"
+                        beamPart2.Size = petClone.PrimaryPart.Size
+                        beamPart2.CFrame = petClone.PrimaryPart.CFrame
+                        beamPart2.Rotation = Vector3.new(0,180,0)
+                        beamPart2.CanCollide = false
+                        beamPart2.CanQuery = false
+                        beamPart2.CanTouch = false
+                        beamPart2.Anchored = false
+                        beamPart2.Massless = true
+                        beamPart2.Shape = Enum.PartType.Ball
+
+                        local beamPart2CenterAttachment : Attachment = Instance.new("Attachment")
+                        beamPart2CenterAttachment.Name = "Center"
+                        beamPart2CenterAttachment.Parent = beamPart2
+
+                        local beamPart2Attachment0 : Attachment = Instance.new("Attachment")
+                        beamPart2Attachment0.Name = "Attachment"
+                        beamPart2Attachment0.CFrame = CFrame.new(Vector3.new(math.ceil(beamPart2.Size.X) / 2, 0, 0)) -- round size to upper 0.5
+                        beamPart2Attachment0.Orientation = Vector3.new(0,0,90)
+                        beamPart2Attachment0.Parent = beamPart2
+
+                        local beamPart2Attachment1 : Attachment = Instance.new("Attachment")
+                        beamPart2Attachment1.Name = "Attachment"
+                        beamPart2Attachment1.CFrame = CFrame.new(Vector3.new(0, math.ceil(beamPart2.Size.Y) / 2, 0)) -- round size to upper 0.5
+                        beamPart2Attachment1.Orientation = Vector3.new(0,0,180)
+                        beamPart2Attachment1.Parent = beamPart2
+
+                        local beamPart2AlignPosition : AlignPosition = Instance.new("AlignPosition")
+                        beamPart2AlignPosition.ReactionForceEnabled = true
+                        beamPart2AlignPosition.Attachment0 = petClone.PrimaryPart.Center
+                        beamPart2AlignPosition.Attachment1 = beamPart2CenterAttachment
+                        beamPart2AlignPosition.MaxForce = 1_000_000
+                        beamPart2AlignPosition.Parent = beamPart2
+
+                        local beamPart2AngularVelocity : AngularVelocity = Instance.new("AngularVelocity")
+                        beamPart2AngularVelocity.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
+                        beamPart2AngularVelocity.Attachment0 = beamPart2Attachment0
+                        beamPart2AngularVelocity.AngularVelocity = Vector3.new(0,0,15)
+                        beamPart2AngularVelocity.MaxTorque = 1000
+                        beamPart2AngularVelocity.Parent = beamPart2
+
+                        local beam2 : Beam = Instance.new("Beam")
+                        beam2.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(67, 205, 255)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(29, 44, 132))
+                        }
+                        beam2.Transparency = NumberSequence.new(0)
+                        beam2.Attachment0 = beamPart2Attachment0
+                        beam2.Attachment1 = beamPart2Attachment1
+                        beam2.CurveSize0 = curveSize
+                        beam2.CurveSize1 = curveSize
+                        beam2.Segments = 10
+                        beam2.Width0 = 0.1
+                        beam2.Width1 = 0.1
+                        beam2.Parent = beamPart2
+
+                        beamPart2.Parent = petClone
+
+                        local particleEmitter : ParticleEmitter = Instance.new("ParticleEmitter")
+                        particleEmitter.Color = ColorSequence.new{
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(67, 205, 255)),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(29, 44, 132))
+                        }
+                        particleEmitter.Brightness = 5
+                        particleEmitter.Size = NumberSequence.new(0.4)
+                        particleEmitter.Squash = NumberSequence.new(1.5)
+                        particleEmitter.Lifetime = NumberRange.new(0.3)
+                        particleEmitter.Rate = 40
+                        particleEmitter.Speed = NumberRange.new(5)
+                        particleEmitter.Parent = petClone.PrimaryPart
+                    end
+
+                    -- move the pet to the attachment it will be using
+                    petClone:PivotTo(v.WorldCFrame)
 
                     -- parent the pet to the pets folder in the character or destroy it if the folder doesn't exist
                     if self.plr.Character and self.plr.Character:FindFirstChild("Pets") then
