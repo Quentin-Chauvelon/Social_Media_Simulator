@@ -74,6 +74,7 @@ local upgradesMachinesMagicUpgradeButton : TextButton = upgradesMachineDetails:W
 local upgradesMachinesGuaranteedSuccess : TextLabel = upgradesMachineDetails:WaitForChild("GuaranteedSuccess")
 local upgradesMachinesChance : TextLabel = upgradesMachineDetails:WaitForChild("Chance")
 local upgradesMachinesUpgradeResult : TextLabel = upgradesMachineDetails:WaitForChild("UpgradeResult")
+local petNameToolTip : TextLabel = inventoryBackground:WaitForChild("PetNameTooltip")
 
 
 export type PetModule = {
@@ -956,7 +957,8 @@ function PetModule:SelectPet(id : number)
                 displayPet:Clone().Parent = petDetailsPetDisplay
             end
 
-            petDetailsBoost.Text = "x" .. tostring(pet.activeBoost) .. " followers"
+            -- petDetailsBoost.Text = string.format("x%f followers", math.round(pet.activeBoost * 1000) / 1000)
+            petDetailsBoost.Text = "x" .. (math.round(pet.activeBoost * 1000) / 1000) .. " followers"
 
             petDetailsRarity.Text = rarity.name
             petDetailsRarity.BackgroundColor3 = rarity.color
@@ -1103,6 +1105,27 @@ function PetModule:AddPetToInventory(pet : pet)
     if displayPet then
         displayPet:Clone().Parent = petClone.PetDisplay
     end
+
+    -- show the pet name tooltip if the player is using the machine
+    petClone.MouseEnter:Connect(function()
+        local petSize : string = sizes[pet.size]
+        local petUpgrade : upgrade = upgrades[pet.upgrade]
+        
+        petNameToolTip.Text = petUpgrade.name .. " " .. petSize .. " " .. pet.name
+
+        petNameToolTip.Position = UDim2.new(
+            0,
+            petClone.AbsolutePosition.X - inventoryBackground.AbsolutePosition.X - (petNameToolTip.AbsoluteSize.X / 2) + (petClone.AbsoluteSize.X / 2),
+            0,
+            petClone.AbsolutePosition.Y - inventoryBackground.AbsolutePosition.Y - (petNameToolTip.AbsoluteSize.Y / 2)
+        )
+
+        petNameToolTip.Visible = true
+    end)
+
+    petClone.MouseLeave:Connect(function()
+        petNameToolTip.Visible = false
+    end)
 
     petClone.MouseButton1Down:Connect(function()
 
@@ -1412,7 +1435,7 @@ function PetModule:OpenGui()
         self.petsUIMaid:GiveTask(
             deleteUnequippedPetsButton.MouseButton1Down:Connect(function()
                 for _,pet : pet in pairs(self.ownedPets) do
-                    if not pet.equipped then
+                    if not pet.equipped and pet.rarity ~= Rarities.Mystical then
                         pet.inventorySlot.UIStroke.Color = Color3.new(1,0,0)
                     end
                 end
@@ -1499,6 +1522,8 @@ function PetModule:OpenGui()
                         self.selectedPet = nil
                         self:SelectPet(craftedPet.id)
                         self.selectedPet = craftedPet.id
+
+                        self:UpdateUsedCapacity()
                     end
                 end
             end)
