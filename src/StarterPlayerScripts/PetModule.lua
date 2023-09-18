@@ -618,15 +618,56 @@ function PetModule.new(utility : Utility.Utility)
                         for _,luckButton : GuiObject in ipairs(eggGui.Background.LuckContainer:GetChildren()) do
                             if luckButton:IsA("ImageButton") then
 
-                                if luckButton.Name == "BasicLuck" then
-                                    luckButton.MouseButton1Down:Connect(function()
-                                        GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.BasicLuck)
+                                -- tweens to scale the button up and down on mouse enter and mouse leave
+                                local mouseEnterTween : Tween = TweenService:Create(
+                                    luckButton.UIScale,
+                                    TweenInfo.new(
+                                        0.15,
+                                        Enum.EasingStyle.Quad,
+                                        Enum.EasingDirection.InOut
+                                    ),
+                                    {Scale = 1.1}
+                                )
+
+                                local mouseLeaveTween : Tween = TweenService:Create(
+                                    luckButton.UIScale,
+                                    TweenInfo.new(
+                                        0.15,
+                                        Enum.EasingStyle.Quad,
+                                        Enum.EasingDirection.InOut
+                                    ),
+                                    {Scale = 1}
+                                )
+
+                                
+                                -- scale the button up on mouse enter
+                                petModule.eggsMaid:GiveTask(
+                                    luckButton.MouseEnter:Connect(function()
+                                        mouseEnterTween:Play()
                                     end)
+                                )
+
+                                -- scale the button down on mouse leave
+                                petModule.eggsMaid:GiveTask(
+                                    luckButton.MouseLeave:Connect(function()
+                                        mouseLeaveTween:Play()
+                                    end)
+                                )
+
+
+                                if luckButton.Name == "BasicLuck" then
+                                    petModule.eggsMaid:GiveTask(
+                                        luckButton.MouseButton1Down:Connect(function()
+                                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.BasicLuck)
+                                        end)
+                                    )
 
                                 elseif luckButton.Name == "GoldenLuck" then
-                                    luckButton.MouseButton1Down:Connect(function()
-                                        GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.GoldenLuck)
-                                    end)
+                                    petModule.eggsMaid:GiveTask(
+                                        luckButton.MouseButton1Down:Connect(function()
+                                            GamePassModule.PromptGamePassPurchase(GamePassModule.gamePasses.GoldenLuck)
+                                        end)
+                                    )
                                 end
                             end
                         end
