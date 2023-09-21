@@ -8,6 +8,8 @@ local Types = require(ServerScriptService:WaitForChild("Types"))
 local Rewards = require(script:WaitForChild("Rewards"))
 
 local PlayTimeRewardsTimerSyncRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayTimeRewardsTimerSync")
+local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
+
 
 DataStore2.Combine("SMS", "playTimeRewards")
 
@@ -179,10 +181,25 @@ function PlayTimeRewards:CollectReward(p : Types.PlayerModule)
 		-- apply the reward
 		if reward.reward == "followers" then
 			p:UpdateFollowersAmount(reward.value)
+
 		elseif reward.reward == "coins" then
 			p:UpdateCoinsAmount(reward.value)
+
 		elseif reward.reward == "pet" then
-			print("pet")
+			local pet : {} = p.petModule:GetPetFromPetId(18)
+			if not pet then
+				return nil
+			end
+
+			-- set the unique id for the pet
+			pet.id = p.petModule.nextId
+			p.petModule.nextId += 1
+
+			p.petModule:AddPetToInventory(pet)
+
+			-- add the pet to the inventory
+			PetsRE:FireClient(p.player, {pet}, false)
+
 		elseif reward.reward == "potion" then
 			-- if the potion is a followers and coins potion, we split into two potions
 			if reward.value.type == p.potionModule.potionTypes.FollowersCoins then

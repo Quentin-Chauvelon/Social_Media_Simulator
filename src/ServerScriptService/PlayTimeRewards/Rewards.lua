@@ -26,7 +26,7 @@ function Rewards.GetReward(rewardToCollect : number) : Reward
     elseif rewardToCollect == 900 then
         return {reward = "coins", value = 100}
     elseif rewardToCollect == 1_200 then
-        return {reward = "pet", value = ""}
+        return {reward = "pet", value = "Thumbs Up"}
     elseif rewardToCollect == 1_800 then
         return {reward = "followers", value = 75_000}
     elseif rewardToCollect == 2_700 then

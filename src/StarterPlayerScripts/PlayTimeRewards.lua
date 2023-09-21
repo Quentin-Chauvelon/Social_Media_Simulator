@@ -110,6 +110,10 @@ function PlayTimeRewards:NextRewardClick()
                 collectedReward.Reward.Image = "http://www.roblox.com/asset/?id=14109221821"
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(255, 251, 36)
 
+            elseif reward.reward == "pet" then
+                collectedReward.Reward.Image = "http://www.roblox.com/asset/?id=14839244148"
+                collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(255, 215, 36)
+
             elseif reward.reward == "potion" then
                 collectedReward.Reward.Image = PotionModule:GetPotionImage(reward.value)
                 collectedReward.Reward.TextLabel.TextColor3 = Color3.fromRGB(92, 198, 255)
