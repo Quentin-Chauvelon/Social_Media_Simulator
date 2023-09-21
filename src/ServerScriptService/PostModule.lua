@@ -213,6 +213,8 @@ function PostModule:Post(p : Types.PlayerModule)
 
 	p:UpdateFollowersAmount(GetRandomFollowerAmount())
 
+	p.plotModule.popSound:Play()
+
 	local randomNumber : number = math.random()
 	
 	-- if the player has a rebirth level less than 100, then we calculate the odds of getting 1 coin

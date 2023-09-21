@@ -33,6 +33,7 @@ export type PlotModule = {
 	phone : Model,
 	screen : Frame,
 	followerGoal : Frame,
+    popSound : Sound,
 	new : () -> PlotModule,
 	AssignPlayerToPlot : (self : PlotModule, playerName : string) -> boolean,
 	AssignPlot : (self : PlotModule, plr : Player) -> boolean,
