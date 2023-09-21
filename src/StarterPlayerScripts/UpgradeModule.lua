@@ -227,6 +227,8 @@ function UpgradeModule:OpenUpgradesGui()
                     upgradeBackground.UpgradePurchaseContainer.UpgradeButton.MouseButton1Down:Connect(function()
                         local upgrade : upgrade = UpgradeRF:InvokeServer(upgradeBackground.LayoutOrder)
                         if upgrade then
+                            self.utility.PlayDingSound()
+                            
                             self:UpdateUpgradeUI(upgradeBackground, upgrade)
                         end
                     end)

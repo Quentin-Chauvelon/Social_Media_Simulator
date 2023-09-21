@@ -89,6 +89,7 @@ export type PetModule = {
     upgradeSuccessChance : number,
     maxNumberOfPetsInMachine : number,
     petsInMachine : {pet},
+    revealSound : Sound,
     petsUIMaid : Maid.Maid,
     eggsMaid : Maid.Maid,
     closeEggSequenceInputConnection : RBXScriptSignal?,
@@ -451,6 +452,8 @@ function PetModule.new(utility : Utility.Utility)
     petModule.upgradeSuccessChance = 0
     petModule.closeEggSequenceInputConnection = nil
     petModule.upgradesMachineCloseButtonConnection = nil
+
+    petModule.revealSound = game:GetService("SoundService"):WaitForChild("Reveal")
 
     petModule.petsUIMaid = Maid.new()
     petModule.eggsMaid = Maid.new()
@@ -848,6 +851,10 @@ function PetModule:PlayEggOpeningSequence(eggSequenceContainer : Frame, pets : {
 
                 resetEggOrientation:Play()
                 resetEggOrientation.Completed:Wait()
+
+                if i == 1 then
+                    self.revealSound:Play()
+                end
 
                 explodeEgg:Play()
                 explodeEgg.Completed:Wait()
