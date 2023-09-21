@@ -97,9 +97,7 @@ function GamepassModule:PlayerBoughtGamePass(gamePassId : number, p : Types.Play
         end
 
     elseif gamePassId == self.gamePasses.GoldenLuck then
-        print(p.petModule.luck)
         p.petModule.luck = 2
-        print(p.petModule.luck)
     end
 
     -- if the purchase of the game pass was succesful, fire the client to make changes locally if needed
@@ -172,17 +170,16 @@ function GamepassModule:LoadOwnedGamePasses(p : Types.PlayerModule)
             end
         end
     end
-    print(self.ownedGamePasses)
 end
 
 
 function GamepassModule:GetCoinsMultiplier()
-    return self:PlayerOwnsGamePass(self.gamePasses.CoinsMultiplier) and 2 or 0
+    return self:PlayerOwnsGamePass(self.gamePasses.CoinsMultiplier) and 2 or 1
 end
 
 
 function GamepassModule:GetFollowersMultiplier()
-    return self:PlayerOwnsGamePass(self.gamePasses.FollowersMultiplier) and 2 or 0
+    return self:PlayerOwnsGamePass(self.gamePasses.FollowersMultiplier) and 2 or 1
 end
 
 

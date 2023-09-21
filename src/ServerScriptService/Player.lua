@@ -144,17 +144,17 @@ end
 ]]--
 function Player:UpdateFollowersMultiplier()
 	self.followersMultiplier =
-		1 +
-		self.upgradeModule.followersMultiplier +
-		self.rebirthModule.followersMultiplier +
-		self.potionModule.followersMultiplier +
-		self.petModule.followersMultiplier +
-		self.friendsModule.followersMultiplier +
+		1 *
+		(1 + self.upgradeModule.followersMultiplier) *
+		(1 + self.rebirthModule.followersMultiplier) *
+		(1 + self.potionModule.followersMultiplier) *
+		(1 + self.petModule.followersMultiplier) *
+		(1 + self.friendsModule.followersMultiplier) *
 		self.gamepassModule:GetFollowersMultiplier()
 
 	-- TODO: DELETE THE FOLLOWING LINE
 	-- self.followersMultiplier *= 100
-	print("followers multiplier", self.followersMultiplier, self.petModule.followersMultiplier)
+	print("followers multiplier", self.followersMultiplier, self.upgradeModule.followersMultiplier, self.rebirthModule.followersMultiplier, self.potionModule.followersMultiplier, self.petModule.followersMultiplier, self.friendsModule.followersMultiplier)
 end
 
 
