@@ -763,6 +763,7 @@ function PetModule:PlayEggOpeningSequence(eggSequenceContainer : Frame, pets : {
             local petClone : Model
             if displayPets:FindFirstChild(pet.identifier) then
                 petClone = displayPets[pet.identifier]:Clone()
+                petClone:ScaleTo(1.4)
                 petClone.Parent = eggContainer.ViewportFrame.WorldModel
             end
 
@@ -988,8 +989,8 @@ function PetModule:SelectPet(id : number)
             petDetailsName.Text = petUpgrade.name .. " " .. petSize .. " " .. pet.name
 
             -- if there was already a pet displayed, destroy the model from the viewport frame
-            if displayPets:FindFirstAncestorWhichIsA("Model") then
-                displayPets:FindFirstAncestorWhichIsA("Model"):Destroy()
+            if petDetailsPetDisplay:FindFirstChildWhichIsA("Model") then
+                petDetailsPetDisplay:FindFirstChildWhichIsA("Model"):Destroy()
             end
 
             -- clone the model of the pet to the viewport frame
