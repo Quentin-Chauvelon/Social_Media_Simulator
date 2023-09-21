@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -75,6 +76,9 @@ local upgradesMachinesGuaranteedSuccess : TextLabel = upgradesMachineDetails:Wai
 local upgradesMachinesChance : TextLabel = upgradesMachineDetails:WaitForChild("Chance")
 local upgradesMachinesUpgradeResult : TextLabel = upgradesMachineDetails:WaitForChild("UpgradeResult")
 local petNameToolTip : TextLabel = inventoryBackground:WaitForChild("PetNameTooltip")
+
+local successSound : Sound = SoundService:WaitForChild("Success")
+local failureSound : Sound = SoundService:WaitForChild("Failure")
 
 
 export type PetModule = {
@@ -1704,12 +1708,14 @@ function PetModule:OpenUpgradesMachineGui()
                         upgradesMachinesUpgradeResult.TextColor3 = Color3.fromRGB(135, 255, 139)
                         upgradesMachinesUpgradeResult.UIStroke.Color = Color3.fromRGB(0, 115, 4)
                         upgradesMachinesUpgradeResult.Visible = true
+                        successSound:Play()
 
                     else
                         upgradesMachinesUpgradeResult.Text = "Failed!"
                         upgradesMachinesUpgradeResult.TextColor3 = Color3.fromRGB(255, 146, 146)
                         upgradesMachinesUpgradeResult.UIStroke.Color = Color3.fromRGB(126, 0, 0)
                         upgradesMachinesUpgradeResult.Visible = true
+                        failureSound:Play()
                     end
 
                     if #pets > 0 then
