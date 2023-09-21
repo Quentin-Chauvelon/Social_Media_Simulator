@@ -670,6 +670,8 @@ MarketplaceService.ProcessReceipt = function(receiptInfo : table) : Enum.Product
 
 			local p : Player.PlayerModule = players[playerName]
 			if p then
+				ParticleRE:FireClient(p.player)
+
 				return DeveloperProductModule.BoughtDeveloperProduct(receiptInfo, p)
 			end
 		end
@@ -684,6 +686,8 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player : Play
 	if purchaseSuccess then
 		local p : Player.PlayerModule = players[player.Name]
 		if p then
+			ParticleRE:FireClient(p.player)
+
 			p.gamepassModule:PlayerBoughtGamePass(purchasedPassID, p)
 		end
 	end

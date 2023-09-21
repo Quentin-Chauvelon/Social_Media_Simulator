@@ -253,11 +253,6 @@ ParticleRE.OnClientEvent:Connect(function()
 	local character : Model? = lplr.Character
 	if character then
 
-		-- "ding" sound
-		local sound : Sound = Instance.new("Sound")
-		sound.SoundId = "rbxassetid://826129174"
-		sound.Parent = character.PrimaryPart
-
 		local particleEmittersColors : {Color3} = {
 			Color3.new(1,0,0),
 			Color3.new(1,1,0),
@@ -291,7 +286,7 @@ ParticleRE.OnClientEvent:Connect(function()
 			particleEmitter:Emit(30)
 		end
 
-		sound:Play()
+		Utility.PlayDingSound()
 
 		Promise.new(function(resolve)
 			task.wait(3)
@@ -301,8 +296,6 @@ ParticleRE.OnClientEvent:Connect(function()
 			for _,particleEmitter in pairs(particleEmitters) do
 				particleEmitter:Destroy()
 			end
-
-			sound:Destroy()
 		end)
 	end
 end)

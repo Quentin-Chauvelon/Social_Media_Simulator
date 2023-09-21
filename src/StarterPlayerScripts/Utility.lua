@@ -20,9 +20,12 @@ local notificationType : TextLabel = notification:WaitForChild("Type")
 local notificationClose : TextButton = notification:WaitForChild("Close")
 local notificationUIPadding : UIPadding = notification:WaitForChild("UIPadding")
 
+local dingSound : Sound = game:GetService("SoundService"):WaitForChild("Ding")
+
 local uiToResize : {(viewportSize : Vector2) -> nil} = {}
 local debounce : boolean = true
 local openGuiDebounce : boolean = true
+
 
 local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4,["M"] = 7,["B"] = 10,["T"] = 13,["Qa"] = 16,["Qi"] = 19}
 
@@ -38,6 +41,7 @@ export type Utility = {
     GetNumberInRangeProportionallyDefaultHeight : (X : number, minRange : number, maxRange : number) -> number,
     DisplayInformation : (text : string, duration : number) -> nil,
     DisplayError : (text : string, duration : number) -> nil,
+    PlayDingSound : () -> nil,
     OpenGui : (ui : GuiObject, duration : number?) -> boolean,
     SetCloseGuiConnection : (closeConnection : RBXScriptConnection) -> nil,
     CloseGui : (ui : GuiObject, duration : number?) -> nil,
@@ -244,6 +248,11 @@ function Utility.DisplayError(text : string, duration : number)
     notificationClose.UIStroke.Color = Color3.fromRGB(126, 0, 0)
 
     DisplayNotification(text, duration)
+end
+
+
+function Utility.PlayDingSound()
+    dingSound:Play()
 end
 
 
