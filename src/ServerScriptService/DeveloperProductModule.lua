@@ -37,14 +37,14 @@ local DeveloperProductModule : DeveloperProductModule = {}
 DeveloperProductModule.__index = DeveloperProductModule
 
 DeveloperProductModule.developerProducts = {
-    Rebirth = 1590728129,
-    LimitedEditionPetHundred = 1644616511,
-    LimitedEditionPetFire = 1644617696,
-    LimitedEditionPetPartyPopper = 1644617959,
-    LimitedEditionPetRedHeart = 1644618109,
-    LimitedEditionPetDevil = 1644618260,
-    LimitedEditionPetMoney = 1644618414,
-    MagicUpgrade = 1645098556
+    Rebirth = 1649536769,
+    LimitedEditionPetHundred = 1649537308,
+    LimitedEditionPetFire = 1649537548,
+    LimitedEditionPetPartyPopper = 1649537845,
+    LimitedEditionPetRedHeart = 1649538090,
+    LimitedEditionPetDevil = 1649538239,
+    LimitedEditionPetMoney = 1649538427,
+    MagicUpgrade = 1649537019
 }
 
 
@@ -123,7 +123,11 @@ function DeveloperProductModule.BoughtDeveloperProduct(receiptInfo : receiptInfo
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.MagicUpgrade then
             p.petModule:MagicUpgradePet()
 
+            p:UpdateFollowersMultiplier()
+
             PetsRE:FireClient(player, p.petModule.ownedPets, true)
+
+            return Enum.ProductPurchaseDecision.PurchaseGranted
         end
 	end
 

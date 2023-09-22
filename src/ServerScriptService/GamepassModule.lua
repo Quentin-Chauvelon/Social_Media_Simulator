@@ -21,6 +21,8 @@ export type GamepassModule = {
 }
 
 type GamePasses = {
+    VIP : number,
+    AutoClicker : number,
     CoinsMultiplier : number,
     FollowersMultiplier : number,
     SpaceCase : number,
@@ -46,15 +48,17 @@ function GamepassModule.new(plr : Player)
     local gamepassModule : GamepassModule = {}
 
     gamepassModule.gamePasses = {
-        CoinsMultiplier = 0,
-        FollowersMultiplier = 0,
-        SpaceCase = 249101309,
-        Open3Eggs = 252411712,
-        Open6Eggs = 252412855,
-        EquipFourMorePets = 255196158,
-        PlusHundredAndFiftyInventoryCapacity = 255197366,
-        BasicLuck = 255242908,
-        GoldenLuck = 255243662
+        VIP = 259211867,
+        AutoClicker = 259212569,
+        CoinsMultiplier = 259213576,
+        FollowersMultiplier = 259212928,
+        SpaceCase = 259213853,
+        Open3Eggs = 259214629,
+        Open6Eggs = 259214777,
+        EquipFourMorePets = 259214205,
+        PlusHundredAndFiftyInventoryCapacity = 259214393,
+        BasicLuck = 259215061,
+        GoldenLuck = 259215469
     }
 
     gamepassModule.ownedGamePasses = {}

@@ -15,6 +15,10 @@ export type GamePassModule = {
 }
 
 type GamePasses = {
+    VIP : number,
+    AutoClicker : number,
+    CoinsMultiplier : number,
+    FollowersMultiplier : number,
     SpaceCase : number,
     OpenThreeEggs : number,
     OpenSixEggs : number,
@@ -36,13 +40,17 @@ GamePassModule.__index = GamePassModule
 
 -- Game passes enum
 GamePassModule.gamePasses = {
-    SpaceCase = 249101309,
-    OpenThreeEggs = 252411712,
-    OpenSixEggs = 252412855,
-    EquipFourMorePets = 255196158,
-    PlusHundredAndFiftyInventoryCapacity = 255197366,
-    BasicLuck = 255242908,
-    GoldenLuck = 255243662
+    VIP = 259211867,
+    AutoClicker = 259212569,
+    CoinsMultiplier = 259213576,
+    FollowersMultiplier = 259212928,
+    SpaceCase = 259213853,
+    OpenThreeEggs = 259214629,
+    OpenSixEggs = 259214777,
+    EquipFourMorePets = 259214205,
+    PlusHundredAndFiftyInventoryCapacity = 259214393,
+    BasicLuck = 259215061,
+    GoldenLuck = 259215469
 }
 
 -- list of all the game passes

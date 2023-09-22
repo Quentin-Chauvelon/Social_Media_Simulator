@@ -404,7 +404,7 @@ end)
 
 local experienceInviteOptions : ExperienceInviteOptions = Instance.new("ExperienceInviteOptions")
 experienceInviteOptions.PromptMessage = "Get +20% followers and coins for each friend on your server"
-experienceInviteOptions.InviteMessageId = "745b4e11-1f31-7d4d-874c-9d9fbe28f1db"
+experienceInviteOptions.InviteMessageId = "842979b2-b6dd-1f45-9d03-dabf43b36da9"
 
 -- invite friends
 friendsBoostButton.MouseButton1Down:Connect(function()
