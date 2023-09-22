@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -6,13 +7,14 @@ local PostRE : RemoteEvent = ReplicatedStorage:WaitForChild("Post")
 
 local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local Types = require(ServerScriptService:WaitForChild("Types"))
+local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 
 DataStore2.Combine("SMS", "level", "postStats")
 
 
 local defaultPostStats = {
 	autoPostInterval = 3 * 1_000, -- this value is also defined in ServerScriptService/UpgradeModule.lua:25 (in upgrade.baseValue)
-	clickPostInterval = 0.3 * 1_000
+	clickPostInterval = 0.22 * 1_000
 }
 
 
@@ -101,11 +103,13 @@ export type PostModule = {
 	numberOfPosts : number,
 	numberOfDialogs : number,
 	numberOfReplies : number,
+	autoClickerPromise : Promise.Promise,
 	new : (plr : Player) -> PostModule,
 	GenerateDialog : (self : PostModule, p : Types.PlayerModule, tableToUse : string) -> nil,
     Post : (self : PostModule, p : Types.PlayerModule) -> nil,
     PlayerClicked : (self : PostModule, p : Types.PlayerModule) -> nil,
     GenerateStateMachine : (self : PostModule) -> nil,
+	StartAutoClicker : (self : PostModule, p : Types.PlayerModule) -> nil,
     OnLeave : (self : PostModule) -> nil
 }
 
@@ -176,6 +180,8 @@ function PostModule.new(plr : Player)
 	postModule.numberOfPosts = #postModule.posts
 	postModule.numberOfDialogs = #postModule.dialogs
 	postModule.numberOfReplies = #postModule.replies
+
+	postModule.autoClickerPromise = nil
 
 	return setmetatable(postModule, PostModule)
 end
@@ -414,7 +420,24 @@ function PostModule:GenerateStateMachine()
 end
 
 
+--[[
+	Starts the auto clicker promise if the player owns the auto clicker gamepass
+]]--
+function PostModule:StartAutoClicker(p : Types.PlayerModule)
+	self.autoClickerPromise = Promise.new(function()
+		while true do
+			self:PlayerClicked(p)
+			RunService.Heartbeat:Wait()
+		end
+	end)
+end
+
+
 function PostModule:OnLeave()
+	if self.autoClickerPromise then
+		self.autoClickerPromise:cancel()
+	end
+
 	setmetatable(self, nil)
 	self = nil
 end

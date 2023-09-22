@@ -6,6 +6,8 @@ local BoughtGamePassRE : RemoteEvent = ReplicatedStorage:WaitForChild("BoughtGam
 
 local Types = ServerScriptService:WaitForChild("Types")
 
+local vipTag : BillboardGui = ReplicatedStorage:WaitForChild("VIPTag")
+
 export type GamepassModule = {
     gamePasses : GamePasses,
     ownedGamePasses : {[GamePasses] : ownedGamePass},
@@ -102,6 +104,30 @@ function GamepassModule:PlayerBoughtGamePass(gamePassId : number, p : Types.Play
 
     elseif gamePassId == self.gamePasses.GoldenLuck then
         p.petModule.luck = 2
+
+    elseif gamePassId == self.gamePasses.AutoClicker then
+        p.postModule:StartAutoClicker(p)
+
+    elseif gamePassId == self.gamePasses.VIP then
+        local character : Model = p.player.Character
+        if character then
+
+            local humanoid : Humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                -- hide the player's default name display
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                
+                -- clone the vip tag over the player's head
+                local vipTagClone : BillboardGui = vipTag:Clone()
+                vipTagClone.PlayerNameContainer.PlayerName.Text = p.player.DisplayName
+                vipTagClone.Enabled = true
+                vipTagClone.Parent = character.Head
+            end
+        end
+
+        if p.player:FindFirstChild("VIP") then
+            p.player.VIP.Value = true
+        end
     end
 
     -- if the purchase of the game pass was succesful, fire the client to make changes locally if needed
@@ -178,12 +204,16 @@ end
 
 
 function GamepassModule:GetCoinsMultiplier()
-    return self:PlayerOwnsGamePass(self.gamePasses.CoinsMultiplier) and 2 or 1
+    return self:PlayerOwnsGamePass(self.gamePasses.CoinsMultiplier)
+        and 2 + (self:PlayerOwnsGamePass(self.gamePasses.VIP) and 0.5 or 0)
+        or 1  + (self:PlayerOwnsGamePass(self.gamePasses.VIP) and 0.5 or 0)
 end
 
 
 function GamepassModule:GetFollowersMultiplier()
-    return self:PlayerOwnsGamePass(self.gamePasses.FollowersMultiplier) and 2 or 1
+    return self:PlayerOwnsGamePass(self.gamePasses.FollowersMultiplier)
+        and 2 + (self:PlayerOwnsGamePass(self.gamePasses.VIP) and 0.5 or 0)
+        or 1  + (self:PlayerOwnsGamePass(self.gamePasses.VIP) and 0.5 or 0)
 end
 
 

@@ -133,6 +133,10 @@ function Player.new(plr : Player)
 	rebirthValue.Value = p.rebirthModule.rebirthLevel
 	rebirthValue.Parent = statsFolder
 
+	local vip : BoolValue = Instance.new("BoolValue")
+	vip.Name = "VIP"
+	vip.Parent = plr
+
 	p.gamepassModule = GamepassModule.new(plr)
 
 	return setmetatable(p, Player)
@@ -248,10 +252,13 @@ function Player:UpdateAutopostInterval()
 	local upgrade : UpgradeModule.upgrade = self.upgradeModule.upgrades[2]
 
 	self.postModule.autoPostInterval =
-		3_000 -
-		(upgrade.baseValue + upgrade.upgradeValues[upgrade.level]) -
-		(self.caseModule.speedBoost) -
-		(self.potionModule.speedBoost)
+		math.max(
+			3_000 -
+			(upgrade.baseValue + upgrade.upgradeValues[upgrade.level]) -
+			(self.caseModule.speedBoost) -
+			(self.potionModule.speedBoost),
+			220
+		)
 	print("new autopost invertal: ", self.postModule.autoPostInterval, "(", (upgrade.baseValue + upgrade.upgradeValues[upgrade.level]), ", ", self.caseModule.speedBoost, ", ", self.potionModule.speedBoost, ")")
 end
 

@@ -56,11 +56,13 @@ export type PostModule = {
 	numberOfPosts : number,
 	numberOfDialogs : number,
 	numberOfReplies : number,
+    autoClickerPromise : Promise,
 	new : (plr : Player) -> PostModule,
 	GenerateDialog : (self : PostModule, p : PlayerModule, tableToUse : string) -> nil,
     Post : (self : PostModule, p : PlayerModule) -> nil,
     PlayerClicked : (self : PostModule, p : PlayerModule) -> nil,
     GenerateStateMachine : (self : PostModule) -> nil,
+    StartAutoClicker : (self : PostModule, p : PlayerModule) -> nil,
     OnLeave : (self : PostModule) -> nil
 }
 

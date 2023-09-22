@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local SocialService = game:GetService("SocialService")
+local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
@@ -600,6 +601,22 @@ end)
 UpdateFriendsBoostRE.OnClientEvent:Connect(function(numberOfFriendsOnline : number)
 	friendsBoostButton.Text = string.format("Friends boost: %.f%%", (0.2 * numberOfFriendsOnline * 100))
 end)
+
+
+-- add the vip tag before the player message if they are vip
+TextChatService.OnIncomingMessage = function(message: TextChatMessage)
+	local properties : TextChatMessageProperties = Instance.new("TextChatMessageProperties")
+
+	if message.TextSource then
+		local player : Player = Players:GetPlayerByUserId(message.TextSource.UserId)
+		if player and player:FindFirstChild("VIP") and player.VIP.Value then
+			properties.PrefixText = "<font color='##F5DE30'>[VIP]</font> " .. message.PrefixText
+		end
+	end
+
+	return properties
+end
+
 
 
 if not game:IsLoaded() then
