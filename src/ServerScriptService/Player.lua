@@ -102,7 +102,7 @@ function Player.new(plr : Player)
 	p.rebirthModule:UpdateFollowersNeededToRebirth()
 
 	p.caseModule = CaseModule.new(plr)
-	
+
 	p.potionModule = PotionModule.new(plr)
 
 	p.petModule = PetModule.new(plr)
@@ -152,9 +152,7 @@ function Player:UpdateFollowersMultiplier()
 		(1 + self.friendsModule.followersMultiplier) *
 		self.gamepassModule:GetFollowersMultiplier()
 
-	-- TODO: DELETE THE FOLLOWING LINE
-	-- self.followersMultiplier *= 100
-	print("followers multiplier", self.followersMultiplier, self.upgradeModule.followersMultiplier, self.rebirthModule.followersMultiplier, self.potionModule.followersMultiplier, self.petModule.followersMultiplier, self.friendsModule.followersMultiplier)
+	print("followers multiplier", self.followersMultiplier, self.upgradeModule.followersMultiplier, self.rebirthModule.followersMultiplier, self.potionModule.followersMultiplier, self.petModule.followersMultiplier, self.friendsModule.followersMultiplier, self.gamepassModule:GetFollowersMultiplier())
 end
 
 
@@ -163,13 +161,13 @@ end
 ]]--
 function Player:UpdateCoinsMultiplier()
 	self.coinsMultiplier =
-		1 +
-		self.upgradeModule.coinsMultiplier +
-		self.potionModule.coinsMultiplier +
-		self.friendsModule.coinsMultiplier +
+		1 *
+		(1 + self.upgradeModule.coinsMultiplier) *
+		(1 + self.potionModule.coinsMultiplier) *
+		(1 + self.friendsModule.coinsMultiplier) *
 		self.gamepassModule:GetCoinsMultiplier()
-	
-	print("coins multiplier", self.coinsMultiplier)
+
+	print("coins multiplier", self.coinsMultiplier, self.upgradeModule.coinsMultiplier, self.potionModule.coinsMultiplier, self.friendsModule.coinsMultiplier, self.gamepassModule:GetCoinsMultiplier())
 end
 
 
@@ -244,7 +242,7 @@ end
 
 
 --[[
-	
+
 ]]--
 function Player:UpdateAutopostInterval()
 	local upgrade : UpgradeModule.upgrade = self.upgradeModule.upgrades[2]
@@ -279,7 +277,7 @@ function Player:OnLeave()
 	self.potionModule:OnLeave()
 
 	self.caseModule:OnLeave()
-	
+
 	self.rebirthModule:OnLeave()
 
 	self.petModule:OnLeave()
