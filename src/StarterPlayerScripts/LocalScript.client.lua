@@ -42,6 +42,7 @@ local CaseModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Case
 local PotionModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PotionModule"))
 local PetModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PetModule"))
 local LimitedEditionPetsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("LimitedEditionPetsModule"))
+local ShopModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("ShopModule"))
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 
 
@@ -89,6 +90,8 @@ local potionModule : PotionModule.PotionModule = PotionModule.new(Utility)
 local petModule : PetModule.PetModule = PetModule.new(Utility)
 
 LimitedEditionPetsModule.new(Utility)
+
+ShopModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
@@ -405,7 +408,7 @@ end)
 
 local experienceInviteOptions : ExperienceInviteOptions = Instance.new("ExperienceInviteOptions")
 experienceInviteOptions.PromptMessage = "Get +20% followers and coins for each friend on your server"
-experienceInviteOptions.InviteMessageId = "842979b2-b6dd-1f45-9d03-dabf43b36da9"
+experienceInviteOptions.InviteMessageId = "52e070a6-6065-d74c-b9d3-9f39a42bee55"
 
 -- invite friends
 friendsBoostButton.MouseButton1Down:Connect(function()

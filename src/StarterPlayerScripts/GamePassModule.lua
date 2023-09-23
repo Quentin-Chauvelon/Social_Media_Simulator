@@ -40,17 +40,17 @@ GamePassModule.__index = GamePassModule
 
 -- Game passes enum
 GamePassModule.gamePasses = {
-    VIP = 259211867,
-    AutoClicker = 259212569,
-    CoinsMultiplier = 259213576,
-    FollowersMultiplier = 259212928,
-    SpaceCase = 259213853,
-    OpenThreeEggs = 259214629,
-    OpenSixEggs = 259214777,
-    EquipFourMorePets = 259214205,
-    PlusHundredAndFiftyInventoryCapacity = 259214393,
-    BasicLuck = 259215061,
-    GoldenLuck = 259215469
+    VIP = 259863695,
+    AutoClicker = 259863929,
+    CoinsMultiplier = 259864413,
+    FollowersMultiplier = 259864174,
+    SpaceCase = 259864682,
+    OpenThreeEggs = 259864854,
+    OpenSixEggs = 259865048,
+    EquipFourMorePets = 259865245,
+    PlusHundredAndFiftyInventoryCapacity = 259865406,
+    BasicLuck = 259865697,
+    GoldenLuck = 259865957
 }
 
 -- list of all the game passes

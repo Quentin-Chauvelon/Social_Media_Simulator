@@ -135,7 +135,7 @@ local followersNeededToRebirth : {number} = {
     22814000
 }
 
-local REBIRTH_DEV_PRODUCT_ID : number = 1649536769 -- ID for the rebirth's developer product
+local REBIRTH_DEV_PRODUCT_ID : number = 1650523473 -- ID for the rebirth's developer product
 
 
 export type RebirthModule = {

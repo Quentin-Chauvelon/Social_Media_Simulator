@@ -50,17 +50,17 @@ function GamepassModule.new(plr : Player)
     local gamepassModule : GamepassModule = {}
 
     gamepassModule.gamePasses = {
-        VIP = 259211867,
-        AutoClicker = 259212569,
-        CoinsMultiplier = 259213576,
-        FollowersMultiplier = 259212928,
-        SpaceCase = 259213853,
-        Open3Eggs = 259214629,
-        Open6Eggs = 259214777,
-        EquipFourMorePets = 259214205,
-        PlusHundredAndFiftyInventoryCapacity = 259214393,
-        BasicLuck = 259215061,
-        GoldenLuck = 259215469
+        VIP = 259863695,
+        AutoClicker = 259863929,
+        CoinsMultiplier = 259864413,
+        FollowersMultiplier = 259864174,
+        SpaceCase = 259864682,
+        Open3Eggs = 259864854,
+        Open6Eggs = 259865048,
+        EquipFourMorePets = 259865245,
+        PlusHundredAndFiftyInventoryCapacity = 259865406,
+        BasicLuck = 259865697,
+        GoldenLuck = 259865957
     }
 
     gamepassModule.ownedGamePasses = {}

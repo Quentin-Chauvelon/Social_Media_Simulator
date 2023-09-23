@@ -1692,7 +1692,7 @@ function PetModule:OpenUpgradesMachineGui()
 
                     self:RemovePetFromMachine()
 
-                    MarketplaceService:PromptProductPurchase(lplr, 1649537019)
+                    MarketplaceService:PromptProductPurchase(lplr, 1650533238)
                 end
             end)
         )
