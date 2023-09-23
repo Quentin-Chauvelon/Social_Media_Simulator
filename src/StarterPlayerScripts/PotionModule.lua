@@ -156,6 +156,16 @@ function PotionModule:DisplayActivePotions()
                 potionTemplateClone.Visible = true
                 potionTemplateClone.Parent = mobileActivePotionsContainer
             end
+
+            -- if the player has at least 3 active potions, add an empty frame at the bottom, otherwise the last potion is out of the scrolling frame and can't be seen
+            if #self.activePotions > 2 then
+                local frame : Frame = Instance.new("Frame")
+                frame.Name = "BottomGap"
+                frame.Size = UDim2.new(0.95, 0, 0.2, 0)
+                frame.BackgroundTransparency = 1
+                frame.LayoutOrder = 1000
+                frame.Parent = mobileActivePotionsContainer
+            end
         end
     end
 end
