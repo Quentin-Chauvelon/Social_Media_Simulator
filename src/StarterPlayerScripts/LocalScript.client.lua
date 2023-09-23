@@ -91,7 +91,7 @@ local petModule : PetModule.PetModule = PetModule.new(Utility)
 
 LimitedEditionPetsModule.new(Utility)
 
-ShopModule.new(Utility)
+local shopModule : ShopModule.ShopModule = ShopModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
@@ -575,6 +575,8 @@ end)
 ]]--
 BoughtGamePassRE.OnClientEvent:Connect(function(gamePassId : number)
 	GamePassModule.PlayerBoughtGamePass(gamePassId)
+
+	shopModule:UpdateGamePassOwnership(gamePassId)
 
 	if gamePassId == GamePassModule.gamePasses.SpaceCase then
 		CaseModule:CaseBoughtSuccessfully("Space")
