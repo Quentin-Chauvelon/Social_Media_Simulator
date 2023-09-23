@@ -25,7 +25,20 @@ type DeveloperProducts = {
     LimitedEditionPetRedHeart : number,
     LimitedEditionPetDevil : number,
     LimitedEditionPetMoney : number,
-    MagicUpgrade : number
+    MagicUpgrade : number,
+    TwentyKFollowers : number,
+    HundredKFollowers : number,
+    TwoHundredFiftyKFollowers : number,
+    OneMFollowers : number,
+    OneKCoins : number,
+    TenKCoins : number,
+    FiftyKCoins : number,
+    TwoHundredKCoins : number,
+    TwoXFollowersPotion30Min : number,
+    FiveXFollowersPotion30Min : number,
+    TwoXCoinsPotion30Min : number,
+    FiveXCoinsPotion30Min : number,
+    TenXFollowersAndCoinsPotion100Hours : number
 }
 
 export type DeveloperProductModule = {
@@ -37,14 +50,27 @@ local DeveloperProductModule : DeveloperProductModule = {}
 DeveloperProductModule.__index = DeveloperProductModule
 
 DeveloperProductModule.developerProducts = {
-    Rebirth = 1649536769,
-    LimitedEditionPetHundred = 1649537308,
-    LimitedEditionPetFire = 1649537548,
-    LimitedEditionPetPartyPopper = 1649537845,
-    LimitedEditionPetRedHeart = 1649538090,
-    LimitedEditionPetDevil = 1649538239,
-    LimitedEditionPetMoney = 1649538427,
-    MagicUpgrade = 1649537019
+    Rebirth = 1650523473,
+    LimitedEditionPetHundred = 1650534346,
+    LimitedEditionPetFire = 1650534615,
+    LimitedEditionPetPartyPopper = 1650533751,
+    LimitedEditionPetRedHeart = 1650533521,
+    LimitedEditionPetDevil = 1650534926,
+    LimitedEditionPetMoney = 1650533975,
+    MagicUpgrade = 1650533238,
+    TwentyKFollowers = 1650538357,
+    HundredKFollowers = 1650538552,
+    TwoHundredFiftyKFollowers = 1650538745,
+    OneMFollowers = 1650539381,
+    OneKCoins = 1650536557,
+    TenKCoins = 1650536791,
+    FiftyKCoins = 1650537008,
+    TwoHundredKCoins = 1650538021,
+    TwoXFollowersPotion30Min = 1650535700,
+    FiveXFollowersPotion30Min = 1650535260,
+    TwoXCoinsPotion30Min = 1650535902,
+    FiveXCoinsPotion30Min = 1650535469,
+    TenXFollowersAndCoinsPotion100Hours = 1650536241
 }
 
 
@@ -127,6 +153,59 @@ function DeveloperProductModule.BoughtDeveloperProduct(receiptInfo : receiptInfo
 
             PetsRE:FireClient(player, p.petModule.ownedPets, true)
 
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TwentyKFollowers then
+            p:SetFollowersAmount(p.followers + 20_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.HundredKFollowers then
+            p:SetFollowersAmount(p.followers + 100_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TwoHundredFiftyKFollowers then
+            p:SetFollowersAmount(p.followers + 250_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.OneMFollowers then
+            p:SetFollowersAmount(p.followers + 1_000_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.OneKCoins then
+            p:SetCoinsAmount(p.coins + 1_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TenKCoins then
+            p:SetCoinsAmount(p.coins + 10_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.FiftyKCoins then
+            p:SetCoinsAmount(p.coins + 50_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TwoHundredKCoins then
+            p:SetCoinsAmount(p.coins + 200_000)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TwoXFollowersPotion30Min then
+            p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Followers, 2, 30, p)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.FiveXFollowersPotion30Min then
+            p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Followers, 5, 30, p)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TwoXCoinsPotion30Min then
+            p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Coins, 2, 30, p)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.FiveXCoinsPotion30Min then
+            p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Coins, 5, 30, p)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TenXFollowersAndCoinsPotion100Hours then
+            p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Coins, 10, 60000, p)
+            p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Followers, 10, 60000, p)
             return Enum.ProductPurchaseDecision.PurchaseGranted
         end
 	end
