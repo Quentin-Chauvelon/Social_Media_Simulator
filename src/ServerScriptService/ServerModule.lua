@@ -241,6 +241,10 @@ function ServerModule.onJoin(plr : Player)
 		-- load the effect of the game passes the player owns
 		p.gamepassModule:LoadOwnedGamePasses(p)
 
+		if p.gamepassModule:PlayerOwnsGamePass(p.gamepassModule.gamePasses.SpaceCase) then
+			p.caseModule.ownedCases["Space"] = true
+		end
+
 		-- update the friends boost of all the player's friends that are online
 		local onlineFriends : {string} = p.friendsModule:GetOnlineFriends()
 		for _,friendName : string in pairs(onlineFriends) do

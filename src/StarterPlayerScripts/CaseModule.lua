@@ -94,6 +94,10 @@ function CaseModule.new(utility : Utility.Utility)
     local savedCases : savedCases = CaseRF:InvokeServer()
     caseModule.equippedCase = savedCases.equippedCase
 
+    if GamePassModule.PlayerOwnsGamePass(GamePassModule.gamePasses.SpaceCase) then
+        savedCases.ownedCases["Space"] = true
+    end
+
     for _,caseUIFrame : GuiObject in ipairs(casesListContainer:GetChildren()) do
         if caseUIFrame:IsA("ImageButton") then
             local caseColor : string = caseUIFrame.Color.Value
