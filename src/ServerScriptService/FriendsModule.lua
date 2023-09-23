@@ -84,7 +84,13 @@ end
     @return {string}, a table of the name of the friends that are online
 ]]--
 function FriendsModule:GetOnlineFriends() : {string}
-    local friendsPages : FriendPages = Players:GetFriendsAsync(self.plr.UserId)
+    local friendsPages : FriendPages
+    pcall(function()
+        friendsPages = Players:GetFriendsAsync(self.plr.UserId)
+    end)
+
+    -- if the player's friends couldn't not be found, return an empty table
+    if not friendsPages then return {} end
 
     local usernames = {}
     for item,_ in iterPageItems(friendsPages) do
