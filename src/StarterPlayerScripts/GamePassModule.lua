@@ -14,7 +14,7 @@ export type GamePassModule = {
     PlayerBoughtGamePass : (gamePassId : number) -> nil
 }
 
-type GamePasses = {
+export type GamePasses = {
     VIP : number,
     AutoClicker : number,
     CoinsMultiplier : number,
@@ -45,10 +45,10 @@ GamePassModule.gamePasses = {
     CoinsMultiplier = 259864413,
     FollowersMultiplier = 259864174,
     SpaceCase = 259864682,
-    OpenThreeEggs = 259864854,
-    OpenSixEggs = 259865048,
-    EquipFourMorePets = 259865245,
-    PlusHundredAndFiftyInventoryCapacity = 259865406,
+    OpenThreeEggs = 259865245,
+    OpenSixEggs = 259865406,
+    EquipFourMorePets = 259864854,
+    PlusHundredAndFiftyInventoryCapacity = 259865048,
     BasicLuck = 259865697,
     GoldenLuck = 259865957
 }

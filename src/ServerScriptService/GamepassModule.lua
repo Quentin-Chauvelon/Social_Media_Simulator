@@ -55,10 +55,10 @@ function GamepassModule.new(plr : Player)
         CoinsMultiplier = 259864413,
         FollowersMultiplier = 259864174,
         SpaceCase = 259864682,
-        Open3Eggs = 259864854,
-        Open6Eggs = 259865048,
-        EquipFourMorePets = 259865245,
-        PlusHundredAndFiftyInventoryCapacity = 259865406,
+        Open3Eggs = 259865245,
+        Open6Eggs = 259865406,
+        EquipFourMorePets = 259864854,
+        PlusHundredAndFiftyInventoryCapacity = 259865048,
         BasicLuck = 259865697,
         GoldenLuck = 259865957
     }
