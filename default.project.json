@@ -28,23 +28,9 @@
           "$ignoreUnknownInstances": true
       }
     },
-
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true
-      }
-    },
-    "Lighting": {
-      "$properties": {
-        "Ambient": [
-          0,
-          0,
-          0
-        ],
-        "Brightness": 2,
-        "GlobalShadows": true,
-        "Outlines": false,
-        "Technology": "Voxel"
       }
     },
     "SoundService": {
