@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local SocialService = game:GetService("SocialService")
 local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
@@ -53,6 +54,9 @@ local playerGui : PlayerGui = lplr.PlayerGui
 local menu : ScreenGui = playerGui:WaitForChild("Menu")
 local menuSideButtons : Frame = menu:WaitForChild("SideButtons")
 local friendsBoostButton : TextButton = menu:WaitForChild("FriendsBoost")
+local menuFollowersIcon : ImageButton = menu:WaitForChild("TabsContainer"):WaitForChild("FollowersContainer"):WaitForChild("FollowersIcon")
+local menuCoinsIcon : ImageButton = menu:WaitForChild("TabsContainer"):WaitForChild("CoinsContainer"):WaitForChild("CoinsIcon")
+
 
 local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
 local upgradePostsBackground : Frame = upgradePosts:WaitForChild("Background")
@@ -184,6 +188,43 @@ Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 end)
 
 
+for _,menuSideButton : GuiObject in ipairs(menuSideButtons:GetChildren()) do
+	if menuSideButton:IsA("ImageButton") then
+		menuSideButton.MouseEnter:Connect(function()
+
+			-- tweens to scale the button up and down on mouse enter and mouse leave
+			local mouseEnterTween : Tween = TweenService:Create(
+				menuSideButton.UIScale,
+				TweenInfo.new(
+					0.15,
+					Enum.EasingStyle.Quad,
+					Enum.EasingDirection.InOut
+				),
+				{Scale = 1.15}
+			)
+
+			local mouseLeaveTween : Tween = TweenService:Create(
+				menuSideButton.UIScale,
+				TweenInfo.new(
+					0.15,
+					Enum.EasingStyle.Quad,
+					Enum.EasingDirection.InOut
+				),
+				{Scale = 1}
+			)
+
+			menuSideButton.MouseEnter:Connect(function()
+				mouseEnterTween:Play()
+			end)
+
+			menuSideButton.MouseLeave:Connect(function()
+				mouseLeaveTween:Play()
+			end)
+		end)
+	end
+end
+
+
 --[[
 	Change the camera orientation when the character resets to face the player's phone
 
@@ -211,6 +252,20 @@ end
 
 local followerValue : NumberValue = lplr:WaitForChild("Stats"):WaitForChild("Followers")
 local coinsValue : NumberValue = lplr:WaitForChild("Stats"):WaitForChild("Coins")
+
+
+-- when player clicks on the followers or coins icon in the menu, redirect them to the shop section corresponding to the button they clicked
+menuFollowersIcon.MouseButton1Down:Connect(function()
+	shopModule:OpenGui()
+	task.wait(0.4)
+	shopModule:ScrollToSection("Followers")
+end)
+
+menuCoinsIcon.MouseButton1Down:Connect(function()
+	shopModule:OpenGui()
+	task.wait(0.4)
+	shopModule:ScrollToSection("Coins")
+end)
 
 
 --[[

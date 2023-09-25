@@ -49,6 +49,7 @@ export type ShopModule = {
     utility : Utility.Utility,
     new : (utility : Utility.Utility) -> ShopModule,
     OpenGui : (self : ShopModule) -> nil,
+    ScrollToSection : (self : ShopModule, section : string) -> nil,
     CloseGui : (self : ShopModule) -> nil,
     UpdateGamePassOwnership : (self : ShopModule, gamepassId : number) -> nil
 }
@@ -214,61 +215,31 @@ function ShopModule:OpenGui()
 
         self.shopUIMaid:GiveTask(
             shopNavigationBarContainer.LimitedTimeOffers.MouseButton1Down:Connect(function()
-                TweenService:Create(
-                    shopContent,
-                    TweenInfo.new(
-                        0.3
-                    ),
-                    {CanvasPosition = Vector2.new(0, titleScrollingPositions.LimitedTimeOffers)}
-                ):Play()
+                self:ScrollToSection("LimitedTimeOffers")
             end)
         )
 
         self.shopUIMaid:GiveTask(
             shopNavigationBarContainer.GamePasses.MouseButton1Down:Connect(function()
-                TweenService:Create(
-                    shopContent,
-                    TweenInfo.new(
-                        0.3
-                    ),
-                    {CanvasPosition = Vector2.new(0, titleScrollingPositions.GamePasses)}
-                ):Play()
+                self:ScrollToSection("GamePasses")
             end)
         )
 
         self.shopUIMaid:GiveTask(
             shopNavigationBarContainer.Followers.MouseButton1Down:Connect(function()
-                TweenService:Create(
-                    shopContent,
-                    TweenInfo.new(
-                        0.3
-                    ),
-                    {CanvasPosition = Vector2.new(0, titleScrollingPositions.Followers)}
-                ):Play()
+                self:ScrollToSection("Followers")
             end)
         )
 
         self.shopUIMaid:GiveTask(
             shopNavigationBarContainer.Coins.MouseButton1Down:Connect(function()
-                TweenService:Create(
-                    shopContent,
-                    TweenInfo.new(
-                        0.3
-                    ),
-                    {CanvasPosition = Vector2.new(0, titleScrollingPositions.Coins)}
-                ):Play()
+                self:ScrollToSection("Coins")
             end)
         )
 
         self.shopUIMaid:GiveTask(
             shopNavigationBarContainer.Potions.MouseButton1Down:Connect(function()
-                TweenService:Create(
-                    shopContent,
-                    TweenInfo.new(
-                        0.3
-                    ),
-                    {CanvasPosition = Vector2.new(0, titleScrollingPositions.Potions)}
-                ):Play()
+                self:ScrollToSection("Potions")
             end)
         )
 
@@ -530,6 +501,22 @@ function ShopModule:OpenGui()
             end)
         )
     end
+end
+
+
+--[[
+    Scrolls the shop gui to the given section
+
+    @param section : string, the section to scroll to
+]]--
+function ShopModule:ScrollToSection(section : string)
+    TweenService:Create(
+        shopContent,
+        TweenInfo.new(
+            0.3
+        ),
+        {CanvasPosition = Vector2.new(0, titleScrollingPositions[section])}
+    ):Play()
 end
 
 
