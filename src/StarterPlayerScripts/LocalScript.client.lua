@@ -70,6 +70,8 @@ local allRewardsFirstReward : Frame = allRewardsBackground:WaitForChild("Reward"
 local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward"):WaitForChild("Chest")
 local nextRewardTimer : TextLabel = playTimeRewardsUI.NextReward:WaitForChild("Timer")
 
+local magicUpgradeFloatingCircle : UnionOperation = workspace:WaitForChild("PetsUpgradesMachine"):WaitForChild("MagicMachine"):WaitForChild("FloatingCircle")
+
 local UPGRADE_POSTS_TWEEN_DURATION : number = 0.2
 
 local playTimeRewards
@@ -266,6 +268,31 @@ menuCoinsIcon.MouseButton1Down:Connect(function()
 	task.wait(0.4)
 	shopModule:ScrollToSection("Coins")
 end)
+
+
+-- rotate the magic upgrade floating circle indefinitely
+TweenService:Create(
+	magicUpgradeFloatingCircle,
+	TweenInfo.new(
+		4,
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.InOut,
+		math.huge
+	),
+	{Orientation = magicUpgradeFloatingCircle.Orientation + Vector3.new(0,360,0)}
+):Play()
+
+-- TweenService:Create(
+-- 	magicUpgradeFloatingCircle,
+-- 	TweenInfo.new(
+-- 		0.8,
+-- 		Enum.EasingStyle.Linear,
+-- 		Enum.EasingDirection.InOut,
+-- 		math.huge,
+-- 		true
+-- 	),
+-- 	{Position = magicUpgradeFloatingCircle.Position + Vector3.new(0,1,0)}
+-- ):Play()
 
 
 --[[
