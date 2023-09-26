@@ -324,7 +324,7 @@ TweenService:Create(
 		math.huge,
 		true
 	),
-	{Position = angelEggCloud - Vector3.new(0,1,0)}
+	{Position = angelEggCloud.Position - Vector3.new(0,1,0)}
 ):Play()
 
 
@@ -533,6 +533,14 @@ friendsBoostButton.MouseButton1Down:Connect(function()
 		end
 	end)
 end)
+
+
+-- remove the red upgrade posts part for all the phones except the one that is assigned to the player
+for _,plot : Model in ipairs(workspace:WaitForChild("Plots"):GetChildren()) do
+	if plot:WaitForChild("Owner").Value ~= lplr.Name then
+		plot.UpgradePosts:Destroy()
+	end
+end
 
 
 -- remove last posts if there is more than one (might happens at the start while the player is loading)
