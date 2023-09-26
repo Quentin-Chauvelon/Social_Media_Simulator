@@ -20,6 +20,26 @@ local mostPlayedLeaderboardContainer : ScrollingFrame = leaderboardsFolder:WaitF
 local timeUntilNextRefresh : NumberValue = leaderboardsFolder:WaitForChild("RefreshTime"):WaitForChild("TimeUntilNextRefresh")
 local timeUntilNextRefreshText : TextLabel = leaderboardsFolder.RefreshTime:WaitForChild("RefreshDisplay"):WaitForChild("SurfaceGui"):WaitForChild("TimeUntilNextRefresh")
 
+local dancingNPC1 : Model = workspace.Leaderboards:WaitForChild("Podium"):WaitForChild("DancingNPC1")
+local dancingNPC2 : Model = workspace.Leaderboards.Podium:WaitForChild("DancingNPC2")
+local dancingNPC3 : Model = workspace.Leaderboards.Podium:WaitForChild("DancingNPC3")
+
+local dancingAnimation : Animation = Instance.new("Animation")
+dancingAnimation.AnimationId = "rbxassetid://4049037604" -- or 507771019
+
+-- make all the NPCs dance
+for _,dancingNPC : Model in pairs({dancingNPC1, dancingNPC2, dancingNPC3}) do
+    local humanoid = dancingNPC:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		-- need to use animation object for server access
+		local animator = humanoid:FindFirstChildOfClass("Animator")
+		if animator then
+			local animationTrack = animator:LoadAnimation(dancingAnimation)
+			animationTrack:Play()
+		end
+	end
+end
+
 
 type LeaderboardEntry  = {[number] : LeaderboardEntryData}
 
@@ -136,20 +156,45 @@ function LeaderboardModule.UpdateLeaderboard(leaderboard : LeaderboardInformatio
 
         local leaderboardEntryFrameClone : Frame
         if rank <= 3 then
+            local userId : number
+            pcall(function()
+                userId = Players:GetUserIdFromNameAsync(data.username)
+            end)
+
+            -- if the user id could not be loaded, move to the next player
+            if not userId then continue end
+
             leaderboardEntryFrameClone = leaderboardTop3Entry:Clone()
 
             -- set the player's thumbnail
             pcall(function()
-                leaderboardEntryFrameClone.Thumbnail.Image = Players:GetUserThumbnailAsync(Players:GetUserIdFromNameAsync(data.username), Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size60x60)
+                leaderboardEntryFrameClone.Thumbnail.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size60x60)
             end)
 
             -- update the ui stroke color based on the rank of the player
             if rank == 1 then
                 leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(255, 215, 0)
+
+                -- update the dancing npc appearance to match the player
+                pcall(function()
+                    dancingNPC1.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                end)
+
             elseif rank == 2 then
                 leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(168, 169, 173)
+
+                -- update the dancing npc appearance to match the player
+                pcall(function()
+                    dancingNPC2.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                end)
+
             elseif rank == 3 then
                 leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(205, 127, 50)
+
+                -- update the dancing npc appearance to match the player
+                pcall(function()
+                    dancingNPC3.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                end)
             end
 
         else
