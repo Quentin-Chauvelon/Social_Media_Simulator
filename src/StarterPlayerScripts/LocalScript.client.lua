@@ -74,6 +74,8 @@ local magicUpgradeFloatingCircle : UnionOperation = workspace:WaitForChild("Pets
 local rainbowUpgradeCircle : UnionOperation = workspace:WaitForChild("PetsUpgradesMachine"):WaitForChild("RainbowMachine"):WaitForChild("Circle")
 local rainbowUpgradeColoredParts : UnionOperation = workspace:WaitForChild("PetsUpgradesMachine"):WaitForChild("RainbowMachine"):WaitForChild("Model"):WaitForChild("Colored")
 
+local angelEggCloud : Part = workspace:WaitForChild("Eggs"):WaitForChild("AngelEgg"):WaitForChild("Cloud")
+
 local UPGRADE_POSTS_TWEEN_DURATION : number = 0.2
 
 local playTimeRewards
@@ -312,6 +314,18 @@ end)()
 -- 	),
 -- 	{Position = magicUpgradeFloatingCircle.Position + Vector3.new(0,1,0)}
 -- ):Play()
+
+TweenService:Create(
+	angelEggCloud,
+	TweenInfo.new(
+		1.5,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.InOut,
+		math.huge,
+		true
+	),
+	{Position = angelEggCloud - Vector3.new(0,1,0)}
+):Play()
 
 
 --[[
