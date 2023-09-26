@@ -3,6 +3,16 @@ local Players = game:GetService("Players")
 
 local lplr : Player = Players.LocalPlayer
 
+local gamepassBillboardSurfaceGui : SurfaceGui = lplr.PlayerGui:WaitForChild("GamePassesBillboard")
+local gamepassBillboardImage : ImageLabel = gamepassBillboardSurfaceGui:WaitForChild("Container"):WaitForChild("Image")
+local gamepassBillboardTitle : TextLabel = gamepassBillboardSurfaceGui.Container:WaitForChild("Title")
+local gamepassBillboardDescription : TextLabel = gamepassBillboardSurfaceGui.Container:WaitForChild("Description")
+local gamepassBillboardBuy : TextButton = gamepassBillboardSurfaceGui.Container:WaitForChild("Buy")
+local gamepassBillboardPrice : TextLabel = gamepassBillboardBuy:WaitForChild("Price")
+local gamepassBillboardOwned : TextLabel = gamepassBillboardSurfaceGui.Container:WaitForChild("Owned")
+
+local gamepassIdBillboard : NumberValue = workspace:WaitForChild("GamePassesBillboard"):WaitForChild("GamePassId")
+
 
 export type GamePassModule = {
     gamePasses : GamePasses,
@@ -33,6 +43,16 @@ type ownedGamePass = {
     owned : boolean
 }
 
+type GamepassInformation = {
+    gamepassId : number,
+    title : string,
+    description : string,
+    image : string,
+    price : number
+}
+
+local gamepassesInformation : {[number] : GamepassInformation} = {}
+
 
 local GamePassModule : GamePassModule = {}
 GamePassModule.__index = GamePassModule
@@ -61,6 +81,32 @@ GamePassModule.ownedGamePasses = {}
 for _,gamePassId : number in pairs(GamePassModule.gamePasses) do
     GamePassModule.ownedGamePasses[gamePassId] = {loaded = false, owned = false}
 end
+
+
+-- update the gamepass billboard with the given gamepass information
+local function UpdateGamepassBillboard(gamepassInformation : GamepassInformation)
+    -- update the id of the displayed gamepass
+    gamepassIdBillboard.Value = gamepassInformation.gamepassId
+
+    gamepassBillboardTitle.Text = gamepassInformation.title
+    gamepassBillboardDescription.Text = gamepassInformation.description
+    gamepassBillboardImage.Image = "rbxassetid://" .. gamepassInformation.image
+
+    if GamePassModule.PlayerOwnsGamePass(gamepassInformation.gamepassId) then
+        gamepassBillboardBuy.Visible = false
+        gamepassBillboardOwned.Visible = true
+    else
+        gamepassBillboardOwned.Visible = false
+        gamepassBillboardBuy.Visible = true
+        gamepassBillboardPrice.Text = gamepassInformation.price
+    end
+end
+
+
+-- prompt the player to buy the gamepass when they click the buy button
+gamepassBillboardBuy.MouseButton1Down:Connect(function()
+    GamePassModule.PromptGamePassPurchase(gamepassIdBillboard.Value)
+end)
 
 
 --[[
@@ -128,6 +174,41 @@ function GamePassModule.PlayerBoughtGamePass(gamePassId : number)
     GamePassModule.ownedGamePasses[gamePassId].loaded = true
     GamePassModule.ownedGamePasses[gamePassId].owned = true
 end
+
+
+-- display all gamepasses one by one on the game pass billboard
+coroutine.wrap(function()
+    while true do
+        for _,gamepassId : number in pairs(GamePassModule.gamePasses) do
+
+            -- if the gamepass information has already been found, update the billboard
+            if gamepassesInformation[gamepassId] then
+                UpdateGamepassBillboard(gamepassesInformation[gamepassId])
+
+            -- otherwise load the information from the server
+            else
+                local gamepassInformation
+                pcall(function()
+                    gamepassInformation = MarketplaceService:GetProductInfo(gamepassId, Enum.InfoType.GamePass)
+                end)
+
+                if gamepassInformation then
+                    gamepassesInformation[gamepassId] = {
+                        gamepassId = gamepassId,
+                        title = gamepassInformation.Name,
+                        description = gamepassInformation.Description,
+                        image = gamepassInformation.IconImageAssetId,
+                        price = gamepassInformation.PriceInRobux,
+                    }
+
+                    UpdateGamepassBillboard(gamepassesInformation[gamepassId])
+                end
+            end
+
+            task.wait(8)
+        end
+    end
+end)()
 
 
 return GamePassModule
