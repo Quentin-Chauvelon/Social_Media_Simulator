@@ -71,6 +71,8 @@ local nextRewardChest : ImageButton = playTimeRewardsUI:WaitForChild("NextReward
 local nextRewardTimer : TextLabel = playTimeRewardsUI.NextReward:WaitForChild("Timer")
 
 local magicUpgradeFloatingCircle : UnionOperation = workspace:WaitForChild("PetsUpgradesMachine"):WaitForChild("MagicMachine"):WaitForChild("FloatingCircle")
+local rainbowUpgradeCircle : UnionOperation = workspace:WaitForChild("PetsUpgradesMachine"):WaitForChild("RainbowMachine"):WaitForChild("Circle")
+local rainbowUpgradeColoredParts : UnionOperation = workspace:WaitForChild("PetsUpgradesMachine"):WaitForChild("RainbowMachine"):WaitForChild("Model"):WaitForChild("Colored")
 
 local UPGRADE_POSTS_TWEEN_DURATION : number = 0.2
 
@@ -281,6 +283,23 @@ TweenService:Create(
 	),
 	{Orientation = magicUpgradeFloatingCircle.Orientation + Vector3.new(0,360,0)}
 ):Play()
+
+
+-- rainbow circle
+coroutine.wrap(function()
+	while true do
+		for i=0,1,0.01 do
+			rainbowUpgradeCircle.Color = Color3.fromHSV(i,0.67,1)
+			rainbowUpgradeColoredParts.Color = Color3.fromHSV(i,0.67,1)
+
+			for _=1,10 do
+				RunService.Heartbeat:Wait()
+			end
+		end
+
+		task.wait(1)
+	end
+end)()
 
 -- TweenService:Create(
 -- 	magicUpgradeFloatingCircle,
