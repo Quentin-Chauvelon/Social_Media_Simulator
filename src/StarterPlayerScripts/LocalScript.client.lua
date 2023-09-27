@@ -21,6 +21,7 @@ local BoughtGamePassRE : RemoteEvent = ReplicatedStorage:WaitForChild("BoughtGam
 local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 local UpdateFriendsBoostRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFriendsBoost")
+local GroupChestRewardRE : RemoteEvent = ReplicatedStorage:WaitForChild("GroupChestReward")
 
 local lplr = Players.LocalPlayer
 
@@ -44,6 +45,7 @@ local PotionModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Po
 local PetModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("PetModule"))
 local LimitedEditionPetsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("LimitedEditionPetsModule"))
 local ShopModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("ShopModule"))
+local GroupModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GroupModule"))
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 
 
@@ -102,6 +104,8 @@ local petModule : PetModule.PetModule = PetModule.new(Utility)
 LimitedEditionPetsModule.new(Utility)
 
 local shopModule : ShopModule.ShopModule = ShopModule.new(Utility)
+
+local groupModule : GroupModule.GroupModule = GroupModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
@@ -728,6 +732,14 @@ end)
 ]]--
 UpdateFriendsBoostRE.OnClientEvent:Connect(function(numberOfFriendsOnline : number)
 	friendsBoostButton.Text = string.format("Friends boost: %.f%%", (0.2 * numberOfFriendsOnline * 100))
+end)
+
+
+--[[
+	Fired when the player collects the group reward chest to display the ui
+]]--
+GroupChestRewardRE.OnClientEvent:Connect(function()
+    groupModule:CollectReward()
 end)
 
 

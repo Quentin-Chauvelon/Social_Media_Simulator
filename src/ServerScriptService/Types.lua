@@ -14,6 +14,8 @@ export type PlayerModule = {
 	caseModule : CaseModule,
 	potionModule : PotionModule,
 	petModule : PetModule,
+    friendsModule : FriendsModule,
+	groupModule : GroupModule,
 	gamepassModule : GamepassModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -331,6 +333,32 @@ type pet = {
     baseBoost : number,
     activeBoost : number,
     equipped : boolean
+}
+
+
+export type FriendsModule = {
+    numberOfFriendsOnline : number,
+    followersMultiplier : number,
+    coinsMultiplier : number,
+    plr : Player,
+    new : (plr : Player) -> FriendsModule,
+    FriendJoined : (self : FriendsModule) -> nil,
+    FriendLeft : (self : FriendsModule) -> nil,
+    GetOnlineFriends : (self : FriendsModule) -> {string},
+    OnLeave : (self : FriendsModule) -> nil
+}
+
+
+export type GroupModule = {
+    hasCollectedRewardChest : boolean,
+    isInGroupLoaded : boolean,
+    isInGroup : boolean,
+    plr : Player,
+    new : (p : PlayerModule) -> GroupModule,
+    CanCollectRewardChest : (self : GroupModule) -> boolean,
+    CollectRewardChest : (self : GroupModule, p : PlayerModule) -> nil,
+    IsInGroup : (self : GroupModule) -> boolean,
+    OnLeave : (self : GroupModule) -> nil
 }
 
 return nil

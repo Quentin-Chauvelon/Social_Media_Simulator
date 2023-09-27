@@ -12,6 +12,7 @@ local CaseModule = require(ServerScriptService:WaitForChild("CaseModule"))
 local PotionModule = require(ServerScriptService:WaitForChild("PotionModule"))
 local PetModule = require(ServerScriptService:WaitForChild("PetModule"))
 local FriendsModule = require(ServerScriptService:WaitForChild("FriendsModule"))
+local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -37,6 +38,7 @@ export type PlayerModule = {
 	potionModule : PotionModule.PotionModule,
 	petModule : PetModule.PetModule,
 	friendsModule : FriendsModule.FriendsModule,
+	groupModule : GroupModule.GroupModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -290,6 +292,8 @@ function Player:OnLeave()
 	self.petModule:OnLeave()
 
 	self.friendsModule:OnLeave()
+
+	self.groupModule:OnLeave()
 
 	-- clean all the connections
 	self.maid:DoCleaning()

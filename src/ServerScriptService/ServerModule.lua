@@ -9,6 +9,7 @@ local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local DeveloperProductModule = require(ServerScriptService:WaitForChild("DeveloperProductModule"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local LeaderboardModule = require(ServerScriptService:WaitForChild("LeaderboardModule"))
+local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
@@ -107,6 +108,7 @@ end)
 ]]--
 function ServerModule.onJoin(plr : Player)
 	local p : Player.PlayerModule = Player.new(plr)
+	p.groupModule = GroupModule.new(p)
 	
 	-- save the player module on the server module
 	players[plr.Name] = p
