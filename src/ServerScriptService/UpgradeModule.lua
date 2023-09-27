@@ -13,7 +13,7 @@ local defaultUpgrades : {upgrade} = {
         id = 1,
         level = 1,
         maxLevel = 10,
-        baseValue = 16,
+        baseValue = 20,
         upgradeValues = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18},
         costs = {10, 25, 50, 200, 1_000, 3_000, 10_000, 25_000, 50_000, 100_000}
     },
@@ -169,8 +169,8 @@ function UpgradeModule:Upgrade(p : Types.PlayerModule, id : number) : {upgrade} 
     if upgrade then
         if self:CanUpgrade(upgrade, id) then
             
-            if p:HasEnoughCoins(upgrade.costs[upgrade.level + 1]) then
-                p:UpdateCoinsAmount(-upgrade.costs[upgrade.level + 1])
+            if p:HasEnoughFollowers(upgrade.costs[upgrade.level + 1]) then
+                p:UpdateFollowersAmount(-upgrade.costs[upgrade.level + 1])
 
                 self.upgrades[id].level += 1
                 DataStore2("upgrades", p.player):Set(self.upgrades)
