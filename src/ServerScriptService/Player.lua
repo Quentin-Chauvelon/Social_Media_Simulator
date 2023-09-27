@@ -117,7 +117,7 @@ function Player.new(plr : Player)
 
 	-- create the followers and coins number values
 	local statsFolder = Instance.new("Folder")
-	statsFolder.Name = "Stats"
+	statsFolder.Name = "leaderstats"
 	statsFolder.Parent = plr
 
 	local followerValue : NumberValue = Instance.new("NumberValue")

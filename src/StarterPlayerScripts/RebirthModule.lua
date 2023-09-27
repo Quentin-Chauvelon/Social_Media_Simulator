@@ -158,7 +158,7 @@ RebirthModule.__index = RebirthModule
 function RebirthModule.new(utility : Utility.Utility)
     local rebirthModule : RebirthModule = {}
 
-    rebirthModule.level = lplr:WaitForChild("Stats"):WaitForChild("Rebirth").Value
+    rebirthModule.level = lplr:WaitForChild("leaderstats"):WaitForChild("Rebirth").Value
     rebirthModule.utility = utility
     rebirthModule.followersNeededToRebirth = 0
     
@@ -202,7 +202,7 @@ function RebirthModule.new(utility : Utility.Utility)
     
     -- fire the client when the player clicks the button to rebirth
     rebirthButton.MouseButton1Down:Connect(function()
-        if lplr.Stats.Followers.Value >= rebirthModule.followersNeededToRebirth then
+        if lplr.leaderstats.Followers.Value >= rebirthModule.followersNeededToRebirth then
             -- fire the server to rebirth
             RebirthRE:FireServer()
         end
@@ -222,7 +222,7 @@ end
 	Updates the amount of followers needed to rebirth based on the rebirth level of the player
 ]]--
 function RebirthModule:UpdateFollowersNeededToRebirth()
-    local nextRebirthLevel : number = lplr:WaitForChild("Stats"):WaitForChild("Rebirth").Value + 1
+    local nextRebirthLevel : number = lplr:WaitForChild("leaderstats"):WaitForChild("Rebirth").Value + 1
 
     -- if the player's rebirth level is less than 100, take the value from the table, otherwise use the formula to calculate the amount needed
     if followersNeededToRebirth[nextRebirthLevel] then
@@ -259,15 +259,15 @@ end
 function RebirthModule:UpdateGui()
     self.updateGuiPromise = Promise.new(function(resolve)
         -- update the followers upgrade boost values
-        followersUpgradeOldText.Text = tostring(lplr.Stats.Rebirth.Value * 10) .. "%"
-        followersUpgradeNewText.Text = tostring((lplr.Stats.Rebirth.Value + 1) * 10) .. "%"
+        followersUpgradeOldText.Text = tostring(lplr.leaderstats.Rebirth.Value * 10) .. "%"
+        followersUpgradeNewText.Text = tostring((lplr.leaderstats.Rebirth.Value + 1) * 10) .. "%"
 
         -- update the coins upgrade boost values
-        coinsUpgradeOldText.Text = string.format("%.2f", tostring(0.05 + (lplr.Stats.Rebirth.Value / 100))) .. "%"
-        coinsUpgradeNewText.Text = string.format("%.2f", tostring(0.05 + ((lplr.Stats.Rebirth.Value + 1) / 100))) .. "%"
+        coinsUpgradeOldText.Text = string.format("%.2f", tostring(0.05 + (lplr.leaderstats.Rebirth.Value / 100))) .. "%"
+        coinsUpgradeNewText.Text = string.format("%.2f", tostring(0.05 + ((lplr.leaderstats.Rebirth.Value + 1) / 100))) .. "%"
 
         while rebirthsBackground.Visible do
-            local followersValue : number = lplr.Stats.Followers.Value
+            local followersValue : number = lplr.leaderstats.Followers.Value
 
             -- change the button color based on if the player has enough followers to rebirth
             if followersValue >= self.followersNeededToRebirth then
@@ -285,7 +285,7 @@ function RebirthModule:UpdateGui()
             end
 
             -- change the amount of followers text
-            followersResetText.Text = lplr.Stats.Followers.Value
+            followersResetText.Text = lplr.leaderstats.Followers.Value
 
             -- change the progress bar text and fullness
             progressBar.Size = UDim2.new(math.min(followersValue / self.followersNeededToRebirth, 1), 0, 1, 0)

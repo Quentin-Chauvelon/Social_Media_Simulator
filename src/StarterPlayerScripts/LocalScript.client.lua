@@ -260,8 +260,8 @@ if lplr.Character then
 end
 
 
-local followerValue : NumberValue = lplr:WaitForChild("Stats"):WaitForChild("Followers")
-local coinsValue : NumberValue = lplr:WaitForChild("Stats"):WaitForChild("Coins")
+local followerValue : NumberValue = lplr:WaitForChild("leaderstats"):WaitForChild("Followers")
+local coinsValue : NumberValue = lplr:WaitForChild("leaderstats"):WaitForChild("Coins")
 
 
 -- when player clicks on the followers or coins icon in the menu, redirect them to the shop section corresponding to the button they clicked

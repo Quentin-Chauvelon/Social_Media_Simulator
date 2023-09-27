@@ -166,7 +166,7 @@ function RebirthModule:Rebirth(plr : Player) : boolean
     -- save the new rebirth level for the player
     DataStore2("rebirth", plr):Increment(1)
 
-    plr.Stats.Rebirth.Value += 1
+    plr.leaderstats.Rebirth.Value += 1
 
     -- update the rebirth followers multiplier
     self.followersMultiplier = self.rebirthLevel / 10
