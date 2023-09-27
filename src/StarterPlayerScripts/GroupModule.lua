@@ -15,6 +15,7 @@ local groupChestCloseButton : ImageButton = groupChestBackground:WaitForChild("C
 local groupChestDescription : TextLabel = groupChestBackground:WaitForChild("Description")
 
 local groupChestTouchDetector : Part = workspace:WaitForChild("GroupChest"):WaitForChild("TouchDetector")
+local groupChestBillboardGuiTitle : TextLabel = workspace.GroupChest:WaitForChild("Chest"):WaitForChild("BillboardGui"):WaitForChild("TextLabel")
 
 local FLOAT_GAMES_GROUP_ID : number = 33137062
 
@@ -66,6 +67,21 @@ function GroupModule.new(utility : Utility.Utility)
             end
         end
     end)
+
+
+    -- rainbow color cycle effect on the group chest billboard gui title
+    coroutine.wrap(function()
+        while true do
+            for i=0,1,0.01 do
+                groupChestBillboardGuiTitle.TextColor3 = Color3.fromHSV(i,0.67,1)
+
+                for _=1,10 do
+                    RunService.Heartbeat:Wait()
+                end
+            end
+        end
+    end)()
+
 
     -- load the value to know if the player is in a group
     groupModule:IsInGroup()
@@ -127,7 +143,7 @@ function GroupModule:OpenGui()
                 while groupChestBackground.Visible do
                     for i=0,1,0.01 do
                         groupChestDescription.TextColor3 = Color3.fromHSV(i,0.67,1)
-            
+
                         for _=1,10 do
                             RunService.Heartbeat:Wait()
                         end

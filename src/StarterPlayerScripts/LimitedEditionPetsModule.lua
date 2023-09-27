@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -18,6 +19,7 @@ local offersContainer : ScrollingFrame = limitedEditionPetsBackground:WaitForChi
 
 
 local touchDetector : Part = workspace:WaitForChild("LimitedEditionPets"):WaitForChild("TouchDetector")
+local limitedEditionPetsBillboardGuiTitle : TextLabel = workspace.LimitedEditionPets.TouchDetector:WaitForChild("BillboardGui"):WaitForChild("TextLabel")
 
 local OFFER_END_TIME = os.time({year = 2023, month = 11, day = 30, hour = 23, min = 59, sec = 59})
 
@@ -72,6 +74,19 @@ function LimitedEditionPetsModule.new(utility : Utility.Utility)
             uiStroke.Thickness = thickness
         end
     end)
+
+    -- rainbow color cycle effect on the group chest billboard gui title
+    coroutine.wrap(function()
+        while true do
+            for i=0,1,0.01 do
+                limitedEditionPetsBillboardGuiTitle.TextColor3 = Color3.fromHSV(i,0.67,1)
+
+                for _=1,10 do
+                    RunService.Heartbeat:Wait()
+                end
+            end
+        end
+    end)()
 
     return limitedEditionPetsBackground
 end
