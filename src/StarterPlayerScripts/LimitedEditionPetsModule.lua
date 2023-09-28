@@ -49,14 +49,22 @@ function LimitedEditionPetsModule.new(utility : Utility.Utility)
 
 
     -- open the gui on part touched
-    touchDetector.Touched:Connect(function()
-        limitedEditionPetsModule:OpenGui()
+    touchDetector.Touched:Connect(function(hit : BasePart)
+        if hit.Parent and hit.Name == "HumanoidRootPart" then
+            if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                limitedEditionPetsModule:OpenGui()
+            end
+        end
     end)
 
 
     -- close the gui on part touch ended
-    touchDetector.TouchEnded:Connect(function()
-        limitedEditionPetsModule:CloseGui()
+    touchDetector.TouchEnded:Connect(function(hit : BasePart)
+        if hit.Parent and hit.Name == "HumanoidRootPart" then
+            if Players:GetPlayerFromCharacter(hit.Parent) == lplr then
+                limitedEditionPetsModule:CloseGui()
+            end
+        end
     end)
 
 
