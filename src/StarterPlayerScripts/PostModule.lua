@@ -111,7 +111,7 @@ local function UpdatePostContent(post : Frame, screen : Frame, plr : Player, mes
 
 	if post:GetAttribute("Start") then
 		-- move the player display name textLabel based on the length of the player's display name
-		post.DisplayName.Position = UDim2.new(1, post.Guild.Position.X.Offset - TextService:GetTextSize(post.Guild.Text, 50, Enum.Font.FredokaOne, Vector2.new(650, 50)).X - 15, 0, 13)
+		-- post.DisplayName.Position = UDim2.new(1, post.Guild.Position.X.Offset - TextService:GetTextSize(post.Guild.Text, 50, Enum.Font.FredokaOne, Vector2.new(650, 50)).X - 15, 0, 13)
 	else
 		-- move the guild textLabel based on the length of player's display name
 		post.Guild.Position = UDim2.new(0, post.DisplayName.Position.X.Offset + TextService:GetTextSize(post.DisplayName.Text, 55, Enum.Font.FredokaOne, Vector2.new(650, 55)).X + 15, 0, 13)
