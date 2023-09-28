@@ -19,7 +19,19 @@ local defaultPostStats = {
 
 
 local react = {
-	"http://www.roblox.com/asset/?id=12576610566"
+	"http://www.roblox.com/asset/?id=14903935253",
+	"http://www.roblox.com/asset/?id=14904048436",
+	"http://www.roblox.com/asset/?id=14904049332",
+	"http://www.roblox.com/asset/?id=14904050234",
+	"http://www.roblox.com/asset/?id=14904051238",
+	"http://www.roblox.com/asset/?id=14904052428",
+	"http://www.roblox.com/asset/?id=14904053317",
+	"http://www.roblox.com/asset/?id=14904054232",
+	"http://www.roblox.com/asset/?id=14904055361",
+	"http://www.roblox.com/asset/?id=14904056263",
+	"http://www.roblox.com/asset/?id=14904057761",
+	"http://www.roblox.com/asset/?id=14904058658",
+	"http://www.roblox.com/asset/?id=14904059485"
 }
 local numberOfReact : number = #react
 
