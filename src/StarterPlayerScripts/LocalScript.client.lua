@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local GuiService = game:GetService("GuiService")
 local TweenService = game:GetService("TweenService")
 local SocialService = game:GetService("SocialService")
 local TextChatService = game:GetService("TextChatService")
@@ -163,7 +164,7 @@ Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 
 	-- resize the all rewards uigridlayout cell padding (to evenly space out all the rewards)
 	allRewardsUiGridLayout.CellPadding = UDim2.new(
-		UDim.new(0, (allRewardsBackground.AbsoluteSize.X - (allRewardsFirstReward.AbsoluteSize.X * 4)) / 5),
+		UDim.new(0.03,0),
 		UDim.new(0, (allRewardsBackground.AbsoluteSize.Y - (allRewardsFirstReward.AbsoluteSize.Y * 3)) / 4)
 	)
 
@@ -183,7 +184,10 @@ Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
 end)
 
 
-
+-- move the side buttons up if the player is using a mobile device, otherwise the shop button is too close to the joystick and it can be misclicked easily
+if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and not UserInputService.MouseEnabled and not UserInputService.GamepadEnabled and not GuiService:IsTenFootInterface() then
+	menuSideButtons.AnchorPoint = Vector2.new(0,0.75)
+end
 
 -- resize the menu side buttons UI stroke
 Utility.ResizeUIOnWindowResize(function(viewportSize : Vector2)
