@@ -168,13 +168,13 @@ end
     Closes the gui
 ]]--
 function GroupModule:CloseGui()
-    -- disconnect the close gui connection
-    if self.closeGuiConnection then
-        self.closeGuiConnection:Disconnect()
-        self.closeGuiConnection = nil
-    end
-
     if groupChestBackground.Visible then
+        -- disconnect the close gui connection
+        if self.closeGuiConnection then
+            self.closeGuiConnection:Disconnect()
+            self.closeGuiConnection = nil
+        end
+
         local upgradesOriginalSize : UDim2 = groupChestBackground.Size
 
         self.utility.BlurBackground(false)
