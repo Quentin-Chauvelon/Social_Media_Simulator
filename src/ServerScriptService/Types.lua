@@ -1,5 +1,7 @@
 export type PlayerModule = {
 	player : Player,
+    isLoaded : boolean,
+    isPremium : boolean,
 	followers : number,
 	nextFollowerGoal : number,
 	coins : number,

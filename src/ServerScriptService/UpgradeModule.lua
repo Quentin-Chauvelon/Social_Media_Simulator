@@ -118,7 +118,7 @@ end
 function UpgradeModule:ApplyUpgrade(p : Types.PlayerModule, upgrade : upgrade)
     if upgrade.id == 1 then
         if p.player.Character then
-            p.player.Character.Humanoid.WalkSpeed = upgrade.baseValue + upgrade.upgradeValues[upgrade.level]
+            p.player.Character.Humanoid.WalkSpeed = upgrade.baseValue + upgrade.upgradeValues[upgrade.level] + (p.isPremium and 4 or 0)
         end
 
     elseif upgrade.id == 2 then

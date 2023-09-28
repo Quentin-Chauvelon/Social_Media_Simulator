@@ -22,6 +22,7 @@ DataStore2.Combine("SMS", "followers", "coins")
 export type PlayerModule = {
 	player : Player,
 	isLoaded : boolean,
+	isPremium : boolean,
 	followers : number,
 	nextFollowerGoal : number,
 	coins : number,
@@ -69,6 +70,7 @@ function Player.new(plr : Player)
 
 	p.player = plr
 	p.isLoaded = false
+	p.isPremium = plr.MembershipType == Enum.MembershipType.Premium
 
 	--DataStore2("followers", plr):Set(nil)
 	--DataStore2("coins", plr):Set(nil)
