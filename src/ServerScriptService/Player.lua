@@ -200,6 +200,8 @@ function Player:UpdateFollowersAmount(amount : number)
 
 	self.followers += increment
 	DataStore2("followers", self.player):Increment(increment, self.followers)
+
+	self.player.leaderstats.Followers.Value = self.followers
 end
 
 
@@ -235,6 +237,8 @@ function Player:UpdateCoinsAmount(amount : number)
 
 	self.coins += increment
 	DataStore2("coins", self.player):Increment(increment, self.coins)
+
+	self.player.leaderstats.Coins.Value = self.coins
 end
 
 
