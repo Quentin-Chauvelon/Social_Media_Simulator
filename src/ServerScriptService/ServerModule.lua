@@ -171,9 +171,15 @@ function ServerModule.onJoin(plr : Player)
 					-- create the attachments, turn them and loads the pets
 					p.petModule:CreatePetAttachments()
 					p.petModule:RotateAttachmentsTowardsPlayer(p.plotModule.phone.PrimaryPart.Position)
+					p.petModule.currentlyEquippedPets = 0
 					p.petModule:LoadEquippedPets()
 				end
 			end)
+
+			local p : Player.PlayerModule = players[plr.Name]
+			if p then
+				p.upgradeModule:ApplyUpgrade(p, p.upgradeModule.upgrades[1])
+			end
 		end)
 	)
 
