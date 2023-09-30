@@ -247,13 +247,6 @@ end
     Closes the upgrades gui
 ]]--
 function UpgradeModule:CloseUpgradesGui()
-    self.closeButtonConnection:Disconnect()
-
-    for _,upgradeButtonConnection : RBXScriptConnection in pairs(self.upgradeButtonConnections) do
-        upgradeButtonConnection:Disconnect()
-    end
-    table.clear(self.upgradeButtonConnections)
-
     self.utility.BlurBackground(false)
 
     if upgradesBackground.Visible then
@@ -268,6 +261,13 @@ function UpgradeModule:CloseUpgradesGui()
             function()
                 upgradesBackground.Visible = false
                 upgradesBackground.Size = upgradesOriginalSize
+                
+                self.closeButtonConnection:Disconnect()
+
+                for _,upgradeButtonConnection : RBXScriptConnection in pairs(self.upgradeButtonConnections) do
+                    upgradeButtonConnection:Disconnect()
+                end
+                table.clear(self.upgradeButtonConnections)
             end
         )
     end

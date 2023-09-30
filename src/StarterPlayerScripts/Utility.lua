@@ -320,12 +320,6 @@ end
     @param duration : number?, the duration of the tween or nil (default: 0.2)
 ]]
 function Utility.CloseGui(ui : GuiObject, duration : number?)
-
-    -- disconnect the close gui connection
-    if Utility.closeGuiConnection then
-        Utility.closeGuiConnection:Disconnect()
-        Utility.closeGuiConnection = nil
-    end
     
     if ui.Visible then
         local upgradesOriginalSize : UDim2 = ui.Size
@@ -341,6 +335,12 @@ function Utility.CloseGui(ui : GuiObject, duration : number?)
             function()
                 ui.Visible = false
                 ui.Size = upgradesOriginalSize
+                
+                -- disconnect the close gui connection
+                if Utility.closeGuiConnection then
+                    Utility.closeGuiConnection:Disconnect()
+                    Utility.closeGuiConnection = nil
+                end
             end
         )
     end
