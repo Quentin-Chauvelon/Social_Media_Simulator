@@ -21,7 +21,7 @@ local offersContainer : ScrollingFrame = limitedEditionPetsBackground:WaitForChi
 local touchDetector : Part = workspace:WaitForChild("LimitedEditionPets"):WaitForChild("TouchDetector")
 local limitedEditionPetsBillboardGuiTitle : TextLabel = workspace.LimitedEditionPets.TouchDetector:WaitForChild("BillboardGui"):WaitForChild("TextLabel")
 
-local OFFER_END_TIME = os.time({year = 2023, month = 11, day = 30, hour = 23, min = 59, sec = 59})
+local OFFER_END_TIME = os.time({year = 2023, month = 11, day = 7, hour = 23, min = 59, sec = 59})
 
 
 export type LimitedEditionPetsModule = {
@@ -184,7 +184,7 @@ function LimitedEditionPetsModule:StartTimer()
 
         while limitedEditionPetsBackground.Visible do
             local timeLeft : number = os.difftime(OFFER_END_TIME, os.time())
-            limitedEditionTimeLeft.Text = string.format("%0.2id %0.2ih %0.2im %0.2is", timeLeft / 86400, (timeLeft / 3600) % 60, (timeLeft / 60) % 60, timeLeft % 60)
+            limitedEditionTimeLeft.Text = string.format("%0.2id %0.2ih %0.2im %0.2is", timeLeft / 86400, (timeLeft / 3600) % 24, (timeLeft / 60) % 60, timeLeft % 60)
 
             task.wait(1)
         end

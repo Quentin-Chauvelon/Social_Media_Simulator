@@ -71,19 +71,19 @@ type LimitedTimeOffer = {
 -- end dates for the limited time offers
 local limitedTimeOffers : {[LimitedTimeOffers] : LimitedTimeOffer} = {
     tenXFollowersAndCoinsPotion100Hours1 = {
-        endDate = os.time({year = 2023, month = 10, day = 31, hour = 23, min = 59, sec = 59}),
+        endDate = os.time({year = 2023, month = 11, day = 31, hour = 23, min = 59, sec = 59}),
         dateTextLabel = shopContent.PotionLimitedTimeOfferContainer.TimeLeft
     },
     tenXFollowersAndCoinsPotion100Hours2 = {
-        endDate = os.time({year = 2023, month = 10, day = 31, hour = 23, min = 59, sec = 59}),
+        endDate = os.time({year = 2023, month = 11, day = 31, hour = 23, min = 59, sec = 59}),
         dateTextLabel = shopContent.Potions3.TimeLeft
     },
     spaceCase = {
-        endDate = os.time({year = 2023, month = 10, day = 10, hour = 23, min = 59, sec = 59}),
+        endDate = os.time({year = 2023, month = 11, day = 7, hour = 23, min = 59, sec = 59}),
         dateTextLabel = shopContent.GamePassesLimitedOffersContainer.SpaceCaseLimitedTimeOfferContainer.TimeLeft
     },
     autoClicker = {
-        endDate = os.time({year = 2023, month = 10, day = 10, hour = 23, min = 59, sec = 59}),
+        endDate = os.time({year = 2023, month = 11, day = 7, hour = 23, min = 59, sec = 59}),
         dateTextLabel = shopContent.GamePassesLimitedOffersContainer.AutoClickerLimitedTimeOfferContainer.TimeLeft
     }
 }
@@ -480,7 +480,7 @@ function ShopModule:OpenGui()
                     -- update the time left text for all the limited time offers
                     for _,limitedTimeOffer : LimitedTimeOffer in pairs(limitedTimeOffers) do
                         local timeLeft : number = os.difftime(limitedTimeOffer.endDate, os.time())
-                        limitedTimeOffer.dateTextLabel.Text = string.format("%0.2id %0.2ih %0.2im %0.2is", timeLeft / 86400, (timeLeft / 3600) % 60, (timeLeft / 60) % 60, timeLeft % 60)
+                        limitedTimeOffer.dateTextLabel.Text = string.format("%0.2id %0.2ih %0.2im %0.2is", timeLeft / 86400, (timeLeft / 3600) % 24, (timeLeft / 60) % 60, timeLeft % 60)
                     end
                     
                     task.wait(1)
