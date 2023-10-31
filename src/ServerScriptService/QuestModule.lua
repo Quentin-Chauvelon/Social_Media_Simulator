@@ -130,7 +130,6 @@ function QuestModule.new(p : Types.PlayerModule)
 
     -- DataStore2("quests", p.player):Set(nil)
     questModule.quests = DataStore2("quests", p.player):Get({})
-    print(questModule.quests)
     questModule.questStreak = DataStore2("questsStreak", p.player):Get(defautQuestStreak)
 
     questModule.averageFollowersPerSecond = 2.248 / (p.postModule.autoPostInterval / 1000) * p.followersMultiplier
@@ -321,7 +320,7 @@ function QuestModule:CreateQuest(p : Types.PlayerModule) : Quest
             end
         end
 
-        if maxed then
+        if maxed and quest.status == QuestStatus.Pending then
             self:CompleteQuest(p, quest.id)
         end
     end
@@ -581,12 +580,14 @@ function QuestModule:CompleteQuest(p : Types.PlayerModule, id : number)
     local position : number = self:GetPositionOfQuestWithId(id)
     if position == -1 then return end
 
-    self.quests[position].status = QuestStatus.Completed
-    self.quests[position].progress = self.quests[position].target -- set the progress value to target in case it passed it when completing
+    if self.quests[position].status == QuestStatus.Pending then
+        self.quests[position].status = QuestStatus.Completed
+        self.quests[position].progress = self.quests[position].target -- set the progress value to target in case it passed it when completing
 
-    self:SaveQuests(p.player)
+        self:SaveQuests(p.player)
 
-    UpdateQuestProgressRE:FireClient(self.plr, self.quests[position].id, self.quests[position].progress)
+        UpdateQuestProgressRE:FireClient(self.plr, self.quests[position].id, self.quests[position].progress)
+    end
 end
 
 
