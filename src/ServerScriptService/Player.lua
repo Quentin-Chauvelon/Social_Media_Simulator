@@ -13,10 +13,11 @@ local PotionModule = require(ServerScriptService:WaitForChild("PotionModule"))
 local PetModule = require(ServerScriptService:WaitForChild("PetModule"))
 local FriendsModule = require(ServerScriptService:WaitForChild("FriendsModule"))
 local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
+local QuestModule = require(ServerScriptService:WaitForChild("QuestModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
-DataStore2.Combine("SMS", "followers", "coins")
+DataStore2.Combine("SMS", "followers", "coins", "lastPlayed")
 
 
 export type PlayerModule = {
@@ -28,7 +29,11 @@ export type PlayerModule = {
 	coins : number,
 	followersMultiplier : number,
 	coinsMultiplier : number,
+	lastPlayed : number,
+	alreadyPlayedToday : boolean,
 	totalTimePlayed : number,
+	getXFollowersQuest : (followers : number) -> nil | nil,
+	getXCoinsQuest : (coins : number) -> nil | nil,
 	plotModule : PlotModule.PlotModule,
 	postModule : PostModule.PostModule,
 	upgradeModule : UpgradeModule.UpgradeModule,
@@ -40,6 +45,7 @@ export type PlayerModule = {
 	petModule : PetModule.PetModule,
 	friendsModule : FriendsModule.FriendsModule,
 	groupModule : GroupModule.GroupModule,
+	questModule : QuestModule.QuestModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -88,7 +94,18 @@ function Player.new(plr : Player)
 	p.followersMultiplier = 1
 	p.coinsMultiplier = 1
 
+	p.lastPlayed = os.time()
+	if os.date("%j") == os.date("%j", p.lastPlayed) then
+		p.alreadyPlayedToday = true
+	else
+		p.alreadyPlayedToday = false
+	end
+	DataStore2("lastPlayed", p.player):Set(p.lastPlayed)
+
 	p.totalTimePlayed = DataStore2("totalTimePlayed", p.player):Get(0)
+
+	p.getXFollowersQuest = nil
+	p.getXCoinsQuest = nil
 
 	p.plotModule = PlotModule.new()
 
@@ -198,6 +215,11 @@ end
 function Player:UpdateFollowersAmount(amount : number)
 	local increment : number = if amount <= 0 then amount else math.round(amount * self.followersMultiplier)
 
+	-- update get X followers quest
+	if increment > 0 and self.getXFollowersQuest then
+		self.getXFollowersQuest(increment)
+	end
+
 	self.followers += increment
 	DataStore2("followers", self.player):Increment(increment, self.followers)
 
@@ -236,6 +258,12 @@ function Player:UpdateCoinsAmount(amount : number)
 	local increment : number = if amount <= 0 then amount else math.round(amount * self.coinsMultiplier)
 
 	self.coins += increment
+
+	-- update get X coins quest
+	if increment > 0 and self.getXCoinsQuest then
+		self.getXCoinsQuest(increment)
+	end
+
 	DataStore2("coins", self.player):Increment(increment, self.coins)
 
 	self.player.leaderstats.Coins.Value = self.coins
@@ -276,6 +304,10 @@ end
 ]]--
 function Player:OnLeave()
 
+	-- save the lastplayed value of on leave in case the player started playing yesterday but kept playing until today
+	self.lastPlayed = os.time()
+	DataStore2("lastPlayed", self.player):Set(self.lastPlayed)
+
 	-- remove the plot for the player
 	self.plotModule:OnLeave()
 
@@ -300,6 +332,8 @@ function Player:OnLeave()
 	self.friendsModule:OnLeave()
 
 	self.groupModule:OnLeave()
+
+	self.questModule:OnLeave()
 
 	-- clean all the connections
 	self.maid:DoCleaning()

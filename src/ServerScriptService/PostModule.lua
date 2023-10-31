@@ -116,6 +116,7 @@ export type PostModule = {
 	numberOfDialogs : number,
 	numberOfReplies : number,
 	autoClickerPromise : Promise.Promise,
+	postXTimesQuest : () -> nil | nil,
 	new : (plr : Player) -> PostModule,
 	GenerateDialog : (self : PostModule, p : Types.PlayerModule, tableToUse : string) -> nil,
     Post : (self : PostModule, p : Types.PlayerModule) -> nil,
@@ -161,12 +162,15 @@ function PostModule.new(plr : Player)
 		function () return "If at first you don't succeed, try again." end,
 		function () return "Never forget that someone cares for you." end,
 		function () return "Bonjour" end,
+		function () return "Hola" end,
+		function () return "Tip: You can create your own posts" end,
+		function () return "Tip: Tap the screen to post faster" end,
 		function () return "Do you all like pizzas?" end,
 		function () return "My favourite food is pasta." end,
 		function () return "You have a 5% chance of seeing this" end,
 		function (p : number) return string.format("I have %s followers.", p.followers) end,
 		function (p : number) return string.format("I have %s coins.", p.coins) end,
-		--function (p : number) return string.format("I'm prestige %s.", p.prestige) end
+		function (p : number) return string.format("I'm rebirth %s.", p.rebirthModule.rebirthLevel) end
 	}
 	
 	
@@ -186,7 +190,7 @@ function PostModule.new(plr : Player)
 		function () return "Social Media Simulator is the best game!", {"Agreed", "For sure", "Yes", "No"} end,
 		function (p : number) return string.format("I have %s followers", p.followers), {"Wow", "Impressive", "Great", string.format("I have %s", p.followers), "That's it?", "ez"} end,
 		function (p : number) return string.format("I have %s coins", p.coins), {"Wow", "Impressive", "Great", string.format("I have %s", p.coins), "That's it?", "ez"} end,
-		--function (p : number) return string.format("I'm prestige %s", p.prestige), {"Wow", "Impressive", "Great", string.format("I have %s", p.prestige), "That's it?", "ez"} end
+		function (p : number) return string.format("I'm rebirth %s", p.rebirthModule.rebirthLevel), {"Wow", "Impressive", "Great", string.format("I am rebirth %s", p.rebirthModule.rebirthLevel), "That's it?", "ez"} end
 	}
 
 	postModule.numberOfPosts = #postModule.posts
@@ -194,6 +198,8 @@ function PostModule.new(plr : Player)
 	postModule.numberOfReplies = #postModule.replies
 
 	postModule.autoClickerPromise = nil
+
+	postModule.postXTimesQuest = nil
 
 	return setmetatable(postModule, PostModule)
 end
@@ -232,6 +238,11 @@ function PostModule:Post(p : Types.PlayerModule)
 	p:UpdateFollowersAmount(GetRandomFollowerAmount())
 
 	p.plotModule.popSound:Play()
+
+	-- update the quest's progress when the player posts
+	if self.postXTimesQuest then
+		self.postXTimesQuest()
+	end
 
 	local randomNumber : number = math.random()
 	

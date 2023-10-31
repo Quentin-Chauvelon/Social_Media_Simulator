@@ -9,6 +9,7 @@ local DataStore2 = require(ServerScriptService:WaitForChild("DataStore2"))
 local DeveloperProductModule = require(ServerScriptService:WaitForChild("DeveloperProductModule"))
 local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local LeaderboardModule = require(ServerScriptService:WaitForChild("LeaderboardModule"))
+local QuestModule = require(ServerScriptService:WaitForChild("QuestModule"))
 local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
@@ -33,6 +34,9 @@ local DeletePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeletePet")
 local DeleteUnequippedPetsRF : RemoteFunction = ReplicatedStorage:WaitForChild("DeleteUnequippedPets")
 local CraftPetRF : RemoteFunction = ReplicatedStorage:WaitForChild("CraftPet")
 local UpgradePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("UpgradePet")
+local CreateQuestRE : RemoteEvent = ReplicatedStorage:WaitForChild("CreateQuest")
+local ClaimQuestRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("ClaimQuestReward")
+local UpdateQuestProgressRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateQuestProgress")
 
 local LeaderboardsDataBF : BindableFunction = game:GetService("ServerStorage"):WaitForChild("LeaderboardsData")
 
@@ -275,6 +279,8 @@ function ServerModule.onJoin(plr : Player)
 		-- update the followers and coins multiplier of the player in case he had friends online
 		p:UpdateFollowersMultiplier()
 		p:UpdateCoinsMultiplier()
+
+		p.questModule = QuestModule.new(p)
 
 		resolve()
 	end)
@@ -672,6 +678,39 @@ end)
 
 
 --[[
+	Tries to claim the reward for the quest matching the given id
+
+	@param plr : Player, the player who wants to claim the reward
+	@param id : number, the id of the quest to claim the reward for
+	@return boolean, true if the reward could be claimed, false otherwise
+]]--
+ClaimQuestRewardRF.OnServerInvoke = function(plr : Player, id : number) : boolean
+	if id and typeof(id) == "number" then
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			return p.questModule:ClaimReward(p, id)
+		end
+	end
+end
+
+
+--[[
+	Fired to tell the server if it should fire the client to update the progress of the quests
+
+	@param plr : Player, the player for whom to update the progress
+	@param updateProgress : boolean, true if the server should fire the client to update the progress, false to stop
+]]--
+UpdateQuestProgressRE.OnServerEvent:Connect(function(plr : Player, updateProgress : boolean)
+	if updateProgress ~= nil and typeof(updateProgress) == "boolean" then
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			p.questModule.updateUIProgress = updateProgress
+		end
+	end
+end)
+
+
+--[[
 	Apply an upgrade when the player buys a developer product
 ]]--
 MarketplaceService.ProcessReceipt = function(receiptInfo : table) : Enum.ProductPurchaseDecision
@@ -724,6 +763,42 @@ coroutine.wrap(function()
 		end
 
 		RunService.Heartbeat:Wait()
+	end
+end)()
+
+
+--[[
+	Coroutine running every few seconds to save the players quests progress
+	Also, Refreshes the quest if it's past midnight
+]]--
+coroutine.wrap(function()
+	local today : number = os.date("%j")
+
+	while true do
+		for _,p : Player.PlayerModule in pairs(players) do
+			if p.questModule then
+				p.questModule:SaveQuests(p.player)
+				task.wait(2)
+
+				-- if the player played past midnight, refresh the quests
+				if os.date("%j") ~= today then
+					today = os.date("%j")
+
+					-- create an empty quest to signal the client to delete the previous quests
+					CreateQuestRE:FireClient(p.player)
+
+					p.alreadyPlayedToday = false -- set alreadyPlayedToday to false to recreate the quests
+					p.questModule = QuestModule.new(p)
+					p.alreadyPlayedToday = true
+
+					-- update the last played time to today
+					p.lastPlayed = os.time()
+					DataStore2("lastPlayed", p.player):Set(p.lastPlayed)
+				end
+			end
+		end
+
+		task.wait(2)
 	end
 end)()
 

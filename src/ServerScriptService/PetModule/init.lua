@@ -22,6 +22,12 @@ export type PetModule = {
     luck : number,
     magicUpgradePetId : number,
     plr : Player,
+    openOneEggQuest : () -> nil | nil,
+    getARarePetQuest : () -> nil | nil,
+    craftOnePetIntoBigQuest : () -> nil | nil,
+    craftOnePetIntoHugeQuest : () -> nil | nil,
+    upgradeOnePetToShinyQuest : () -> nil | nil,
+    upgradeOnePetToRainbowQuest : () -> nil | nil,
     new : (plr : Player) -> PetModule,
     IsPetInventoryFull : (self : PetModule) -> boolean,
     AddPetToInventory : (self : PetModule, pet : pet) -> nil,
@@ -552,6 +558,13 @@ function PetModule.new(plr : Player)
 
     petModule.plr = plr
 
+    petModule.openOneEggQuest = nil
+    petModule.getARarePetQuest = nil
+    petModule.craftOnePetIntoBigQuest = nil
+    petModule.craftOnePetIntoHugeQuest = nil
+    petModule.upgradeOnePetToShinyQuest = nil
+    petModule.upgradeOnePetToRainbowQuest = nil
+
     return setmetatable(petModule, PetModule)
 end
 
@@ -668,6 +681,17 @@ function PetModule:OpenEgg(eggId : number) : pet?
             self.nextId += 1
 
             self:AddPetToInventory(pet)
+
+            -- complete the open one egg quest
+            if self.openOneEggQuest then
+                self.openOneEggQuest()
+            end
+
+            -- if it's a rare pet, complete the get a rare pet quest
+            if self.getARarePetQuest and pet.rarity == rarities.Rare then
+                self.getARarePetQuest()
+            end
+
             return pet
         end
     end
@@ -1355,6 +1379,16 @@ function PetModule:CraftPet(id : number) : boolean
 
     petToCraft.size += 1
 
+    -- if the player crafted a big pet, complete the quest
+    if self.craftOnePetIntoBigQuest and petToCraft.size == sizes.Big then
+        self.craftOnePetIntoBigQuest()
+    end
+
+    -- if the player crafted a huge pet, complete the quest
+    if self.craftOnePetIntoHugeQuest and petToCraft.size == sizes.Huge then
+        self.craftOnePetIntoHugeQuest()
+    end
+
     -- if we couldn't find 2 other matching pets, return
     if #petsToRemovePositions ~= 2 then return false end
 
@@ -1492,6 +1526,16 @@ function PetModule:UpgradePet(id : number, upgradeType : number, numberOfPetsInM
 
         -- set the new upgrade for the pet
         petToUpgrade.upgrade = upgradeType
+
+        -- if the player upgraded a pet to shiny, complete the quest
+        if self.upgradeOnePetToShinyQuest and upgradeType == upgrades.Shiny then
+            self.upgradeOnePetToShinyQuest()
+        end
+
+        -- if the player upgraded a pet to shiny, complete the quest
+        if self.upgradeOnePetToRainbowQuest and upgradeType == upgrades.Shiny then
+            self.upgradeOnePetToRainbowQuest()
+        end
 
         -- if the pet to craft was equipped, update the pet size of the pet in the player's character
         if petToUpgrade.equipped then

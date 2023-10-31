@@ -7,6 +7,11 @@ export type PlayerModule = {
 	coins : number,
 	followersMultiplier : number,
 	coinsMultiplier : number,
+    lastPlayed : number,
+	alreadyPlayedToday : boolean,
+	totalTimePlayed : number,
+    getXFollowersQuest : (followers : number) -> nil | nil,
+    getXCoinsQuest : (coins : number) -> nil | nil,
 	plotModule : PlotModule,
 	postModule : PostModule,
 	upgradeModule : UpgradeModule,
@@ -47,7 +52,7 @@ export type PlotModule = {
 export type PostModule = {
     nextAutoPost : number,
 	nextClickPost : number,
-	autoPostInverval : number,
+	autoPostInterval : number,
 	clickPostInterval : number,
 	dialog : {},
 	currentState : string,
@@ -61,6 +66,7 @@ export type PostModule = {
 	numberOfDialogs : number,
 	numberOfReplies : number,
     autoClickerPromise : Promise,
+    postXTimesQuest : () -> nil | nil,
 	new : (plr : Player) -> PostModule,
 	GenerateDialog : (self : PostModule, p : PlayerModule, tableToUse : string) -> nil,
     Post : (self : PostModule, p : PlayerModule) -> nil,
@@ -76,6 +82,7 @@ export type UpgradeModule = {
     new : (plr : Player) -> UpgradeModule,
 	followersMultiplier : number,
     coinsMultiplier : number,
+    upgradeOnceQuest : () -> nil | nil,
     CanUpgrade : (self : UpgradeModule, p : PlayerModule, upgrade : upgrade, id : number) -> boolean,
     ApplyUpgrade : (self : UpgradeModule, p : PlayerModule, upgrade : upgrade) -> nil,
     ApplyUpgrades : (self : UpgradeModule, p : PlayerModule) -> nil,
@@ -302,6 +309,12 @@ export type PetModule = {
     luck : number,
     magicUpgradePetId : number,
     plr : Player,
+    openOneEggQuest : () -> nil | nil,
+    getARarePetQuest : () -> nil | nil,
+    craftOnePetIntoBigQuest : () -> nil | nil,
+    craftOnePetIntoHugeQuest : () -> nil | nil,
+    upgradeOnePetToShinyQuest : () -> nil | nil,
+    upgradeOnePetToRainbowQuest : () -> nil | nil,
     new : (plr : Player) -> PetModule,
     IsPetInventoryFull : (self : PetModule) -> boolean,
     AddPetToInventory : (self : PetModule, pet : pet) -> nil,
@@ -361,6 +374,76 @@ export type GroupModule = {
     CollectRewardChest : (self : GroupModule, p : PlayerModule) -> nil,
     IsInGroup : (self : GroupModule) -> boolean,
     OnLeave : (self : GroupModule) -> nil
+}
+
+
+export type QuestModule = {
+    quests : {Quest},
+    questStreak : QuestStreak,
+    averageFollowersPerSecond : number,
+    averageCoinsPerSecond : number,
+    playedTodayPromise : Promise,
+    updateUIProgress : boolean,
+    plr : Player,
+    new : (p : PlayerModule) -> QuestModule,
+    LoadQuests : (self : QuestModule, p : PlayerModule) -> nil,
+    SaveQuests : (self : QuestModule, plr : Player) -> nil,
+    CreateQuest : (self : QuestModule, p : PlayerModule) -> Quest,
+    AddQuestsListeners : (self : QuestModule, p : PlayerModule, quest : Quest) -> Quest,
+    DeleteQuest : (self : QuestModule, p : PlayerModule, id : number) -> nil,
+    DeleteAllQuests : (self : QuestModule, p : PlayerModule) -> nil,
+    IsCompleted : (self : QuestModule, id : number) -> boolean,
+    AreAllQuestsCompleted : (self : QuestModule) -> boolean,
+    CompleteQuest : (self : QuestModule, p : PlayerModule, id : number) -> nil,
+    HasClaimedReward : (self : QuestModule, id : number) -> boolean,
+    ClaimReward : (self : QuestModule, p : PlayerModule, id : number) -> boolean,
+    AreAllQuestsClaimed : (self : QuestModule) -> boolean,
+    GetPositionOfQuestWithId : (self : QuestModule, id : number) -> number,
+    FollowersToCoins : (self : QuestModule, followers : number) -> number,
+    CoinsToFollowers : (self : QuestModule, coins : number) -> number,
+    AbbreviateNumber : (self : QuestModule, number : number) -> number,
+    OnLeave : (self : QuestModule) -> nil
+}
+
+type Quest = {
+    id : number,
+    name : string,
+    questType : QuestType,
+    progress : number,
+    target : number,
+    status : QuestStatus,
+    rewardValue : number,
+    rewardType : QuestRewardType
+}
+
+type QuestType = {
+    GetXFollowers : number,
+    GetXCoins : number,
+    UpgradeOnce : number,
+    PlayXMinutesToday : number,
+    OpenOneEgg : number,
+    GetARarePet : number,
+    PostXTimes : number,
+    CraftOnePetIntoBig : number,
+    CraftOnePetIntoHuge : number,
+    UpgradeOnePetToShiny : number,
+    UpgradeOnePetToRainbow : number
+}
+
+type QuestRewardType = {
+    Followers : number,
+    Coins : number
+}
+
+type QuestStatus = {
+    Pending : number,
+    Completed : number,
+    Claimed : number
+}
+
+type QuestStreak = {
+    lastDayCompleted : number,
+    streak : number
 }
 
 return nil

@@ -55,6 +55,7 @@ export type UpgradeModule = {
     firstFire : boolean?,
     followersMultiplier : number,
     coinsMultiplier : number,
+    upgradeOnceQuest : () -> nil | nil,
     new : (plr : Player) -> UpgradeModule,  
     CanUpgrade : (self : UpgradeModule, p : Types.PlayerModule, upgrade : upgrade, id : number) -> boolean,
     ApplyUpgrade : (self : UpgradeModule, p : Types.PlayerModule, upgrade : upgrade) -> nil,
@@ -86,6 +87,8 @@ function UpgradeModule.new(plr : Player) : UpgradeModule
     upgradeModule.firstFire = true
     upgradeModule.followersMultiplier = 0
     upgradeModule.coinsMultiplier = 0
+
+    upgradeModule.upgradeOnceQuest = nil
 
     return setmetatable(upgradeModule, UpgradeModule)
 end
@@ -176,6 +179,10 @@ function UpgradeModule:Upgrade(p : Types.PlayerModule, id : number) : {upgrade} 
                 DataStore2("upgrades", p.player):Set(self.upgrades)
 
                 self:ApplyUpgrade(p, upgrade)
+
+                if self.upgradeOnceQuest then
+                    self.upgradeOnceQuest()
+                end
 
                 return self.upgrades[id]
             end

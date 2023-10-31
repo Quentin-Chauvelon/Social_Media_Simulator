@@ -23,6 +23,9 @@ local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
 local PlayerLoadedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerLoaded")
 local UpdateFriendsBoostRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFriendsBoost")
 local GroupChestRewardRE : RemoteEvent = ReplicatedStorage:WaitForChild("GroupChestReward")
+local CreateQuestRE : RemoteEvent = ReplicatedStorage:WaitForChild("CreateQuest")
+local UpdateStreakRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateStreak")
+local UpdateQuestProgressRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateQuestProgress")
 
 local lplr = Players.LocalPlayer
 
@@ -48,6 +51,7 @@ local LimitedEditionPetsModule = require(StarterPlayer.StarterPlayerScripts:Wait
 local ShopModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("ShopModule"))
 local GroupModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GroupModule"))
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
+local QuestModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("QuestModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
@@ -107,6 +111,8 @@ LimitedEditionPetsModule.new(Utility)
 local shopModule : ShopModule.ShopModule = ShopModule.new(Utility)
 
 local groupModule : GroupModule.GroupModule = GroupModule.new(Utility)
+
+local questModule : QuestModule.QuestModule = QuestModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
@@ -747,6 +753,41 @@ GroupChestRewardRE.OnClientEvent:Connect(function()
 end)
 
 
+--[[
+	Adds a quest to the ui
+
+	@param quest : Quest, the quest to add
+]]--
+CreateQuestRE.OnClientEvent:Connect(function(quest : QuestModule.Quest)
+	if quest then
+		questModule:AddQuest(quest)
+	else
+		questModule:DeleteAllQuests()
+	end
+end)
+
+
+--[[
+	Updates the streak to match the given number
+
+	@param streak : number, the new streak value
+]]--
+UpdateStreakRE.OnClientEvent:Connect(function(streak : number)
+	questModule:UpdateStreak(streak)
+end)
+
+
+--[[
+	Updates the progress of the quest matching the given id
+
+	@param id : number, the id of the quest to update
+	@param progress : number, the new progress for the quest
+]]--
+UpdateQuestProgressRE.OnClientEvent:Connect(function(id : number, progress : number)
+	questModule:UpdateProgress(id, progress)
+end)
+
+
 -- add the vip tag before the player message if they are vip
 TextChatService.OnIncomingMessage = function(message: TextChatMessage)
 	local properties : TextChatMessageProperties = Instance.new("TextChatMessageProperties")
@@ -760,7 +801,6 @@ TextChatService.OnIncomingMessage = function(message: TextChatMessage)
 
 	return properties
 end
-
 
 
 if not game:IsLoaded() then
