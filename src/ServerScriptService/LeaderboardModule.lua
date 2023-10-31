@@ -175,42 +175,48 @@ function LeaderboardModule.UpdateLeaderboard(leaderboard : LeaderboardInformatio
             if rank == 1 then
                 leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(255, 215, 0)
 
-                -- update the dancing npc appearance to match the player
-                pcall(function()
-                    dancingNPC1.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
-                end)
+                if leaderboard.id == leaderboardsTypes.MostFollowers then
+                    -- update the dancing npc appearance to match the player
+                    pcall(function()
+                        dancingNPC1.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                    end)
 
-                dancingNPC1.Tags.Container.PlayerName.Text = data.username
-                dancingNPC1.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
+                    dancingNPC1.Tags.Container.PlayerName.Text = data.username
+                    dancingNPC1.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
+                end
 
             elseif rank == 2 then
                 leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(168, 169, 173)
 
-                -- update the dancing npc appearance to match the player
-                pcall(function()
-                    dancingNPC2.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
-                end)
+                if leaderboard.id == leaderboardsTypes.MostFollowers then
+                    -- update the dancing npc appearance to match the player
+                    pcall(function()
+                        dancingNPC2.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                    end)
 
-                dancingNPC2.Tags.Container.PlayerName.Text = data.username
-                dancingNPC2.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
+                    dancingNPC2.Tags.Container.PlayerName.Text = data.username
+                    dancingNPC2.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
+                end
 
             elseif rank == 3 then
                 leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(205, 127, 50)
 
-                -- update the dancing npc appearance to match the player
-                pcall(function()
-                    dancingNPC3.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
-                end)
-                
-                dancingNPC3.Tags.Container.PlayerName.Text = data.username
-                dancingNPC3.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
+                if leaderboard.id == leaderboardsTypes.MostFollowers then
+                    -- update the dancing npc appearance to match the player
+                    pcall(function()
+                        dancingNPC3.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                    end)
+                    
+                    dancingNPC3.Tags.Container.PlayerName.Text = data.username
+                    dancingNPC3.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
+                end
             end
 
         else
             leaderboardEntryFrameClone = leaderboardsNormalEntry:Clone()
 
             -- update the rank
-            leaderboardEntryFrameClone.Rank.Text = "%" .. tostring(rank)
+            leaderboardEntryFrameClone.Rank.Text = "#" .. tostring(rank)
         end
 
         -- update the username
