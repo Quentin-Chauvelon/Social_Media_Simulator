@@ -141,99 +141,84 @@ end
     Updates the leaderboard of the given frame with the given data
 
     @param leaderboard : LeaderboardInformation, the leaderboard to update
-    @param leaderboardData : leaderboardEntry, the data to use to update the leaderboard
+    @param rank : number, the rank of the player
+    @param userId : number, the user id of the player
+    @param username : string, the username of the player
+    @param value : number, the value for the leaderboard
 ]]--
-function LeaderboardModule.UpdateLeaderboard(leaderboard : LeaderboardInformation, leaderboardData : LeaderboardEntry)
+function LeaderboardModule.UpdateLeaderboard(leaderboard : LeaderboardInformation, rank : number, userId : number, username : string, value : number)
+    local leaderboardEntryFrameClone : Frame
 
-    -- clear the leaderboard
-    for _,leaderboardEntry : GuiObject in ipairs(leaderboard.leaderboardContainer:GetChildren()) do
-        if leaderboardEntry:IsA("Frame") then
-            leaderboardEntry:Destroy()
-        end
-    end
+    if rank <= 3 then
+        leaderboardEntryFrameClone = leaderboardTop3Entry:Clone()
 
-    for rank, data in pairs(leaderboardData) do
+        -- set the player's thumbnail
+        pcall(function()
+            leaderboardEntryFrameClone.Thumbnail.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size60x60)
+        end)
 
-        local leaderboardEntryFrameClone : Frame
-        if rank <= 3 then
-            local userId : number
-            pcall(function()
-                userId = Players:GetUserIdFromNameAsync(data.username)
-            end)
+        -- update the ui stroke color based on the rank of the player
+        if rank == 1 then
+            leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(255, 215, 0)
 
-            -- if the user id could not be loaded, move to the next player
-            if not userId then continue end
+            if leaderboard.id == leaderboardsTypes.MostFollowers then
+                -- update the dancing npc appearance to match the player
+                pcall(function()
+                    dancingNPC1.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                end)
 
-            leaderboardEntryFrameClone = leaderboardTop3Entry:Clone()
-
-            -- set the player's thumbnail
-            pcall(function()
-                leaderboardEntryFrameClone.Thumbnail.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size60x60)
-            end)
-
-            -- update the ui stroke color based on the rank of the player
-            if rank == 1 then
-                leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(255, 215, 0)
-
-                if leaderboard.id == leaderboardsTypes.MostFollowers then
-                    -- update the dancing npc appearance to match the player
-                    pcall(function()
-                        dancingNPC1.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
-                    end)
-
-                    dancingNPC1.Tags.Container.PlayerName.Text = data.username
-                    dancingNPC1.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
-                end
-
-            elseif rank == 2 then
-                leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(168, 169, 173)
-
-                if leaderboard.id == leaderboardsTypes.MostFollowers then
-                    -- update the dancing npc appearance to match the player
-                    pcall(function()
-                        dancingNPC2.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
-                    end)
-
-                    dancingNPC2.Tags.Container.PlayerName.Text = data.username
-                    dancingNPC2.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
-                end
-
-            elseif rank == 3 then
-                leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(205, 127, 50)
-
-                if leaderboard.id == leaderboardsTypes.MostFollowers then
-                    -- update the dancing npc appearance to match the player
-                    pcall(function()
-                        dancingNPC3.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
-                    end)
-                    
-                    dancingNPC3.Tags.Container.PlayerName.Text = data.username
-                    dancingNPC3.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(data.value)
-                end
+                dancingNPC1.Tags.Container.PlayerName.Text = username
+                dancingNPC1.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(value)
             end
 
-        else
-            leaderboardEntryFrameClone = leaderboardsNormalEntry:Clone()
+        elseif rank == 2 then
+            leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(168, 169, 173)
 
-            -- update the rank
-            leaderboardEntryFrameClone.Rank.Text = "#" .. tostring(rank)
+            if leaderboard.id == leaderboardsTypes.MostFollowers then
+                -- update the dancing npc appearance to match the player
+                pcall(function()
+                    dancingNPC2.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                end)
+
+                dancingNPC2.Tags.Container.PlayerName.Text = username
+                dancingNPC2.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(value)
+            end
+
+        elseif rank == 3 then
+            leaderboardEntryFrameClone.Thumbnail.UIStroke.Color = Color3.fromRGB(205, 127, 50)
+
+            if leaderboard.id == leaderboardsTypes.MostFollowers then
+                -- update the dancing npc appearance to match the player
+                pcall(function()
+                    dancingNPC3.Humanoid:ApplyDescription(Players:GetHumanoidDescriptionFromUserId(userId))
+                end)
+
+                dancingNPC3.Tags.Container.PlayerName.Text = username
+                dancingNPC3.Tags.Container.Value.Text = LeaderboardModule.AbbreviateNumber(value)
+            end
         end
 
-        -- update the username
-        leaderboardEntryFrameClone.InformationContainer.PlayerName.Text = #data.username ~= 0 and data.username or "Loading..."
+    else
+        leaderboardEntryFrameClone = leaderboardsNormalEntry:Clone()
 
-        -- format the value according to the leaderboard's format
-        if leaderboard.id == leaderboardsTypes.MostFollowers then
-            leaderboardEntryFrameClone.InformationContainer.Value.Text = string.format(leaderboard.valueFormat, LeaderboardModule.AbbreviateNumber(data.value))
-        elseif leaderboard.id == leaderboardsTypes.MostRebirths then
-            leaderboardEntryFrameClone.InformationContainer.Value.Text = string.format(leaderboard.valueFormat, data.value)
-        elseif leaderboard.id == leaderboardsTypes.MostPlayed then
-            leaderboardEntryFrameClone.InformationContainer.Value.Text = string.format(leaderboard.valueFormat, (data.value / 60))
-        end
-
-        leaderboardEntryFrameClone.LayoutOrder = rank
-        leaderboardEntryFrameClone.Parent = leaderboard.leaderboardContainer
+        -- update the rank
+        leaderboardEntryFrameClone.Rank.Text = "#" .. tostring(rank)
     end
+
+    -- update the username
+    leaderboardEntryFrameClone.InformationContainer.PlayerName.Text = #username ~= 0 and username or "Loading..."
+
+    -- format the value according to the leaderboard's format
+    if leaderboard.id == leaderboardsTypes.MostFollowers then
+        leaderboardEntryFrameClone.InformationContainer.Value.Text = string.format(leaderboard.valueFormat, LeaderboardModule.AbbreviateNumber(value))
+    elseif leaderboard.id == leaderboardsTypes.MostRebirths then
+        leaderboardEntryFrameClone.InformationContainer.Value.Text = string.format(leaderboard.valueFormat, value)
+    elseif leaderboard.id == leaderboardsTypes.MostPlayed then
+        leaderboardEntryFrameClone.InformationContainer.Value.Text = string.format(leaderboard.valueFormat, (value / 60))
+    end
+
+    leaderboardEntryFrameClone.LayoutOrder = rank
+    leaderboardEntryFrameClone.Parent = leaderboard.leaderboardContainer
 end
 
 
@@ -255,7 +240,12 @@ function LeaderboardModule.GetTopPlayersForLeaderboard(leaderboard : Leaderboard
 
     local firstPage = pages:GetCurrentPage()
 
-    local leaderboardData : {LeaderboardEntry} = {}
+    -- clear the leaderboard
+    for _,leaderboardEntry : GuiObject in ipairs(leaderboard.leaderboardContainer:GetChildren()) do
+        if leaderboardEntry:IsA("Frame") then
+            leaderboardEntry:Destroy()
+        end
+    end
 
     for rank : number, data in pairs(firstPage) do
         local userId : number = data.key
@@ -266,13 +256,9 @@ function LeaderboardModule.GetTopPlayersForLeaderboard(leaderboard : Leaderboard
             username = Players:GetNameFromUserIdAsync(userId)
         end)
 
-        leaderboardData[rank] = {
-            username = username,
-            value = value
-        }
+        LeaderboardModule.UpdateLeaderboard(leaderboard, rank, userId, username, value)
     end
 
-    LeaderboardModule.UpdateLeaderboard(leaderboard, leaderboardData)
 end
 
 
@@ -306,6 +292,11 @@ end
 ]]--
 function LeaderboardModule.SavePlayersDataForLeaderboard(orderedDataStore : OrderedDataStore, leaderboardType : string)
     for _,plr : Player in pairs(Players:GetPlayers()) do
+        -- don't count myself in the leadebroards
+        if plr.UserId == 551795307 then
+            continue
+        end
+
         local value : number = LeaderboardsDataBF:Invoke(plr.Name, leaderboardType)
 
         pcall(function()
