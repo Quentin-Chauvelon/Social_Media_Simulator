@@ -234,6 +234,11 @@ function ServerModule.onJoin(plr : Player)
 	playerReady.Value = true
 	playerReady.Parent = playersReady
 
+	local hideLoadingScreen : BoolValue = Instance.new("BoolValue")
+	hideLoadingScreen.Name = "HideLoadingScreen"
+	hideLoadingScreen.Value = false
+	hideLoadingScreen.Parent = plr
+
 	-- wait for the player to be fully loaded before firing events
 	Promise.new(function(resolve)
 		repeat
@@ -281,6 +286,8 @@ function ServerModule.onJoin(plr : Player)
 		p:UpdateCoinsMultiplier()
 
 		p.questModule = QuestModule.new(p)
+
+		hideLoadingScreen.Value = true
 
 		resolve()
 	end)
@@ -769,7 +776,7 @@ end)()
 
 --[[
 	Coroutine running every few seconds to save the players quests progress
-	Also, Refreshes the quest if it's past midnight
+	Also, refreshes the quest if it's past midnight
 ]]--
 coroutine.wrap(function()
 	local today : number = os.date("%j")
