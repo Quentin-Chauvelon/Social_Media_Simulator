@@ -212,8 +212,7 @@ function QuestModule:CreateQuest(p : Types.PlayerModule) : Quest
     end
     local questType : QuestType
     repeat
-        -- questType = math.random(0, 10)
-        questType = #self.quests + 3
+        questType = math.random(0, 10)
     until not table.find(takenQuestsTypes, questType)
 
     local name : string
@@ -621,9 +620,14 @@ function QuestModule:ClaimReward(p : Types.PlayerModule, id : number) : boolean
         quest.status = QuestStatus.Claimed
 
         if quest.rewardType == QuestRewardTypes.Followers then
-            p:UpdateFollowersAmount(quest.rewardValue)
+            p.followers += quest.rewardValue
+	        DataStore2("followers", p.player):Increment(quest.rewardValue, quest.rewardValue)
+            p.player.leaderstats.Followers.Value = p.followers
+
         elseif quest.rewardType == QuestRewardTypes.Coins then
-            p:UpdateCoinsAmount(quest.rewardValue)
+            p.coins += quest.rewardValue
+            DataStore2("coins", p.player):Increment(quest.rewardValue, quest.rewardValue)
+            p.player.leaderstats.Followers.Value = p.coins
         end
 
         self:SaveQuests(p.player)
