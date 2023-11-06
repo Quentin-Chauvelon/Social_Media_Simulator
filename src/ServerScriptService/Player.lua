@@ -95,14 +95,13 @@ function Player.new(plr : Player)
 	p.coinsMultiplier = 1
 
 	p.lastPlayed = DataStore2("lastPlayed", p.player):Get(0)
-	print(os.date("%j"), os.date("%j"), p.lastPlayed, os.time())
 	if os.date("%j") == os.date("%j", p.lastPlayed) then
 		p.alreadyPlayedToday = true
 	else
 		p.alreadyPlayedToday = false
 	end
 
-	DataStore2("lastPlayed", p.player):Set(p.lastPlayed)
+	DataStore2("lastPlayed", p.player):Set(os.time())
 
 	p.totalTimePlayed = DataStore2("totalTimePlayed", p.player):Get(0)
 
