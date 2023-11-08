@@ -226,9 +226,9 @@ end
     Updates all the leaderboards
 ]]--
 function LeaderboardModule.GetTopPlayersForAllLeaderboards()
-    for _,leaderboard : LeaderboardInformation in pairs(leaderboards) do
-        LeaderboardModule.GetTopPlayersForLeaderboard(leaderboard)
-    end
+    LeaderboardModule.GetTopPlayersForLeaderboard(leaderboards[0])
+	LeaderboardModule.GetTopPlayersForLeaderboard(leaderboards[2])
+	LeaderboardModule.GetTopPlayersForLeaderboard(leaderboards[1])
 end
 
 
@@ -293,7 +293,7 @@ end
 function LeaderboardModule.SavePlayersDataForLeaderboard(orderedDataStore : OrderedDataStore, leaderboardType : string)
     for _,plr : Player in pairs(Players:GetPlayers()) do
         -- don't count myself in the leadebroards
-        if plr.UserId == 551795307 then
+        if plr.UserId == 551795307 or plr.UserId == 1651476952 then
             continue
         end
 
