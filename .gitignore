@@ -1,13 +1,11 @@
 # Project place file
 SMS.rbxlx
 SMS.rbxl
+SMS_Test_Place.rbxl
 
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock
 
-/images.txt
 
 /.vscode
-
-src/ServerScriptService/Types.lua
