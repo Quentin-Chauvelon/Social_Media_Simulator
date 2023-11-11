@@ -26,6 +26,11 @@ local GroupChestRewardRE : RemoteEvent = ReplicatedStorage:WaitForChild("GroupCh
 local CreateQuestRE : RemoteEvent = ReplicatedStorage:WaitForChild("CreateQuest")
 local UpdateStreakRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateStreak")
 local UpdateQuestProgressRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateQuestProgress")
+local UpdateNextEventRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateNextEvent")
+local TimeLeftBeforeEventStartRE : RemoteEvent = ReplicatedStorage:WaitForChild("TimeLeftBeforeEventStart")
+local EventCountdownRE : RemoteEvent = ReplicatedStorage:WaitForChild("EventCountdown")
+local StartEventRE : RemoteEvent = ReplicatedStorage:WaitForChild("StartEvent")
+local CollectedEventCoinRE : RemoteEvent = ReplicatedStorage:WaitForChild("CollectedEventCoin")
 
 local lplr = Players.LocalPlayer
 
@@ -52,6 +57,7 @@ local ShopModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Shop
 local GroupModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GroupModule"))
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 local QuestModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("QuestModule"))
+local EventsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("EventsModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
@@ -113,6 +119,8 @@ local shopModule : ShopModule.ShopModule = ShopModule.new(Utility)
 local groupModule : GroupModule.GroupModule = GroupModule.new(Utility)
 
 local questModule : QuestModule.QuestModule = QuestModule.new(Utility)
+
+local eventsModule : EventsModule.EventsModule = EventsModule.new(Utility)
 
 GamePassModule.LoadGamePasses()
 
@@ -788,6 +796,56 @@ UpdateQuestProgressRE.OnClientEvent:Connect(function(id : number, progress : num
 end)
 
 
+--[[
+	Updates the next event information
+
+	@param event : Event, the next event to update to
+]]--
+UpdateNextEventRE.OnClientEvent:Connect(function(event : {})
+	eventsModule:UpdateNextEvent(event)
+end)
+
+
+--[[
+	Updates the time left before the event starts
+
+	@param timeLeft : number, the time left before the event starts
+]]--
+TimeLeftBeforeEventStartRE.OnClientEvent:Connect(function(timeLeft : number)
+	eventsModule:DisplayTimeLeftBeforeEventStart(timeLeft)
+end)
+
+
+--[[
+	Starts the countdown with the given duration
+
+	@param text : string, the text to display in the countdown
+	@param duration : number, the duration of the countdown
+]]--
+EventCountdownRE.OnClientEvent:Connect(function(text : string, duration : number)
+	eventsModule.timeBeforeNextEvent = duration
+	eventsModule:StartCountdown(text, duration)
+end)
+
+
+--[[
+	Starts the event
+]]--
+StartEventRE.OnClientEvent:Connect(function()
+	eventsModule:StartEvent()
+end)
+
+
+--[[
+	Updates the event followers/coins gained
+
+	@param gain : number, the number of followers/coins gained
+]]--
+CollectedEventCoinRE.OnClientEvent:Connect(function(gain : number)
+	eventsModule:CollectedEventCoin(gain)
+end)
+
+
 -- add the vip tag before the player message if they are vip
 TextChatService.OnIncomingMessage = function(message: TextChatMessage)
 	local properties : TextChatMessageProperties = Instance.new("TextChatMessageProperties")
@@ -807,4 +865,4 @@ if not game:IsLoaded() then
 	game.Loaded:Wait()
 end
 -- fire the server once the client is loaded
-PlayerLoadedRE:FireServer()
+PlayerLoadedRE:FireServer()	

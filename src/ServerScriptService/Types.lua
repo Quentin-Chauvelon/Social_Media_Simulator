@@ -23,6 +23,7 @@ export type PlayerModule = {
 	petModule : PetModule,
     friendsModule : FriendsModule,
 	groupModule : GroupModule,
+    questModule : QuestModule,
 	gamepassModule : GamepassModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -444,6 +445,34 @@ type QuestStatus = {
 type QuestStreak = {
     lastDayCompleted : number,
     streak : number
+}
+
+
+type Event = {
+    id : number,
+    name : string,
+    duration : number,
+    startEvent : () -> nil,
+    backgroundColor : Color3,
+    borderColor : Color3,
+    progressBarColor : Color3,
+    eventIcon : string
+}
+
+export type EventsModule = {
+    eventInProgress : boolean,
+    nextEvent : Event,
+    timeBeforeNextEvent : number,
+    rewards : {[string] : number},
+    eventsLoopPromise : Promise,
+    new : () -> EventsModule,
+    StartEventsLoop : () -> nil,
+    GetNextEvent : () -> Event,
+    SpawnCoin : (coin : Part) -> nil,
+    CollectedCoin : (plr : Player) -> nil,
+    StartRainEvent : (coin : Part) -> nil,
+    StartFollowersRain : () -> nil,
+    StartCoinsRain : () -> nil
 }
 
 return nil

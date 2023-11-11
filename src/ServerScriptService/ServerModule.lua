@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService")
 
@@ -11,6 +12,10 @@ local Promise = require(ReplicatedStorage:WaitForChild("Promise"))
 local LeaderboardModule = require(ServerScriptService:WaitForChild("LeaderboardModule"))
 local QuestModule = require(ServerScriptService:WaitForChild("QuestModule"))
 local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
+local EventsModule = require(ServerScriptService:WaitForChild("EventsModule"))
+
+local UpdateFollowersBE : BindableEvent = ServerStorage:WaitForChild("UpdateFollowers")
+local UpdateCoinsBE : BindableEvent = ServerStorage:WaitForChild("UpdateCoins")
 
 local PlayerClickedRE : RemoteEvent = ReplicatedStorage:WaitForChild("PlayerClicked")
 local UnlockPostRF : RemoteFunction = ReplicatedStorage:WaitForChild("UnlockPost")
@@ -37,6 +42,8 @@ local UpgradePetRF : RemoteFunction = ReplicatedStorage:WaitForChild("UpgradePet
 local CreateQuestRE : RemoteEvent = ReplicatedStorage:WaitForChild("CreateQuest")
 local ClaimQuestRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("ClaimQuestReward")
 local UpdateQuestProgressRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateQuestProgress")
+local UpdateNextEventRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateNextEvent")
+local TimeLeftBeforeEventStartRE : RemoteEvent = ReplicatedStorage:WaitForChild("TimeLeftBeforeEventStart")
 
 local LeaderboardsDataBF : BindableFunction = game:GetService("ServerStorage"):WaitForChild("LeaderboardsData")
 
@@ -65,7 +72,7 @@ LeaderboardModule.new()
 LeaderboardsDataBF.OnInvoke = function(playerName : string, leaderboardType : string)
 	local p : Player.PlayerModule = players[playerName]
 	if p then
-		
+
 		if leaderboardType == "followers" then
 			return p.followers
 		elseif leaderboardType == "rebirths" then
@@ -82,6 +89,9 @@ LeaderboardsDataBF.OnInvoke = function(playerName : string, leaderboardType : st
 
 	return 0
 end
+
+
+EventsModule.StartEventsLoop()
 
 
 local function PlayerReachedFollowerGoal(p : Player.PlayerModule)
@@ -113,7 +123,7 @@ end)
 function ServerModule.onJoin(plr : Player)
 	local p : Player.PlayerModule = Player.new(plr)
 	p.groupModule = GroupModule.new(p)
-	
+
 	-- save the player module on the server module
 	players[plr.Name] = p
 
@@ -167,7 +177,7 @@ function ServerModule.onJoin(plr : Player)
 				resolve()
 			end)
 			:andThen(function()
-				
+
 				character.PrimaryPart.CFrame = CFrame.lookAt(p.plotModule.phone.TeleportPart.Position, p.plotModule.phone.PrimaryPart.Position)
 
 				-- if the player resetted his character, recreate all the attachments (check if it doesn't exist first because when the player joins the attachments can be created before this function runs and we don't want to create them twice)
@@ -255,6 +265,10 @@ function ServerModule.onJoin(plr : Player)
 		-- fire the upgrade posts remote event to load the ui for the types the player already owns
 		UpgradePostsRE:FireClient(plr, p.postModule.level)
 
+		-- fire the client to load the next event
+		UpdateNextEventRE:FireClient(plr, EventsModule.nextEvent)
+		TimeLeftBeforeEventStartRE:FireClient(plr, (EventsModule.timeBeforeNextEvent - os.time()) / 60)
+
 		-- load the effect of the game passes the player owns
 		p.gamepassModule:LoadOwnedGamePasses(p)
 
@@ -266,7 +280,7 @@ function ServerModule.onJoin(plr : Player)
 		local onlineFriends : {string} = p.friendsModule:GetOnlineFriends()
 		for _,friendName : string in pairs(onlineFriends) do
 
-			
+
 			-- add a friend for each friend already connected
 			local friendP : Player.PlayerModule = players[friendName]
 			if friendP then
@@ -286,6 +300,16 @@ function ServerModule.onJoin(plr : Player)
 		p:UpdateCoinsMultiplier()
 
 		p.questModule = QuestModule.new(p)
+
+		local averageFollowersPerSecond : NumberValue = Instance.new("NumberValue")
+		averageFollowersPerSecond.Name = "AverageFollowersPerSecond"
+		averageFollowersPerSecond.Value = p.questModule.averageFollowersPerSecond
+		averageFollowersPerSecond.Parent = p.player
+
+		local averageCoinsPerSecond : NumberValue = Instance.new("NumberValue")
+		averageCoinsPerSecond.Name = "AverageCoinsPerSecond"
+		averageCoinsPerSecond.Value = p.questModule.averageCoinsPerSecond
+		averageCoinsPerSecond.Parent = p.player
 
 		hideLoadingScreen.Value = true
 
@@ -325,6 +349,57 @@ function ServerModule.onLeave(playerName)
 		end
 	end
 end
+
+
+--[[
+	Updates the amount of followers the player has
+
+	@param playerName : string, the name of the player
+	@param amount : number, the amount of followers to add
+	@param useMultiplier : boolean?, if true, the amount will be multiplied by the followers multiplier of the player
+]]
+UpdateFollowersBE.Event:Connect(function(playerName : string, amount : number, useMultiplier : boolean?)
+	if useMultiplier then
+		local p : Player.PlayerModule = players[playerName]
+		if p then
+			p:UpdateFollowersAmount(amount)
+		end
+
+	else
+		local p : Player.PlayerModule = players[playerName]
+		if p then
+			p.followers += amount
+			DataStore2("followers", p.player):Increment(amount, p.followers)
+			p.player.leaderstats.Followers.Value = p.followers
+		end
+	end
+end)
+
+
+
+--[[
+	Updates the amount of coins the player has
+
+	@param playerName : string, the name of the player
+	@param amount : number, the amount of coins to add
+	@param useMultiplier : boolean?, if true, the amount will be multiplied by the coins multiplier of the player
+]]
+UpdateCoinsBE.Event:Connect(function(playerName : string, amount : number, useMultiplier : boolean?)
+	if useMultiplier then
+		local p : Player.PlayerModule = players[playerName]
+		if p then
+			p:UpdateCoinsAmount(amount)
+		end
+
+	else
+		local p : Player.PlayerModule = players[playerName]
+		if p then
+			p.coins += amount
+			DataStore2("coins", p.player):Increment(amount, p.coins)
+			p.player.leaderstats.Coins.Value = p.coins
+		end
+	end
+end)
 
 
 --[[
@@ -410,7 +485,7 @@ SaveCustomPostRF.OnServerInvoke = function(plr : Player, postType : string?, tex
 		if id then
 			if postType then
 				return p.customPosts:SavePost(p, id, postType, text1, text2)
-			else 
+			else
 				return p.customPosts:DeletePost(id)
 			end
 		else
@@ -454,7 +529,7 @@ RebirthRE.OnServerEvent:Connect(function(plr : Player)
 
 			-- reset the followers count
 			DataStore2("followers", plr):Set(0)
-			
+
 			p:UpdateFollowersMultiplier()
 
 			RebirthRE:FireClient(plr)
@@ -583,7 +658,7 @@ end
 ]]
 DeletePetRF.OnServerInvoke = function(plr : Player, id : number) : boolean
 	if id and typeof(id) == "number" then
-		
+
 		local p : Player.PlayerModule = players[plr.Name]
 		if p then
 			local success : boolean = p.petModule:DeletePet(id)
@@ -650,7 +725,7 @@ end
 ]]
 UpgradePetRF.OnServerInvoke = function(plr : Player, id : number, upgradeType : number, numberOfPetsInMachine : number) : (boolean, {})
 	if id and upgradeType and numberOfPetsInMachine and typeof(id) == "number" and typeof(upgradeType) == "number" and typeof(numberOfPetsInMachine) == "number" then
-		
+
 		-- upgrade type can only be shiny (1) or rainbow (2), (pets can't be upgraded to magic via the remote function since it's a developer product)
 		if upgradeType < 1 or upgradeType > 2 then return false, {} end
 
@@ -722,7 +797,7 @@ end)
 ]]--
 MarketplaceService.ProcessReceipt = function(receiptInfo : table) : Enum.ProductPurchaseDecision
 	if receiptInfo and receiptInfo.PlayerId then
-		
+
 		local playerName : string = Players:GetNameFromUserIdAsync(receiptInfo.PlayerId)
 		if playerName then
 
