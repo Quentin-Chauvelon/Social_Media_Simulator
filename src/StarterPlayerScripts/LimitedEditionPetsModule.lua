@@ -21,7 +21,7 @@ local offersContainer : ScrollingFrame = limitedEditionPetsBackground:WaitForChi
 local touchDetector : Part = workspace:WaitForChild("LimitedEditionPets"):WaitForChild("TouchDetector")
 local limitedEditionPetsBillboardGuiTitle : TextLabel = workspace.LimitedEditionPets.TouchDetector:WaitForChild("BillboardGui"):WaitForChild("TextLabel")
 
-local OFFER_END_TIME = os.time({year = 2023, month = 11, day = 7, hour = 23, min = 59, sec = 59})
+local OFFER_END_TIME = os.time({year = 2023, month = 11, day = 25, hour = 23, min = 59, sec = 59})
 
 
 export type LimitedEditionPetsModule = {
