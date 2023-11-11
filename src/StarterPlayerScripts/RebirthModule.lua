@@ -285,11 +285,11 @@ function RebirthModule:UpdateGui()
             end
 
             -- change the amount of followers text
-            followersResetText.Text = lplr.leaderstats.Followers.Value
+            followersResetText.Text = self.utility.AbbreviateNumber(lplr.leaderstats.Followers.Value)
 
-            -- change the progress bar text and fullness
+            -- change the progress bar text and progress
             progressBar.Size = UDim2.new(math.min(followersValue / self.followersNeededToRebirth, 1), 0, 1, 0)
-            progressBarText.Text = tostring(followersValue) .. "/" .. tostring(self.followersNeededToRebirth) .. " (" .. tostring(math.round(math.min((followersValue / self.followersNeededToRebirth) * 100, 100))) .. "%)"
+            progressBarText.Text = string.format("%s/%s (%d%%)", self.utility.AbbreviateNumber(followersValue), self.utility.AbbreviateNumber(self.followersNeededToRebirth), math.round(math.min((followersValue / self.followersNeededToRebirth) * 100, 100)))
 
             for _=1,5 do
                 RunService.Heartbeat:Wait()
