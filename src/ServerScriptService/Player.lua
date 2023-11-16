@@ -14,6 +14,7 @@ local PetModule = require(ServerScriptService:WaitForChild("PetModule"))
 local FriendsModule = require(ServerScriptService:WaitForChild("FriendsModule"))
 local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
 local QuestModule = require(ServerScriptService:WaitForChild("QuestModule"))
+local SpinningWheelModule = require(ServerScriptService:WaitForChild("SpinningWheelModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -46,6 +47,7 @@ export type PlayerModule = {
 	friendsModule : FriendsModule.FriendsModule,
 	groupModule : GroupModule.GroupModule,
 	questModule : QuestModule.QuestModule,
+	spinningWheelModule : SpinningWheelModule.SpinningWheelModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -80,6 +82,7 @@ function Player.new(plr : Player)
 
 	--DataStore2("followers", plr):Set(nil)
 	--DataStore2("coins", plr):Set(nil)
+	-- DataStore2("lastPlayed", p.player):Set(nil)
 
 	p.followers = DataStore2("followers", plr):Get(0)
 	p.nextFollowerGoal = math.pow(10, math.ceil(math.log10(p.followers))) -- find the next power of 10
@@ -128,6 +131,13 @@ function Player.new(plr : Player)
 	p.potionModule = PotionModule.new(plr)
 
 	p.petModule = PetModule.new(plr)
+
+	p.spinningWheelModule = SpinningWheelModule.new(plr)
+	-- give a free spin if the player hasn't played today
+	if not p.alreadyPlayedToday then
+		p.spinningWheelModule:GiveFreeSpin("normal")
+		p.spinningWheelModule:GiveFreeSpin("normal")
+	end
 
 	p.friendsModule = FriendsModule.new(plr)
 
@@ -178,7 +188,7 @@ function Player:UpdateFollowersMultiplier()
 		(1 + self.friendsModule.followersMultiplier) *
 		self.gamepassModule:GetFollowersMultiplier()
 
-	print("followers multiplier", self.followersMultiplier, self.upgradeModule.followersMultiplier, self.rebirthModule.followersMultiplier, self.potionModule.followersMultiplier, self.petModule.followersMultiplier, self.friendsModule.followersMultiplier, self.gamepassModule:GetFollowersMultiplier())
+	-- print("followers multiplier", self.followersMultiplier, self.upgradeModule.followersMultiplier, self.rebirthModule.followersMultiplier, self.potionModule.followersMultiplier, self.petModule.followersMultiplier, self.friendsModule.followersMultiplier, self.gamepassModule:GetFollowersMultiplier())
 end
 
 
@@ -193,7 +203,7 @@ function Player:UpdateCoinsMultiplier()
 		(1 + self.friendsModule.coinsMultiplier) *
 		self.gamepassModule:GetCoinsMultiplier()
 
-	print("coins multiplier", self.coinsMultiplier, self.upgradeModule.coinsMultiplier, self.potionModule.coinsMultiplier, self.friendsModule.coinsMultiplier, self.gamepassModule:GetCoinsMultiplier())
+	-- print("coins multiplier", self.coinsMultiplier, self.upgradeModule.coinsMultiplier, self.potionModule.coinsMultiplier, self.friendsModule.coinsMultiplier, self.gamepassModule:GetCoinsMultiplier())
 end
 
 
@@ -296,7 +306,7 @@ function Player:UpdateAutopostInterval()
 			(self.potionModule.speedBoost),
 			220
 		)
-	print("new autopost invertal: ", self.postModule.autoPostInterval, "(", (upgrade.baseValue + upgrade.upgradeValues[upgrade.level]), ", ", self.caseModule.speedBoost, ", ", self.potionModule.speedBoost, ")")
+	-- print("new autopost invertal: ", self.postModule.autoPostInterval, "(", (upgrade.baseValue + upgrade.upgradeValues[upgrade.level]), ", ", self.caseModule.speedBoost, ", ", self.potionModule.speedBoost, ")")
 end
 
 

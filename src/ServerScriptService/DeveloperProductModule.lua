@@ -6,6 +6,7 @@ local Types = ServerScriptService:WaitForChild("Types")
 
 local RebirthRE : RemoteEvent = ReplicatedStorage:WaitForChild("Rebirth")
 local PetsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Pets")
+local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel")
 
 
 type receiptInfo = {
@@ -38,7 +39,9 @@ type DeveloperProducts = {
     FiveXFollowersPotion30Min : number,
     TwoXCoinsPotion30Min : number,
     FiveXCoinsPotion30Min : number,
-    TenXFollowersAndCoinsPotion100Hours : number
+    TenXFollowersAndCoinsPotion100Hours : number,
+    NormalWheelSpin : number,
+    CrazyWheelSpin : number
 }
 
 export type DeveloperProductModule = {
@@ -70,7 +73,9 @@ DeveloperProductModule.developerProducts = {
     FiveXFollowersPotion30Min = 1650535260,
     TwoXCoinsPotion30Min = 1650535902,
     FiveXCoinsPotion30Min = 1650535469,
-    TenXFollowersAndCoinsPotion100Hours = 1650536241
+    TenXFollowersAndCoinsPotion100Hours = 1650536241,
+    NormalWheelSpin = 1688137977,
+    CrazyWheelSpin = 1688138251
 }
 
 
@@ -206,6 +211,18 @@ function DeveloperProductModule.BoughtDeveloperProduct(receiptInfo : receiptInfo
         elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.TenXFollowersAndCoinsPotion100Hours then
             p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Coins, 10, 60000, p)
             p.potionModule:CreateAndUsePotion(p.potionModule.potionTypes.Followers, 10, 60000, p)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.NormalWheelSpin then
+            p.spinningWheelModule:SwitchWheel("normal")
+            p.spinningWheelModule:SpinWheel()
+            SwitchWheelRE:FireClient(p.player, "normal")
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+
+        elseif receiptInfo.ProductId == DeveloperProductModule.developerProducts.CrazyWheelSpin then
+            p.spinningWheelModule:SwitchWheel("crazy")
+            p.spinningWheelModule:SpinWheel()
+            SwitchWheelRE:FireClient(p.player, "crazy")
             return Enum.ProductPurchaseDecision.PurchaseGranted
         end
 	end

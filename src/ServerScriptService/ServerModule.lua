@@ -44,6 +44,10 @@ local ClaimQuestRewardRF : RemoteFunction = ReplicatedStorage:WaitForChild("Clai
 local UpdateQuestProgressRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateQuestProgress")
 local UpdateNextEventRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateNextEvent")
 local TimeLeftBeforeEventStartRE : RemoteEvent = ReplicatedStorage:WaitForChild("TimeLeftBeforeEventStart")
+local SpinWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheel")
+local SpinWheelEndedRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheelEnded")
+local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel")
+local UpdateFreeSpinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFreeSpins")
 
 local LeaderboardsDataBF : BindableFunction = game:GetService("ServerStorage"):WaitForChild("LeaderboardsData")
 
@@ -268,6 +272,9 @@ function ServerModule.onJoin(plr : Player)
 		-- fire the client to load the next event
 		UpdateNextEventRE:FireClient(plr, EventsModule.nextEvent)
 		TimeLeftBeforeEventStartRE:FireClient(plr, (EventsModule.timeBeforeNextEvent - os.time()) / 60)
+
+		-- fire the client to load the free spins
+		UpdateFreeSpinsRE:FireClient(plr, p.spinningWheelModule.normalFreeSpinsLeft, p.spinningWheelModule.crazyFreeSpinsLeft)
 
 		-- load the effect of the game passes the player owns
 		p.gamepassModule:LoadOwnedGamePasses(p)
@@ -788,6 +795,47 @@ UpdateQuestProgressRE.OnServerEvent:Connect(function(plr : Player, updateProgres
 		if p then
 			p.questModule.updateUIProgress = updateProgress
 		end
+	end
+end)
+
+
+--[[
+	Fired when the player wants to spin the wheel
+
+	@param plr : Player, the player who wants to spin the wheel
+	@return boolean, true if the player could spin the wheel, false otherwise
+]]--
+SpinWheelRE.OnServerEvent:Connect(function(plr : Player)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		p.spinningWheelModule:FreeSpinWheel()
+	end
+end)
+
+
+--[[
+	Fired when the player spun the wheel and the wheel spin ended
+
+	@param plr : Player, the player who spun the wheel
+]]--
+SpinWheelEndedRE.OnServerEvent:Connect(function(plr : Player)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		p.spinningWheelModule:WheelSpinEnded(p)
+	end
+end)
+
+
+--[[
+	Fired when the player wants to switch the wheel
+
+	@param plr : Player, the player who wants to switch the wheel
+	@param wheel : string, the wheel the player wants to switch to
+]]--
+SwitchWheelRE.OnServerEvent:Connect(function(plr : Player, wheel : string)
+	local p : Player.PlayerModule = players[plr.Name]
+	if p then
+		p.spinningWheelModule:SwitchWheel(wheel)
 	end
 end)
 

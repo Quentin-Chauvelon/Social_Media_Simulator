@@ -31,6 +31,9 @@ local TimeLeftBeforeEventStartRE : RemoteEvent = ReplicatedStorage:WaitForChild(
 local EventCountdownRE : RemoteEvent = ReplicatedStorage:WaitForChild("EventCountdown")
 local StartEventRE : RemoteEvent = ReplicatedStorage:WaitForChild("StartEvent")
 local CollectedEventCoinRE : RemoteEvent = ReplicatedStorage:WaitForChild("CollectedEventCoin")
+local SpinWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheel")
+local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel")
+local UpdateFreeSpinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFreeSpins")
 
 local lplr = Players.LocalPlayer
 
@@ -58,6 +61,7 @@ local GroupModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("Gro
 local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("GamePassModule"))
 local QuestModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("QuestModule"))
 local EventsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("EventsModule"))
+local SpinningWheelModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("SpinningWheelModule"))
 
 
 local currentCamera : Camera = workspace.CurrentCamera
@@ -68,7 +72,8 @@ local menu : ScreenGui = playerGui:WaitForChild("Menu")
 local menuSideButtons : Frame = menu:WaitForChild("SideButtons")
 local friendsBoostButton : TextButton = menu:WaitForChild("FriendsBoost")
 local menuFollowersIcon : ImageButton = menu:WaitForChild("TabsContainer"):WaitForChild("FollowersContainer"):WaitForChild("FollowersIcon")
-local menuCoinsIcon : ImageButton = menu:WaitForChild("TabsContainer"):WaitForChild("CoinsContainer"):WaitForChild("CoinsIcon")
+local menuCoinsIcon : ImageButton = menu.TabsContainer:WaitForChild("CoinsContainer"):WaitForChild("CoinsIcon")
+local spinningWheelButton : ImageButton = menu.TabsContainer:WaitForChild("Container"):WaitForChild("SpinningWheelButton")
 
 
 local upgradePosts : ScreenGui = playerGui:WaitForChild("UpgradePosts")
@@ -121,6 +126,9 @@ local groupModule : GroupModule.GroupModule = GroupModule.new(Utility)
 local questModule : QuestModule.QuestModule = QuestModule.new(Utility)
 
 local eventsModule : EventsModule.EventsModule = EventsModule.new(Utility)
+
+local spinningWheelModule : SpinningWheelModule.SpinningWheelModule = SpinningWheelModule.new(Utility)
+
 
 GamePassModule.LoadGamePasses()
 
@@ -255,6 +263,36 @@ for _,menuSideButton : GuiObject in ipairs(menuSideButtons:GetChildren()) do
 		end)
 	end
 end
+
+-- tweens to scale the spinning wheel button up and down on mouse enter and mouse leave
+local mouseEnterTween : Tween = TweenService:Create(
+	spinningWheelButton.UIScale,
+	TweenInfo.new(
+		0.15,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.InOut
+	),
+	{Scale = 1.15}
+)
+
+local mouseLeaveTween : Tween = TweenService:Create(
+	spinningWheelButton.UIScale,
+	TweenInfo.new(
+		0.15,
+		Enum.EasingStyle.Quad,
+		Enum.EasingDirection.InOut
+	),
+	{Scale = 1}
+)
+
+spinningWheelButton.MouseEnter:Connect(function()
+	mouseEnterTween:Play()
+end)
+
+spinningWheelButton.MouseLeave:Connect(function()
+	mouseLeaveTween:Play()
+end)
+
 
 
 --[[
@@ -850,6 +888,34 @@ CollectedEventCoinRE.OnClientEvent:Connect(function(gain : number)
 end)
 
 
+--[[
+	Spins the wheel with the given reward
+
+	@param rewardId : number, the id of the reward to give to the player
+]]--
+SpinWheelRE.OnClientEvent:Connect(function(rewardId : number)
+	spinningWheelModule:SpinWheel(rewardId)
+end)
+
+
+--[[
+	Switches the wheel to the given one
+
+	@param wheel : string, the wheel to switch to
+]]--
+SwitchWheelRE.OnClientEvent:Connect(function(wheel : string)
+	spinningWheelModule:SwitchWheel(wheel)
+end)
+
+
+UpdateFreeSpinsRE.OnClientEvent:Connect(function(normalFreeSpins : number, crazyFreeSpins : number)
+	spinningWheelModule.normalFreeSpinsLeft = normalFreeSpins
+	spinningWheelModule.crazyFreeSpinsLeft = crazyFreeSpins
+
+	spinningWheelModule:UpdateFreeSpinUI()
+end)
+
+
 -- add the vip tag before the player message if they are vip
 TextChatService.OnIncomingMessage = function(message: TextChatMessage)
 	local properties : TextChatMessageProperties = Instance.new("TextChatMessageProperties")
@@ -869,4 +935,4 @@ if not game:IsLoaded() then
 	game.Loaded:Wait()
 end
 -- fire the server once the client is loaded
-PlayerLoadedRE:FireServer()	
+PlayerLoadedRE:FireServer()

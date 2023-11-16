@@ -25,6 +25,7 @@ export type PlayerModule = {
 	groupModule : GroupModule,
     questModule : QuestModule,
 	gamepassModule : GamepassModule,
+    spinningWheelModule : SpinningWheelModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
 	UpdateFollowersMultiplier : (self : PlayerModule) -> nil,
@@ -473,6 +474,37 @@ export type EventsModule = {
     StartRainEvent : (coin : Part) -> nil,
     StartFollowersRain : () -> nil,
     StartCoinsRain : () -> nil
+}
+
+
+type WheelReward = {
+    id : number,
+    petId : number,
+    probability : number
+}
+
+type Wheel = {
+    id : number,
+    rewards : {WheelReward},
+}
+
+export type SpinningWheelModule = {
+    spinning : boolean,
+    currentWheel : Wheel,
+    nextReward : WheelReward?,
+    normalFreeSpinsLeft : number,
+    crazyFreeSpinsLeft : number,
+    crazyFreeSpinsUsed : number,
+    plr : Player,
+    new : (plr : Player) -> SpinningWheelModule,
+    GetRandomReward : (self: SpinningWheelModule) -> WheelReward,
+    SpinWheel : (self: SpinningWheelModule) -> boolean,
+    WheelSpinEnded : (self: SpinningWheelModule, p : PlayerModule) -> nil,
+    SwitchWheel : (self: SpinningWheelModule, wheel : string) -> nil,
+    FreeSpinWheel : (self: SpinningWheelModule) -> nil,
+    HasFreeSpin : (self: SpinningWheelModule) -> boolean,
+    GiveFreeSpin : (self: SpinningWheelModule, wheel : string) -> nil,
+    UseFreeSpin : (self: SpinningWheelModule) -> nil,
 }
 
 return nil
