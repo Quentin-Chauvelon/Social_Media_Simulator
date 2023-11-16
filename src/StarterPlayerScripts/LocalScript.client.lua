@@ -201,6 +201,10 @@ end)
 -- move the side buttons up if the player is using a mobile device, otherwise the shop button is too close to the joystick and it can be misclicked easily
 if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and not UserInputService.MouseEnabled and not UserInputService.GamepadEnabled and not GuiService:IsTenFootInterface() then
 	menuSideButtons.AnchorPoint = Vector2.new(0,0.75)
+	menuSideButtons.Size = UDim2.new(0.2, 0, 0.4, 0)
+
+	menuSideButtons.UIGridLayout.CellSize = UDim2.new(0.25, 0, 0.25, 0)
+	menuSideButtons.UIGridLayout.CellPadding = UDim2.new(0.08, 0, 0.03, 0)
 end
 
 -- resize the menu side buttons UI stroke
