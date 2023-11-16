@@ -147,11 +147,9 @@ function CaseModule:OpenGui()
         end)
 
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
-        self.utility.SetCloseGuiConnection(
-            casesCloseButton.MouseButton1Down:Connect(function()
-                self:CloseGui()
-            end)
-        )
+        self.utility.SetCloseGuiConnection(casesCloseButton, function()
+            self:CloseGui()
+        end)
     end
 end
 
@@ -223,7 +221,7 @@ function CaseModule:SelectCase(caseListItem : ImageButton)
             end
         end
 
-        speedBoostText.Text = "-" .. tostring(caseListItem.SpeedBoost.Value) .. "s on auto post"
+        speedBoostText.Text = "-" .. tostring(caseListItem.SpeedBoost.Value) .. "seconds on auto post"
         casePrice.Text = self.utility.AbbreviateNumber(caseListItem.Price.Value)
     end
 end

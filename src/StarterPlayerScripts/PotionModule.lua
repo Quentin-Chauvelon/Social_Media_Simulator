@@ -241,11 +241,9 @@ function PotionModule:OpenMobileGui()
     if self.utility.OpenGui(mobilePotionsBackground) then
 
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
-        self.utility.SetCloseGuiConnection(
-            mobilePotionsCloseButton.MouseButton1Down:Connect(function()
-                self:CloseMobileGui()
-            end)
-        )
+        self.utility.SetCloseGuiConnection(mobilePotionsCloseButton, function()
+            self:CloseMobileGui()
+        end)
     end
 end
 

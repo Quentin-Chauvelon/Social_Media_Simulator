@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local TextService = game:GetService("TextService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -33,6 +32,7 @@ local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4,["M"] = 7,["B"] = 
 export type Utility = {
     guisToClose : {GuiObject},
     closeGuiConnection : RBXScriptConnection?,
+    callOnClose : () -> nil,
     new : () -> nil,
     BlurBackground : (enabled : boolean) -> nil,
     ResizeUIOnWindowResize : ((viewportSize : Vector2) -> nil) -> nil,
@@ -43,7 +43,7 @@ export type Utility = {
     DisplayError : (text : string, duration : number) -> nil,
     PlayDingSound : () -> nil,
     OpenGui : (ui : GuiObject, duration : number?) -> boolean,
-    SetCloseGuiConnection : (closeConnection : RBXScriptConnection) -> nil,
+    SetCloseGuiConnection : (closeButton : GuiButton, callOnClose : () -> nil) -> nil,
     CloseGui : (ui : GuiObject, duration : number?) -> nil,
     CloseAllGuis : () -> boolean,
     AbbreviateNumber : (number : number) -> string
@@ -304,12 +304,21 @@ end
 --[[
     Sets the gui connection to disconnect when closing the gui
 
-    @param closeConnection : RBXScriptConnection, the connection
+    @param closeButton : GuiButton, the button to close the gui
+    @param callOnClose : () -> nil, the function to call when closing the gui
+
 ]]
-function Utility.SetCloseGuiConnection(closeConnection : RBXScriptConnection)
-    if not Utility.closeGuiConnection then
-        Utility.closeGuiConnection = closeConnection
+function Utility.SetCloseGuiConnection(closeButton : GuiButton, callOnClose : () -> nil)
+    if Utility.closeGuiConnection then
+        Utility.closeGuiConnection:Disconnect()
+        Utility.closeGuiConnection = nil
     end
+
+    Utility.closeGuiConnection = closeButton.MouseButton1Down:Connect(function()
+        callOnClose()
+    end)
+
+    Utility.callOnClose = callOnClose
 end
 
 
@@ -335,12 +344,6 @@ function Utility.CloseGui(ui : GuiObject, duration : number?)
             function()
                 ui.Visible = false
                 ui.Size = upgradesOriginalSize
-                
-                -- disconnect the close gui connection
-                if Utility.closeGuiConnection then
-                    Utility.closeGuiConnection:Disconnect()
-                    Utility.closeGuiConnection = nil
-                end
             end
         )
     end
@@ -349,9 +352,22 @@ end
 
 --[[
     Tweens all guis from the Utility.guisToClose table to close them (from X,Y to 0,0)
+
+    @return boolean, true if at least one gui was opened, false otherwise
 ]]
 function Utility.CloseAllGuis() : boolean
     local wasOneGuiOpened : boolean = false
+
+    if Utility.callOnClose then
+        Utility.callOnClose()
+        Utility.callOnClose = nil
+    end
+
+    -- disconnect the close gui connection
+    if Utility.closeGuiConnection then
+        Utility.closeGuiConnection:Disconnect()
+        Utility.closeGuiConnection = nil
+    end
 
     for _,ui : GuiObject in pairs(Utility.guisToClose) do
         if ui.Visible then

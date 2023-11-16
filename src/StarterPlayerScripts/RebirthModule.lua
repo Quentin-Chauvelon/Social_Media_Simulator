@@ -241,11 +241,9 @@ function RebirthModule:OpenGui()
     if self.utility.OpenGui(rebirthsBackground) then
 
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
-        self.utility.SetCloseGuiConnection(
-            rebirthCloseButton.MouseButton1Down:Connect(function()
-                self:CloseGui()
-            end)
-        )
+        self.utility.SetCloseGuiConnection(rebirthCloseButton, function()
+            self:CloseGui()
+        end)
     end
 
     -- update the upgrades values + start upgrading the follower every few frames

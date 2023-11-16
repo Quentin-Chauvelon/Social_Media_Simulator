@@ -388,12 +388,10 @@ function CustomPost:OpenCustomPostGui()
         end)
 
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
-        self.utility.SetCloseGuiConnection(
-            customPostsCloseButton.MouseButton1Down:Connect(function()
-                createPostConnection:Disconnect()
-                self:CloseCustomPostGui()
-            end)
-        )
+        self.utility.SetCloseGuiConnection(customPostsCloseButton, function()
+            createPostConnection:Disconnect()
+            self:CloseCustomPostGui()
+        end)
     end
 end
 

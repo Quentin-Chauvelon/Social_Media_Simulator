@@ -525,11 +525,9 @@ function SpinningWheelModule:OpenGui()
         end))
 
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
-        self.utility.SetCloseGuiConnection(
-            spinningWheelCloseButton.MouseButton1Down:Connect(function()
-                self:CloseGui()
-            end)
-        )
+        self.utility.SetCloseGuiConnection(spinningWheelCloseButton, function()
+            self:CloseGui()
+        end)
     end
 end
 
@@ -538,6 +536,7 @@ end
     Closes the spinning wheel GUI and clears all button connections.
 ]]--
 function SpinningWheelModule:CloseGui()
+    print("closed")
     self:HideOdds()
 
     for _,buttonConnection : RBXScriptConnection in pairs(self.buttonsConnections) do

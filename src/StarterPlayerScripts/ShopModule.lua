@@ -495,11 +495,9 @@ function ShopModule:OpenGui()
 
 
         -- set the close gui connection (only do it if the gui was not already open, otherwise multiple connection exist and it is called multiple times)
-        self.utility.SetCloseGuiConnection(
-            shopCloseButton.MouseButton1Down:Connect(function()
-                self:CloseGui()
-            end)
-        )
+        self.utility.SetCloseGuiConnection(shopCloseButton, function()
+            self:CloseGui()
+        end)
     end
 end
 
