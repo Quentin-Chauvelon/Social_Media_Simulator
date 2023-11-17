@@ -68,16 +68,11 @@ export type EventsModule = {
 ]]--
 function EventsModule.StartEventsLoop()
     EventsModule.eventsLoopPromise = Promise.new(function()
+        EventsModule.nextEvent = EventsModule:GetNextEvent()
+        EventsModule.timeBeforeNextEvent = os.time() + 315
+
         while true do
-            EventsModule.nextEvent = EventsModule:GetNextEvent()
-
-            task.wait(2)
-            UpdateNextEventRE:FireAllClients(EventsModule.nextEvent)
-
             task.wait(15)
-            TimeLeftBeforeEventStartRE:FireAllClients(10)
-
-            task.wait(5 * 60)
             TimeLeftBeforeEventStartRE:FireAllClients(5)
 
             task.wait(3 * 60)
@@ -96,6 +91,15 @@ function EventsModule.StartEventsLoop()
             repeat
                 task.wait(1)
             until not EventsModule.eventInProgress
+
+            EventsModule.nextEvent = EventsModule:GetNextEvent()
+
+            task.wait(2)
+            UpdateNextEventRE:FireAllClients(EventsModule.nextEvent)
+
+            task.wait(15)
+            TimeLeftBeforeEventStartRE:FireAllClients(10)
+            task.wait((5 * 60) - 15)
         end
     end)
 end
