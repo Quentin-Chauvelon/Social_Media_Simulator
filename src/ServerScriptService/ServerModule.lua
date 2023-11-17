@@ -78,7 +78,7 @@ LeaderboardsDataBF.OnInvoke = function(playerName : string, leaderboardType : st
 	if p then
 
 		if leaderboardType == "followers" then
-			return p.followers
+			return math.round(p.followers)
 		elseif leaderboardType == "rebirths" then
 			return p.rebirthModule.rebirthLevel
 		elseif leaderboardType == "timePlayed" then
