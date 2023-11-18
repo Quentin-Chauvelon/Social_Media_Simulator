@@ -123,13 +123,15 @@ end
 function EventsModule:DisplayTimeLeftBeforeEventStart(timeLeft : number)
     self.timeBeforeNextEvent = timeLeft * 60
 
-    timeLeftBeforeStart.TextColor3 = self.nextEvent.backgroundColor
-    timeLeftBeforeStart.UIStroke.Color = self.nextEvent.borderColor
-    timeLeftBeforeStart.Text = string.format("%s event starting in %d minutes", self.nextEvent.name, timeLeft)
+    if timeLeftBeforeStart then
+        timeLeftBeforeStart.TextColor3 = self.nextEvent.backgroundColor
+        timeLeftBeforeStart.UIStroke.Color = self.nextEvent.borderColor
+        timeLeftBeforeStart.Text = string.format("%s event starting in %d minutes", self.nextEvent.name, timeLeft)
 
-    timeLeftBeforeStart.Visible = true
-    task.wait(12)
-    timeLeftBeforeStart.Visible = false
+        timeLeftBeforeStart.Visible = true
+        task.wait(12)
+        timeLeftBeforeStart.Visible = false
+    end
 end
 
 
