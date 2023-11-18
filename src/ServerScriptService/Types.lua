@@ -26,6 +26,7 @@ export type PlayerModule = {
     questModule : QuestModule,
 	gamepassModule : GamepassModule,
     spinningWheelModule : SpinningWheelModule,
+    emojisReactionsModule : EmojisReactionsModule,
 	maid : Maid,
 	new : (plr : Player) -> PlayerModule,
 	UpdateFollowersMultiplier : (self : PlayerModule) -> nil,
@@ -505,6 +506,19 @@ export type SpinningWheelModule = {
     HasFreeSpin : (self: SpinningWheelModule) -> boolean,
     GiveFreeSpin : (self: SpinningWheelModule, wheel : string) -> nil,
     UseFreeSpin : (self: SpinningWheelModule) -> nil,
+}
+
+
+export type EmojisReactionsModule = {
+    emojiReactionBillboardGui : BillboardGui,
+    inCooldown : boolean,
+    lastEmojiTime : number,
+    unlockedEmojis : {string},
+    cooldownPromise : Promise,
+    plr : Player,
+    new : (p : PlayerModule) -> EmojisReactionsModule,
+    DisplayEmoji : (self : EmojisReactionsModule, emojiName : string) -> nil,
+    UnlockEmoji : (self : EmojisReactionsModule, emojiName : string) -> nil,
 }
 
 return nil

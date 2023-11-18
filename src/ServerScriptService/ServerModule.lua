@@ -48,6 +48,8 @@ local SpinWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheel")
 local SpinWheelEndedRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheelEnded")
 local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel")
 local UpdateFreeSpinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFreeSpins")
+local EmojiReactionRE : RemoteEvent = ReplicatedStorage:WaitForChild("EmojiReaction")
+local UnlockEmojiReactionRE : RemoteEvent = ReplicatedStorage:WaitForChild("UnlockEmojiReaction")
 
 local LeaderboardsDataBF : BindableFunction = game:GetService("ServerStorage"):WaitForChild("LeaderboardsData")
 
@@ -183,6 +185,8 @@ function ServerModule.onJoin(plr : Player)
 			local petsFolder : Folder = Instance.new("Folder")
 			petsFolder.Name = "Pets"
 			petsFolder.Parent = character
+			
+			p.emojisReactionsModule.emojiReactionBillboardGui.Adornee = character:WaitForChild("Head")
 
 			Promise.new(function(resolve)
 				task.wait(0.5)
@@ -211,6 +215,8 @@ function ServerModule.onJoin(plr : Player)
 
 	if plr.Character then
 		plr.Character.PrimaryPart.CFrame = CFrame.new(p.plotModule.phone.TeleportPart.Position, p.plotModule.phone.PrimaryPart.Position)
+
+		p.emojisReactionsModule.emojiReactionBillboardGui.Adornee = plr.Character:WaitForChild("Head")
 
 		-- if the player resetted his character, recreate all the attachments (check if it doesn't exist first because when the player joins the attachments can be created before this function runs and we don't want to create them twice)
 		if plr.Character.HumanoidRootPart and not plr.Character.HumanoidRootPart:FindFirstChild("PetAttachment") then
@@ -283,6 +289,14 @@ function ServerModule.onJoin(plr : Player)
 
 		-- fire the client to load the free spins
 		UpdateFreeSpinsRE:FireClient(plr, p.spinningWheelModule.normalFreeSpinsLeft, p.spinningWheelModule.crazyFreeSpinsLeft)
+
+		local unlockedEmojis : {string} = {}
+		for emoji : string, unlocked : boolean in pairs(p.emojisReactionsModule.unlockedEmojis) do
+			if unlocked then
+				table.insert(unlockedEmojis, emoji)
+			end
+		end
+		UnlockEmojiReactionRE:FireClient(plr, unlockedEmojis)
 
 		-- load the effect of the game passes the player owns
 		p.gamepassModule:LoadOwnedGamePasses(p)
@@ -849,6 +863,22 @@ SwitchWheelRE.OnServerEvent:Connect(function(plr : Player, wheel : string)
 	local p : Player.PlayerModule = players[plr.Name]
 	if p then
 		p.spinningWheelModule:SwitchWheel(wheel)
+	end
+end)
+
+
+--[[
+	Fired when the player wants to react with an emoji
+
+	@param plr : Player, the player who wants to react to a post
+	@param emojiName : string, the name of the emoji the player wants to react with
+]]--
+EmojiReactionRE.OnServerEvent:Connect(function(plr : Player, emojiName : string)
+	if emojiName and typeof(emojiName) == "string" then
+		local p : Player.PlayerModule = players[plr.Name]
+		if p then
+			p.emojisReactionsModule:DisplayEmoji(emojiName)
+		end
 	end
 end)
 

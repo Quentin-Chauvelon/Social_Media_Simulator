@@ -725,6 +725,13 @@ function PetModule:OpenEggs(p : Types.PlayerModule, eggId : number, numberOfEggs
                 end
             end
 
+            -- unlock the emojis reactions for the opened pets
+            local openedPetsIdentifiers : {string} = {}
+            for _,pet : pet in pairs(openedPets) do
+                table.insert(openedPetsIdentifiers, pet.identifier)
+            end
+            p.emojisReactionsModule:UnlockEmojis(openedPetsIdentifiers)
+
             -- remove the price of the egg times the number of times the player got a pet
             p:UpdateCoinsAmount(-price * #openedPets)
 

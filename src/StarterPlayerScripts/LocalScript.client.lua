@@ -34,6 +34,7 @@ local CollectedEventCoinRE : RemoteEvent = ReplicatedStorage:WaitForChild("Colle
 local SpinWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheel")
 local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel")
 local UpdateFreeSpinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFreeSpins")
+local UnlockEmojiReactionRE : RemoteEvent = ReplicatedStorage:WaitForChild("UnlockEmojiReaction")
 
 local lplr = Players.LocalPlayer
 
@@ -62,7 +63,7 @@ local GamePassModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("
 local QuestModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("QuestModule"))
 local EventsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("EventsModule"))
 local SpinningWheelModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("SpinningWheelModule"))
-
+local EmojisReactionsModule = require(StarterPlayer.StarterPlayerScripts:WaitForChild("EmojisReactionsModule"))
 
 local currentCamera : Camera = workspace.CurrentCamera
 
@@ -128,6 +129,8 @@ local questModule : QuestModule.QuestModule = QuestModule.new(Utility)
 local eventsModule : EventsModule.EventsModule = EventsModule.new(Utility)
 
 local spinningWheelModule : SpinningWheelModule.SpinningWheelModule = SpinningWheelModule.new(Utility)
+
+local emojisReactionsModule : EmojisReactionsModule.EmojisReactionsModule = EmojisReactionsModule.new(Utility)
 
 
 GamePassModule.LoadGamePasses()
@@ -908,11 +911,27 @@ SwitchWheelRE.OnClientEvent:Connect(function(wheel : string)
 end)
 
 
+--[[
+	Updates the free spins left for the player
+
+	@param normalFreeSpins : number, the number of normal free spins left
+	@param crazyFreeSpins : number, the number of crazy free spins left
+]]--
 UpdateFreeSpinsRE.OnClientEvent:Connect(function(normalFreeSpins : number, crazyFreeSpins : number)
 	spinningWheelModule.normalFreeSpinsLeft = normalFreeSpins
 	spinningWheelModule.crazyFreeSpinsLeft = crazyFreeSpins
 
 	spinningWheelModule:UpdateFreeSpinUI()
+end)
+
+
+--[[
+	Unlocks the given emojis
+
+	@param emoji : {string}, the emojis to unlock
+]]
+UnlockEmojiReactionRE.OnClientEvent:Connect(function(emojis : {string})
+	emojisReactionsModule:UnlockEmojis(emojis)
 end)
 
 

@@ -15,6 +15,7 @@ local FriendsModule = require(ServerScriptService:WaitForChild("FriendsModule"))
 local GroupModule = require(ServerScriptService:WaitForChild("GroupModule"))
 local QuestModule = require(ServerScriptService:WaitForChild("QuestModule"))
 local SpinningWheelModule = require(ServerScriptService:WaitForChild("SpinningWheelModule"))
+local EmojisReactionsModule = require(ServerScriptService:WaitForChild("EmojisReactionsModule"))
 local GamepassModule = require(ServerScriptService:WaitForChild("GamepassModule"))
 local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
@@ -48,6 +49,7 @@ export type PlayerModule = {
 	groupModule : GroupModule.GroupModule,
 	questModule : QuestModule.QuestModule,
 	spinningWheelModule : SpinningWheelModule.SpinningWheelModule,
+	emojisReactionsModule : EmojisReactionsModule.EmojisReactionsModule,
 	gamepassModule : GamepassModule.GamepassModule,
 	maid : Maid.Maid,
 	new : (plr : Player) -> PlayerModule,
@@ -138,6 +140,8 @@ function Player.new(plr : Player)
 		p.spinningWheelModule:GiveFreeSpin("normal")
 		p.spinningWheelModule:GiveFreeSpin("normal")
 	end
+
+	p.emojisReactionsModule = EmojisReactionsModule.new(p)
 
 	p.friendsModule = FriendsModule.new(plr)
 
