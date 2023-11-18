@@ -227,7 +227,9 @@ end
 
 
 function PotionModule:OnLeave()
-    self.potionsTimeLeft:cancel()
+    if self.potionsTimeLeft then
+        self.potionsTimeLeft:cancel()
+    end
 
     setmetatable(self, nil)
 	self = nil

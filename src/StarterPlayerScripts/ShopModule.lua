@@ -79,11 +79,11 @@ local limitedTimeOffers : {[LimitedTimeOffers] : LimitedTimeOffer} = {
         dateTextLabel = shopContent.Potions3.TimeLeft
     },
     spaceCase = {
-        endDate = os.time({year = 2023, month = 11, day = 15, hour = 23, min = 59, sec = 59}),
+        endDate = os.time({year = 2023, month = 11, day = 23, hour = 23, min = 59, sec = 59}),
         dateTextLabel = shopContent.GamePassesLimitedOffersContainer.SpaceCaseLimitedTimeOfferContainer.TimeLeft
     },
     autoClicker = {
-        endDate = os.time({year = 2023, month = 11, day = 15, hour = 23, min = 59, sec = 59}),
+        endDate = os.time({year = 2023, month = 11, day = 23, hour = 23, min = 59, sec = 59}),
         dateTextLabel = shopContent.GamePassesLimitedOffersContainer.AutoClickerLimitedTimeOfferContainer.TimeLeft
     }
 }

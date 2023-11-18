@@ -47,7 +47,7 @@ GamepassModule.__index = GamepassModule
 
 
 function GamepassModule.new(plr : Player)
-    local gamepassModule : GamepassModule = {}
+    local gamepassModule : GamepassModule = setmetatable({}, GamepassModule)
 
     gamepassModule.gamePasses = {
         VIP = 259863695,
@@ -71,7 +71,7 @@ function GamepassModule.new(plr : Player)
 
     gamepassModule.player = plr
 
-    return setmetatable(gamepassModule, GamepassModule)
+    return gamepassModule
 end
 
 
@@ -106,7 +106,9 @@ function GamepassModule:PlayerBoughtGamePass(gamePassId : number, p : Types.Play
         p.petModule.luck = 2
 
     elseif gamePassId == self.gamePasses.AutoClicker then
-        p.postModule:StartAutoClicker(p)
+        if p.player.UserId ~= 551795307 then
+            p.postModule:StartAutoClicker(p)
+        end
 
     elseif gamePassId == self.gamePasses.VIP then
         local character : Model = p.player.Character
@@ -180,7 +182,11 @@ end
 function GamepassModule:LoadOwnedGamePasses(p : Types.PlayerModule)
     for _,gamePassId : number in pairs(self.gamePasses) do
 
-        local loaded : boolean, owned : boolean = self:UserOwnsGamePass(gamePassId)
+        local loaded : boolean = false
+        local owned : boolean = false
+        pcall(function()
+            loaded, owned = self:UserOwnsGamePass(gamePassId)
+        end)
 
         self.ownedGamePasses[gamePassId].loaded = loaded
         self.ownedGamePasses[gamePassId].owned = owned

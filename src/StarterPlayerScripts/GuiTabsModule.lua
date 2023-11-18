@@ -1,10 +1,6 @@
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Utility = require(script.Parent:WaitForChild("Utility"))
-
-local FollowersRE : RemoteEvent = ReplicatedStorage:WaitForChild("Followers")
-local coinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("Coins")
 
 local lplr = Players.LocalPlayer
 

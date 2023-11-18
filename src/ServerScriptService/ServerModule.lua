@@ -136,12 +136,12 @@ function ServerModule.onJoin(plr : Player)
 	end
 	
 	if not p.plotModule.phone or not p.plotModule.screen then
-		plr:Kick("There has been a problem loading you in. We apologize for the inconvenience. Please try logging in again.")
+		plr:Kick("There seems to have been a problem loading you in. Please try to restart your game. We apologize for the inconvenience.")
 		ServerModule.onLeave(plr)
 	end
 	--print(plr.Name, p.plotModule, p.plotModule.phone)
 	--print(p.plotModule.phone.Owner.Value, p.plotModule.phone.FollowerGoal)
-	print("player got screen", p.plotModule.screen)
+	-- print("player got screen", p.plotModule.screen)
 
 	-- load the follower goal progress and goal
 	--p.plotModule.phone.FollowerGoal.Goal.SurfaceGui.GoalText.Text = tostring(p.nextFollowerGoal .. " followers")
@@ -300,9 +300,12 @@ function ServerModule.onJoin(plr : Player)
 			local friendP : Player.PlayerModule = players[friendName]
 			if friendP then
 				-- add all the friends for the player that joined
-				p.friendsModule:FriendJoined()
+				pcall(function()
+					p.friendsModule:FriendJoined()
 
-				friendP.friendsModule:FriendJoined()
+					friendP.friendsModule:FriendJoined()
+				end)
+
 
 				-- update the multipliers
 				friendP:UpdateFollowersMultiplier()
@@ -347,7 +350,9 @@ function ServerModule.onLeave(playerName)
 		for _,friendName : string in pairs(onlineFriends) do
 			local p : Player.PlayerModule = players[friendName]
 			if p then
-				p.friendsModule:FriendLeft()
+				pcall(function()
+					p.friendsModule:FriendLeft()
+				end)
 
 				-- update the multipliers
 				p:UpdateFollowersMultiplier()
@@ -800,7 +805,7 @@ end
 UpdateQuestProgressRE.OnServerEvent:Connect(function(plr : Player, updateProgress : boolean)
 	if updateProgress ~= nil and typeof(updateProgress) == "boolean" then
 		local p : Player.PlayerModule = players[plr.Name]
-		if p then
+		if p and p.questModule then
 			p.questModule.updateUIProgress = updateProgress
 		end
 	end

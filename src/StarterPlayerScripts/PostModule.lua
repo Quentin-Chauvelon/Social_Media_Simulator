@@ -5,6 +5,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextService = game:GetService("TextService")
 local PostTemplates = ReplicatedStorage:WaitForChild("PostsTemplates")
 
+local lplr = Players.LocalPlayer
+
 local playersThumbnails = {}
 local camera = workspace.CurrentCamera
 
@@ -103,6 +105,10 @@ end
 	if the post is visible on the player screen. True to tween, false to move
 ]]--
 local function UpdatePostContent(post : Frame, screen : Frame, plr : Player, message : string, tween : boolean)
+	if not plr then
+		plr = lplr
+	end
+
 	post.Name = "LastPost"
 
 	post.DisplayName.Text = plr.DisplayName

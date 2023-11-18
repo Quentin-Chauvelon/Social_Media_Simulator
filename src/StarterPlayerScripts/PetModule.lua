@@ -1847,6 +1847,9 @@ function PetModule:AddPetToMachine(pet : pet)
         self:FilterPetsList(pet)
     end
 
+    -- move the scrolling frame to the top
+    inventoryPetsListContainer.CanvasPosition = Vector2.new(0, 0)
+
     -- if the player has already filled the machine, return
     if #self.petsInMachine == self.maxNumberOfPetsInMachine then return end
 

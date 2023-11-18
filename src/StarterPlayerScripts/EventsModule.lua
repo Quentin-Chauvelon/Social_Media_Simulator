@@ -10,6 +10,8 @@ local lplr = Players.LocalPlayer
 
 local playerGui : PlayerGui = lplr.PlayerGui
 
+local uiLoaded : boolean = false
+
 local menuScreenGui : ScreenGui = playerGui:WaitForChild("Menu")
 local menuFollowersIcon : ImageLabel = menuScreenGui:WaitForChild("TabsContainer"):WaitForChild("FollowersContainer"):WaitForChild("FollowersIcon")
 local menuCoinsIcon : ImageLabel = menuScreenGui:WaitForChild("TabsContainer"):WaitForChild("CoinsContainer"):WaitForChild("CoinsIcon")
@@ -31,6 +33,14 @@ local collectedIcon : ImageLabel = collectedContainer:WaitForChild("Icon")
 
 local rainEventCoins : Folder = workspace:WaitForChild("RainEventCoins")
 local eventIconsTweens : Folder = eventsScreenGui:WaitForChild("EventIconsTweens")
+
+nextEventBackground:WaitForChild("UIStroke")
+timeLeftBeforeStart:WaitForChild("UIStroke")
+countdownProgressBarContainer:WaitForChild("UIStroke")
+countdownTimer:WaitForChild("UIStroke")
+collectedText:WaitForChild("UIStroke")
+
+uiLoaded = true
 
 
 type Event = {
@@ -107,7 +117,7 @@ function EventsModule:UpdateNextEvent(event : Event)
     self.nextEvent = event
     self.timeBeforeNextEvent = 615 -- 10m15s
 
-    if nextEventBackground then
+    if uiLoaded then
         nextEventBackground.BackgroundColor3 = event.backgroundColor
         nextEventBackground.UIStroke.Color = event.borderColor
         nextEventIcon.Image = event.eventIcon
@@ -123,7 +133,7 @@ end
 function EventsModule:DisplayTimeLeftBeforeEventStart(timeLeft : number)
     self.timeBeforeNextEvent = timeLeft * 60
 
-    if timeLeftBeforeStart then
+    if uiLoaded and self.nextEvent then
         timeLeftBeforeStart.TextColor3 = self.nextEvent.backgroundColor
         timeLeftBeforeStart.UIStroke.Color = self.nextEvent.borderColor
         timeLeftBeforeStart.Text = string.format("%s event starting in %d minutes", self.nextEvent.name, timeLeft)
@@ -148,11 +158,13 @@ function EventsModule:StartCountdown(text : string, duration : number)
         self.countdownPromise = nil
     end
 
-    countdownProgressBarContainer.BackgroundColor3 = self.nextEvent.backgroundColor
-    countdownProgressBarContainer.UIStroke.Color = self.nextEvent.borderColor
-    countdownProgressBar.BackgroundColor3 = self.nextEvent.progressBarColor
-    countdownTimer.UIStroke.Color = self.nextEvent.borderColor
-    countdownProgressBar.Size = UDim2.new(0,0,1,0)
+    if uiLoaded and self.nextEvent then
+        countdownProgressBarContainer.BackgroundColor3 = self.nextEvent.backgroundColor
+        countdownProgressBarContainer.UIStroke.Color = self.nextEvent.borderColor
+        countdownProgressBar.BackgroundColor3 = self.nextEvent.progressBarColor
+        countdownTimer.UIStroke.Color = self.nextEvent.borderColor
+        countdownProgressBar.Size = UDim2.new(0,0,1,0)
+    end
 
     -- Fade in
     countdownProgressBarContainer.Visible = true
@@ -175,8 +187,10 @@ function EventsModule:StartCountdown(text : string, duration : number)
 
     self.countdownPromise = Promise.new(function(resolve)
         for timeLeft = duration, 0, -1 do
-            countdownTimer.Text = string.format(text, self.nextEvent.name, timeLeft)
-            task.wait(1)
+            if self.nextEvent then
+                countdownTimer.Text = string.format(text, self.nextEvent.name, timeLeft)
+                task.wait(1)
+            end
         end
 
         resolve()
@@ -221,10 +235,12 @@ end
 function EventsModule:StartEvent()
     self.eventInProgress = true
 
-    collectedText.TextColor3 = self.nextEvent.backgroundColor
-    collectedText.UIStroke.Color = self.nextEvent.borderColor
-    collectedIcon.Image = self.nextEvent.eventIcon
-    collectedContainer.Visible = true
+    if uiLoaded and self.nextEvent then
+        collectedText.TextColor3 = self.nextEvent.backgroundColor
+        collectedText.UIStroke.Color = self.nextEvent.borderColor
+        collectedIcon.Image = self.nextEvent.eventIcon
+        collectedContainer.Visible = true
+    end
 
     coroutine.wrap(function()
         while true do
@@ -254,7 +270,9 @@ function EventsModule:StartEvent()
         end
     end)()
 
-    self:StartCountdown("%s event ends in %d seconds", self.nextEvent.duration)
+    if self.nextEvent then
+        self:StartCountdown("%s event ends in %d seconds", self.nextEvent.duration)
+    end
 end
 
 
@@ -273,38 +291,40 @@ function EventsModule:EndEvent()
     local TWEEN_DURATION : number = 0.5
     local DELAY : number = 0.1
 
-    for _=1,8 do
-        local icon : ImageLabel = Instance.new("ImageLabel")
-        icon.BackgroundTransparency = 1
-        icon.Position = UDim2.new(0, collectedIcon.AbsolutePosition.X, 0, collectedIcon.AbsolutePosition.Y)
+    if self.nextEvent then
+        for _=1,8 do
+            local icon : ImageLabel = Instance.new("ImageLabel")
+            icon.BackgroundTransparency = 1
+            icon.Position = UDim2.new(0, collectedIcon.AbsolutePosition.X, 0, collectedIcon.AbsolutePosition.Y)
 
-        if self.nextEvent.id == 1 then
-            icon.Size = UDim2.new(0, menuFollowersIcon.AbsoluteSize.X, 0, menuFollowersIcon.AbsoluteSize.Y)
-        else
-            icon.Size = UDim2.new(0, menuCoinsIcon.AbsoluteSize.X, 0, menuCoinsIcon.AbsoluteSize.Y)
+            if self.nextEvent.id == 1 then
+                icon.Size = UDim2.new(0, menuFollowersIcon.AbsoluteSize.X, 0, menuFollowersIcon.AbsoluteSize.Y)
+            else
+                icon.Size = UDim2.new(0, menuCoinsIcon.AbsoluteSize.X, 0, menuCoinsIcon.AbsoluteSize.Y)
+            end
+            icon.Image = self.nextEvent.eventIcon
+
+            local uiAspectRatioConstraint : UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+            uiAspectRatioConstraint.Parent = icon
+
+            icon.Parent = eventIconsTweens
+
+            local target : UDim2
+            if self.nextEvent.id == 1 then
+                target = UDim2.new(0, menuFollowersIcon.AbsolutePosition.X, 0, menuFollowersIcon.AbsolutePosition.Y)
+            else
+                target = UDim2.new(0, menuCoinsIcon.AbsolutePosition.X, 0, menuCoinsIcon.AbsolutePosition.Y)
+            end
+
+            icon:TweenPosition(
+                target,
+                Enum.EasingDirection.InOut,
+                Enum.EasingStyle.Linear,
+                TWEEN_DURATION
+            )
+
+            task.wait(DELAY)
         end
-        icon.Image = self.nextEvent.eventIcon
-
-        local uiAspectRatioConstraint : UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
-        uiAspectRatioConstraint.Parent = icon
-
-        icon.Parent = eventIconsTweens
-
-        local target : UDim2
-        if self.nextEvent.id == 1 then
-            target = UDim2.new(0, menuFollowersIcon.AbsolutePosition.X, 0, menuFollowersIcon.AbsolutePosition.Y)
-        else
-            target = UDim2.new(0, menuCoinsIcon.AbsolutePosition.X, 0, menuCoinsIcon.AbsolutePosition.Y)
-        end
-
-        icon:TweenPosition(
-            target,
-            Enum.EasingDirection.InOut,
-            Enum.EasingStyle.Linear,
-            TWEEN_DURATION
-        )
-
-        task.wait(DELAY)
     end
 
     task.wait((TWEEN_DURATION + DELAY) * 8)

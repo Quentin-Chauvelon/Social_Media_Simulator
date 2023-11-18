@@ -282,6 +282,9 @@ function QuestModule:UpdateProgress(id : number, progress : number)
 
             quest.progress = progress
 
+            -- if the ui has not been loaded yet, return
+            if not quest.frame:FindFirstChild("ProgressBarContainer") then return end
+
             quest.frame.ProgressBarContainer.ProgressBar.Size = UDim2.new(quest.progress / quest.target, 0, 1, 0)
 
             if quest.questType <= 1 then
@@ -316,8 +319,8 @@ function QuestModule:CompleteQuest(id : number)
                 self:DisplayQuestCompletedNotification(quest.id)
             end
 
-            quest.frame.ClaimPending.Visible = false
-            quest.frame.ClaimButton.Visible = true
+            quest.frame:WaitForChild("ClaimPending").Visible = false
+            quest.frame:WaitForChild("ClaimButton").Visible = true
         end
     end
 end

@@ -264,7 +264,7 @@ end
     @return boolean, true if the gui has been opened, false if it was already open
 ]]
 function Utility.OpenGui(ui : GuiObject, duration : number?) : boolean
-    if not ui.Visible then
+    if not ui.Visible and ui.Parent then
         if openGuiDebounce then
             openGuiDebounce = false
 
