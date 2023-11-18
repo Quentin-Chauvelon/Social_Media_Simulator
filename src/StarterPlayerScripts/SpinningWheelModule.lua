@@ -419,11 +419,13 @@ function SpinningWheelModule:EnableButtons()
     buyNormalSpinButton.BackgroundColor3 = GREEN_BACKGROUND
     buyNormalSpinButton.UIStroke.Color = GREEN_BORDER
     buyNormalSpinButton.TextLabel.UIStroke.Color = GREEN_BORDER
+    buyNormalSpinButton.SpinningIcon.Image = "http://www.roblox.com/asset/?id=15342813247"
     buyNormalSpinButton.AutoButtonColor = true
 
     buyCrazySpinButton.BackgroundColor3 = ORANGE_BACKGROUND
     buyCrazySpinButton.UIStroke.Color = ORANGE_BORDER
     buyCrazySpinButton.TextLabel.UIStroke.Color = ORANGE_BORDER
+    buyCrazySpinButton.SpinningIcon.Image = "http://www.roblox.com/asset/?id=15372592494"
     buyCrazySpinButton.AutoButtonColor = true
 end
 
@@ -456,11 +458,13 @@ function SpinningWheelModule:DisableButtons()
     buyNormalSpinButton.BackgroundColor3 = GRAY_BACKGROUND
     buyNormalSpinButton.UIStroke.Color = GRAY_BORDER
     buyNormalSpinButton.TextLabel.UIStroke.Color = GRAY_BORDER
+    buyNormalSpinButton.SpinningIcon.Image = "http://www.roblox.com/asset/?id=15372593976"
     buyNormalSpinButton.AutoButtonColor = false
 
     buyCrazySpinButton.BackgroundColor3 = GRAY_BACKGROUND
     buyCrazySpinButton.UIStroke.Color = GRAY_BORDER
     buyCrazySpinButton.TextLabel.UIStroke.Color = GRAY_BORDER
+    buyCrazySpinButton.SpinningIcon.Image = "http://www.roblox.com/asset/?id=15372593976"
     buyCrazySpinButton.AutoButtonColor = false
 end
 
@@ -472,6 +476,7 @@ function SpinningWheelModule:OpenGui()
     if self.utility.OpenGui(spinningWheelContainer) then
 
         spinningWheelBackground.Visible = true
+        spinningWheelBackground.Active = true
         TweenService:Create(
             spinningWheelBackground,
             TweenInfo.new(
@@ -536,7 +541,6 @@ end
     Closes the spinning wheel GUI and clears all button connections.
 ]]--
 function SpinningWheelModule:CloseGui()
-    print("closed")
     self:HideOdds()
 
     for _,buttonConnection : RBXScriptConnection in pairs(self.buttonsConnections) do
@@ -544,6 +548,7 @@ function SpinningWheelModule:CloseGui()
     end
     table.clear(self.buttonsConnections)
 
+    spinningWheelBackground.Active = false
     TweenService:Create(
         spinningWheelBackground,
         TweenInfo.new(
