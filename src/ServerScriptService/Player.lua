@@ -344,7 +344,9 @@ function Player:OnLeave()
 
 	self.groupModule:OnLeave()
 
-	self.questModule:OnLeave()
+	if self.questModule then
+		self.questModule:OnLeave()
+	end
 
 	-- clean all the connections
 	self.maid:DoCleaning()

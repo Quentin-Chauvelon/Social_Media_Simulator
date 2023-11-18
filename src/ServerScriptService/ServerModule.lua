@@ -134,10 +134,18 @@ function ServerModule.onJoin(plr : Player)
 	if not p.plotModule:AssignPlot(p.player) then
 		ServerModule.onLeave(plr)
 	end
+	
+	if not p.plotModule.phone or not p.plotModule.screen then
+		plr:Kick("There has been a problem loading you in. We apologize for the inconvenience. Please try logging in again.")
+		ServerModule.onLeave(plr)
+	end
+	--print(plr.Name, p.plotModule, p.plotModule.phone)
+	--print(p.plotModule.phone.Owner.Value, p.plotModule.phone.FollowerGoal)
+	print("player got screen", p.plotModule.screen)
 
 	-- load the follower goal progress and goal
-	p.plotModule.phone.FollowerGoal.Goal.SurfaceGui.GoalText.Text = tostring(p.nextFollowerGoal .. " followers")
-	p.plotModule.followerGoal.Size = UDim2.new(0.7,0, ((p.followers / p.nextFollowerGoal) * 0.97), 0)
+	--p.plotModule.phone.FollowerGoal.Goal.SurfaceGui.GoalText.Text = tostring(p.nextFollowerGoal .. " followers")
+	--p.plotModule.followerGoal.Size = UDim2.new(0.7,0, ((p.followers / p.nextFollowerGoal) * 0.97), 0)
 
 	-- generate the state machine
 	p.postModule:GenerateStateMachine()

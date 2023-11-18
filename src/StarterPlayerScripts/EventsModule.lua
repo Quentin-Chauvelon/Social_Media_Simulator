@@ -107,9 +107,11 @@ function EventsModule:UpdateNextEvent(event : Event)
     self.nextEvent = event
     self.timeBeforeNextEvent = 615 -- 10m15s
 
-    nextEventBackground.BackgroundColor3 = event.backgroundColor
-    nextEventBackground.UIStroke.Color = event.borderColor
-    nextEventIcon.Image = event.eventIcon
+    if nextEventBackground then
+        nextEventBackground.BackgroundColor3 = event.backgroundColor
+        nextEventBackground.UIStroke.Color = event.borderColor
+        nextEventIcon.Image = event.eventIcon
+    end
 end
 
 

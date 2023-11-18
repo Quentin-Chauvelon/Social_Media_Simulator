@@ -237,7 +237,7 @@ function PostModule:Post(p : Types.PlayerModule)
 
 	p:UpdateFollowersAmount(GetRandomFollowerAmount())
 
-	p.plotModule.popSound:Play()
+	-- p.plotModule.popSound:Play()
 
 	-- update the quest's progress when the player posts
 	if self.postXTimesQuest then
@@ -297,7 +297,13 @@ function PostModule:Post(p : Types.PlayerModule)
 
 	-- if the dialog table is not empty, it means that there is a dialog or reply going on, so we don't want to change the state
 	if #self.dialog == 0 then
-		nextState = self.postStates[self.currentState][math.random(1, #self.postStates[self.currentState])]
+		local result, _ = pcall(function()
+			nextState = self.postStates[self.currentState][math.random(1, #self.postStates[self.currentState])]
+		end)
+
+		if not result then
+			self.dialog = {}
+		end
 	end
 
 	self.currentState = nextState

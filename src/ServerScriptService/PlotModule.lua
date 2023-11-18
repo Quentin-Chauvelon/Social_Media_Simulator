@@ -28,12 +28,26 @@ end
 
 
 --[[
+	Reset the owner values for all the plots where the owners isn't in the game anymore. It shouldn't happen.
+]]--
+local function ClearUnusedPlots()
+	for _,plot : Model in ipairs(plots:GetChildren()) do
+		if not Players:FindFirstChild(plot.Owner.Value) then
+			plot.Owner.Value = ""
+		end
+	end
+end
+
+
+--[[
 	Assigns plr to the first free plot and teleports them to the plot
 
 	@param playerName string, the name of the player whom to assign the plot to
 	@return true if the player has been assigned to a plot, false otherwise (if all plots were taken)
 ]]--
 function PlotModule:AssignPlayerToPlot(playerName : string) : boolean
+	ClearUnusedPlots()
+
 	for _,plot : Model in ipairs(plots:GetChildren()) do
 
 		-- if the plot is free, assign the player to it
@@ -53,18 +67,6 @@ function PlotModule:AssignPlayerToPlot(playerName : string) : boolean
 	end
 
 	return false
-end
-
-
---[[
-	Reset the owner values for all the plots where the owners isn't in the game anymore. It shouldn't happen.
-]]--
-local function ClearUnusedPlots()
-	for _,plot : Model in ipairs(plots:GetChildren()) do
-		if not Players:FindFirstChild(plot.Owner.Value) then
-			plot.Owner.Value = ""
-		end
-	end
 end
 
 
