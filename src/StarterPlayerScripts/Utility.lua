@@ -26,7 +26,7 @@ local debounce : boolean = true
 local openGuiDebounce : boolean = true
 
 
-local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4,["M"] = 7,["B"] = 10,["T"] = 13,["Qa"] = 16,["Qi"] = 19}
+local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4, ["M"] = 7, ["B"] = 10, ["T"] = 13, ["Qa"] = 16, ["Qi"] = 19, ["s"] = 22, ["S"] = 25, ["o"] = 28, ["n"] = 31, ["d"] = 34}
 
 
 export type Utility = {

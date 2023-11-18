@@ -99,6 +99,37 @@ local function GetRandomFollowerAmount() : number
 end
 
 
+local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4, ["M"] = 7, ["B"] = 10, ["T"] = 13, ["Qa"] = 16, ["Qi"] = 19, ["s"] = 22, ["S"] = 25, ["o"] = 28, ["n"] = 31, ["d"] = 34}
+
+
+--[[
+    Abbreviates the given number
+
+    @param number : number, the number to abbreviate
+    @return string, the abbreviated number
+]]--
+local function AbbreviateNumber(number : number) : string
+    local text : string = tostring(string.format("%.f",math.floor(number)))
+
+    local chosenAbbreviation : string
+        for abbreviation : string, digit : number in pairs(NUMBER_ABBREVIATIONS) do
+            if (#text >= digit and #text < (digit + 3)) then
+                chosenAbbreviation = abbreviation
+                break
+        end
+    end
+
+    if (chosenAbbreviation and chosenAbbreviation ~= 0) then
+        local digits : number = NUMBER_ABBREVIATIONS[chosenAbbreviation]
+
+        local rounded : number = math.floor(number / 10 ^  (digits - 2)) * 10 ^  (digits - 2)
+        return string.format("%.1f", rounded / 10 ^ (digits - 1)) .. chosenAbbreviation
+    else
+        return tostring(number)
+    end
+end
+
+
 export type PostModule = {
     nextAutoPost : number,
 	nextClickPost : number,
@@ -168,8 +199,8 @@ function PostModule.new(plr : Player)
 		function () return "Do you all like pizzas?" end,
 		function () return "My favourite food is pasta." end,
 		function () return "You have a 5% chance of seeing this" end,
-		function (p : number) return string.format("I have %s followers.", p.followers) end,
-		function (p : number) return string.format("I have %s coins.", p.coins) end,
+		function (p : number) return string.format("I have %s followers.", AbbreviateNumber(p.followers)) end,
+		function (p : number) return string.format("I have %s coins.", AbbreviateNumber(p.coins)) end,
 		function (p : number) return string.format("I'm rebirth %s.", p.rebirthModule.rebirthLevel) end
 	}
 	
@@ -188,8 +219,8 @@ function PostModule.new(plr : Player)
 	postModule.replies = {
 		function () return "Mom! I'm famous!", {"No"} end,
 		function () return "Social Media Simulator is the best game!", {"Agreed", "For sure", "Yes", "No"} end,
-		function (p : number) return string.format("I have %s followers", p.followers), {"Wow", "Impressive", "Great", string.format("I have %s", p.followers), "That's it?", "ez"} end,
-		function (p : number) return string.format("I have %s coins", p.coins), {"Wow", "Impressive", "Great", string.format("I have %s", p.coins), "That's it?", "ez"} end,
+		function (p : number) return string.format("I have %s followers", AbbreviateNumber(p.followers)), {"Wow", "Impressive", "Great", string.format("I have %s", AbbreviateNumber(p.followers)), "That's it?", "ez"} end,
+		function (p : number) return string.format("I have %s coins", AbbreviateNumber(p.coins)), {"Wow", "Impressive", "Great", string.format("I have %s", AbbreviateNumber(p.coins)), "That's it?", "ez"} end,
 		function (p : number) return string.format("I'm rebirth %s", p.rebirthModule.rebirthLevel), {"Wow", "Impressive", "Great", string.format("I am rebirth %s", p.rebirthModule.rebirthLevel), "That's it?", "ez"} end
 	}
 

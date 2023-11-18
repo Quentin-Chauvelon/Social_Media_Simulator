@@ -11,7 +11,7 @@ local UpdateStreakRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateStrea
 local UpdateQuestProgressRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateQuestProgress")
 local ParticleRE : RemoteEvent = ReplicatedStorage:WaitForChild("Particle")
 
-local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4,["M"] = 7,["B"] = 10,["T"] = 13,["Qa"] = 16,["Qi"] = 19}
+local NUMBER_ABBREVIATIONS : {[string] : number} = {["k"] = 4, ["M"] = 7, ["B"] = 10, ["T"] = 13, ["Qa"] = 16, ["Qi"] = 19, ["s"] = 22, ["S"] = 25, ["o"] = 28, ["n"] = 31, ["d"] = 34}
 
 
 DataStore2.Combine("SMS", "quests", "questsStreak")
@@ -621,12 +621,12 @@ function QuestModule:ClaimReward(p : Types.PlayerModule, id : number) : boolean
 
         if quest.rewardType == QuestRewardTypes.Followers then
             p.followers += quest.rewardValue
-	        DataStore2("followers", p.player):Increment(quest.rewardValue, quest.rewardValue)
+	        DataStore2("followers", p.player):Increment(quest.rewardValue, p.followers)
             p.player.leaderstats.Followers.Value = p.followers
 
         elseif quest.rewardType == QuestRewardTypes.Coins then
             p.coins += quest.rewardValue
-            DataStore2("coins", p.player):Increment(quest.rewardValue, quest.rewardValue)
+            DataStore2("coins", p.player):Increment(quest.rewardValue, p.coins)
             p.player.leaderstats.Followers.Value = p.coins
         end
 
