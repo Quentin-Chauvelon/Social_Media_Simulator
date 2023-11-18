@@ -208,18 +208,18 @@ local rarities : {[Rarities] : rarity} = {
     },
     [Rarities.Uncommon] = {
         name = "Uncommon",
-        color = Color3.fromRGB(90, 164, 255),
-        border = Color3.fromRGB(41, 75, 117)
+        color = Color3.fromRGB(87, 188, 255),
+        border = Color3.fromRGB(37, 81, 108)
     },
     [Rarities.Rare] = {
         name = "Rare",
-        color = Color3.fromRGB(116, 231, 108),
-        border = Color3.fromRGB(59, 117, 55)
+        color = Color3.fromRGB(117, 250, 105),
+        border = Color3.fromRGB(49, 104, 44)
     },
     [Rarities.Epic] = {
         name = "Epic",
-        color = Color3.fromRGB(224, 112, 255),
-        border = Color3.fromRGB(97, 49, 112)
+        color = Color3.fromRGB(242, 102, 255),
+        border = Color3.fromRGB(104, 44, 111)
     },
     [Rarities.Legendary] = {
         name = "Legendary",
@@ -228,7 +228,7 @@ local rarities : {[Rarities] : rarity} = {
     },
     [Rarities.Mystical] = {
         name = "Mystical",
-        color = Color3.fromRGB(80, 8, 125),
+        color = Color3.fromRGB(81, 0, 161),
         border = Color3.new(0, 0, 0)
     }
 }
