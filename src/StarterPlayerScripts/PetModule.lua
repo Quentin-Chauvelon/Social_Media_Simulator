@@ -1662,6 +1662,8 @@ function PetModule:OpenUpgradesMachineGui()
     task.wait(0.2)
 
     if not upgradesMachineDetails.Visible then
+        -- open the pets gui
+        self:OpenGui()
 
         -- listen to clicks on slots to remove the pets from the machine
         for _,slot : ImageButton in ipairs(upgradesMachinesSlots:GetChildren()) do
@@ -1780,9 +1782,6 @@ function PetModule:OpenUpgradesMachineGui()
         upgradesMachineDetails.Size = UDim2.new(0.42, 0, 0.85, 0)
 
         upgradesMachineDetails.Visible = true
-
-        -- open the pets gui
-        self:OpenGui()
 
         self.upgradesMachineCloseButtonConnection = upgradesMachineCloseButton.MouseButton1Down:Connect(function()
             self:CloseUpgradesMachineGui()

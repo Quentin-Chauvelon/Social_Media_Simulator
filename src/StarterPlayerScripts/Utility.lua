@@ -316,6 +316,7 @@ function Utility.SetCloseGuiConnection(closeButton : GuiButton, callOnClose : ()
 
     Utility.closeGuiConnection = closeButton.MouseButton1Down:Connect(function()
         callOnClose()
+        Utility.callOnClose = nil
     end)
 
     Utility.callOnClose = callOnClose
