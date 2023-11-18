@@ -21,6 +21,8 @@ local Maid = require(ReplicatedStorage:WaitForChild("Maid"))
 
 DataStore2.Combine("SMS", "followers", "coins", "lastPlayed")
 
+local lastUpdate : number = os.time({year = 2023, month = 11, day = 18, hour = 22, min = 30, sec = 00})
+
 
 export type PlayerModule = {
 	player : Player,
@@ -32,6 +34,7 @@ export type PlayerModule = {
 	followersMultiplier : number,
 	coinsMultiplier : number,
 	lastPlayed : number,
+	displayChangelog : boolean,
 	alreadyPlayedToday : boolean,
 	totalTimePlayed : number,
 	getXFollowersQuest : (followers : number) -> nil | nil,
@@ -105,6 +108,9 @@ function Player.new(plr : Player)
 	else
 		p.alreadyPlayedToday = false
 	end
+
+	p.displayChangelog = p.lastPlayed <= lastUpdate
+	print(p.lastPlayed, lastUpdate, p.displayChangelog)
 
 	DataStore2("lastPlayed", p.player):Set(os.time())
 

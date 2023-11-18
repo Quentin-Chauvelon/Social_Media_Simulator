@@ -8,6 +8,7 @@ export type PlayerModule = {
 	followersMultiplier : number,
 	coinsMultiplier : number,
     lastPlayed : number,
+    displayChangelog : boolean,
 	alreadyPlayedToday : boolean,
 	totalTimePlayed : number,
     getXFollowersQuest : (followers : number) -> nil | nil,

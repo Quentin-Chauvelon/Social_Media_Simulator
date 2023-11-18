@@ -50,6 +50,7 @@ local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel"
 local UpdateFreeSpinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFreeSpins")
 local EmojiReactionRE : RemoteEvent = ReplicatedStorage:WaitForChild("EmojiReaction")
 local UnlockEmojiReactionRE : RemoteEvent = ReplicatedStorage:WaitForChild("UnlockEmojiReaction")
+local DisplayChangelogRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayChangelog")
 
 local LeaderboardsDataBF : BindableFunction = game:GetService("ServerStorage"):WaitForChild("LeaderboardsData")
 
@@ -289,6 +290,10 @@ function ServerModule.onJoin(plr : Player)
 
 		-- fire the client to load the free spins
 		UpdateFreeSpinsRE:FireClient(plr, p.spinningWheelModule.normalFreeSpinsLeft, p.spinningWheelModule.crazyFreeSpinsLeft)
+
+		if p.displayChangelog then
+			DisplayChangelogRE:FireClient(plr)
+		end
 
 		local unlockedEmojis : {string} = {}
 		for emoji : string, unlocked : boolean in pairs(p.emojisReactionsModule.unlockedEmojis) do

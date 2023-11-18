@@ -35,6 +35,7 @@ local SpinWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SpinWheel")
 local SwitchWheelRE : RemoteEvent = ReplicatedStorage:WaitForChild("SwitchWheel")
 local UpdateFreeSpinsRE : RemoteEvent = ReplicatedStorage:WaitForChild("UpdateFreeSpins")
 local UnlockEmojiReactionRE : RemoteEvent = ReplicatedStorage:WaitForChild("UnlockEmojiReaction")
+local DisplayChangelogRE : RemoteEvent = ReplicatedStorage:WaitForChild("DisplayChangelog")
 
 local lplr = Players.LocalPlayer
 
@@ -922,6 +923,19 @@ UpdateFreeSpinsRE.OnClientEvent:Connect(function(normalFreeSpins : number, crazy
 	spinningWheelModule.crazyFreeSpinsLeft = crazyFreeSpins
 
 	spinningWheelModule:UpdateFreeSpinUI()
+end)
+
+
+DisplayChangelogRE.OnClientEvent:Connect(function()
+	local changelogScreenGui : ScreenGui = lplr.PlayerGui:WaitForChild("Changelog")
+	changelogScreenGui.Enabled = true
+
+	local closeConnection : RBXScriptConnection
+	closeConnection = changelogScreenGui:WaitForChild("Background"):WaitForChild("Close").MouseButton1Down:Connect(function()
+		closeConnection:Disconnect()
+		closeConnection = nil
+		changelogScreenGui:Destroy()
+	end)
 end)
 
 
