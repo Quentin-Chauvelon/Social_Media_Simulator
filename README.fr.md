@@ -38,7 +38,7 @@ Le projet a atteint un stade satisfaisant et à reçu plusieurs mise à jours po
 
 # Projet
 
-J'ai travaillé sur ce projet en tant que projet personnel pendant environ 6 mois. J'ai appris le Lua par moi-même en travaillant sur d'autres projets avant celui-ci (voir [Zombie Invasion: Survive](https://github.com/Quentin-Chauvelon/Zombie_Invasion_Survive) et [Reve Island](https://github.com/Quentin-Chauvelon/Reve_Island)).
+J'ai travaillé sur ce projet en tant que projet personnel pendant environ 10 mois. J'ai appris le Lua par moi-même en travaillant sur d'autres projets avant celui-ci (voir [Zombie Invasion: Survive](https://github.com/Quentin-Chauvelon/Zombie_Invasion_Survive) et [Reve Island](https://github.com/Quentin-Chauvelon/Reve_Island)).
 
 Travaillant seul sur ce projet, j'ai du m'occuper de tous les ascpects du jeu : développement, design de l'interface graphique, modélisation 3D, tests, résolution de bugs... ce qui m'a permis d'apprendre et de m'améliorer dans de nombreux domaines.
 

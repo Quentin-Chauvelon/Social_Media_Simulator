@@ -37,7 +37,7 @@ The project has reached a stable state with multiple updates to add content and 
 
 # Project
 
-I worked on this as a side project for about 6 months. I learnt Lua by myself by working on other projects before this one (see [Zombie Invasion: Survive](https://github.com/Quentin-Chauvelon/Zombie_Invasion_Survive) and [Reve Island](https://github.com/Quentin-Chauvelon/Reve_Island)).
+I worked on this as a side project for about 10 months. I learnt Lua by myself by working on other projects before this one (see [Zombie Invasion: Survive](https://github.com/Quentin-Chauvelon/Zombie_Invasion_Survive) and [Reve Island](https://github.com/Quentin-Chauvelon/Reve_Island)).
 
 As a solo developer on the project, I had to work on all aspects of the game: coding, UI designing, 3D modeling, testing, fixing bugs... which allowed me to learn and improve a lot.
 
