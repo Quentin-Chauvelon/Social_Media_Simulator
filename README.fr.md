@@ -20,11 +20,11 @@
 
 Code source du jeu [Social Media Simulator](https://www.roblox.com/games/14844187553).
 
-Social Media Simulator est un jeu RPG sur Roblox, joué plus de 30k fois avec un ratio de likes de 85%.
+Social Media Simulator est un jeu incrémental sur Roblox, joué plus de 30k fois avec un ratio de likes de 85%.
 
 Le jeu a été développé en Lua avec le moteur de jeu Roblox Studio.
 
-Le jeu vise un public assez jeune et a été créé pour divertir des enfants autour de l'âge de 13 ans (bien que j'ai essayé de le rendre intéressant pour tous les âges. En fait, la moitié des joueurs avaient plus de 18 ans). Le jeu est, comme le nom le suggère, un "Simulateur" qui est un type de jeu populaire sur Roblox.
+Le jeu vise un public assez jeune et a été créé pour divertir des enfants autour de l'âge de 13 ans (bien que j'ai essayé de le rendre intéressant pour tous les âges. En fait, la moitié des joueurs avaient plus de 18 ans). Le jeu est, comme le nom le suggère, un "Simulateur" qui est un type de jeu populaire sur Roblox (similaire à un jeu incrémental).
 
 Le principe d'un simulateur est assez simple et est centré autour d'une tâche facile à réaliser qui permet de gagner une récompense (des pièces en général). Ces pièces peuvent ensuite être utilisées pour acheter des objets permettant de réaliser cette même tâche plus rapidement. Ce jeu suit ce style et est basé sur une tâche simple mais contient aussi divers fonctionnalités populaires des simulateurs (compagnons, rebirths, quêtes, objets améliorables, personnalisation, classements globaux, récompenses quotidiennes, boosts...)
 
