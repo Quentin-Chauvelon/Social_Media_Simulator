@@ -23,7 +23,7 @@ Social Media Simulator is a Roblox clicker game with over 30k plays and a curren
 
 It has been developed in Lua using the Roblox Studio game engine.
 
-This game targets a young audience and has been made to entertain children around the age of 13 (although I tried to make it enjoyable for all ages. In fact, half of the players are more than 18 years old).  The game is, as the name suggests, a “Simulator” which is a popular type of game on Roblox (similar to clicker game).
+This game targets a young audience and has been made to entertain children around the age of 13 (although I tried to make it enjoyable for all ages. In fact, half of the players are more than 18 years old).  The game is, as the name suggests, a “Simulator” which is a popular type of game on Roblox (similar to a clicker game).
 
 A simulator’s gameplay is rather simple as it usually focuses on one easy task which gives you a reward (coins usually). You can use these coins to buy something allowing to complete that task faster. This game follows this style and revolves around one simple task but also incorporates other popular features of simulators (pets, rebirths, quests, items that you can upgrade, customization, leaderboards, daily rewards, boosts...) 
 
