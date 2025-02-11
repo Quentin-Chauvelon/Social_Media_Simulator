@@ -95,10 +95,3 @@ Depuis, j'ai commencé à travailler sur un nouveau projet en C# que vous pouvez
 Email: [quentin.chauvelon@gmail.com](mailto:quentin.chauvelon@gmail.com)
 
 Linkedin: [Quentin Chauvelon](https://www.linkedin.com/in/quentin-chauvelon/)
-
-
-# Contact
-
-Email: [quentin.chauvelon@gmail.com](mailto:quentin.chauvelon@gmail.com)
-
-Linkedin: [Quentin Chauvelon](https://www.linkedin.com/in/quentin-chauvelon/)
